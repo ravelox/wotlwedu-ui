@@ -64,23 +64,101 @@ Legacy top-level paths redirect into `/app/*` routes to preserve compatibility w
 
 ## Backend Dependencies
 
-The UI expects the backend to expose endpoints for:
+The UI expects the backend to expose the following endpoint groups.
 
-- authentication and 2FA
-- registration and confirmation
-- password reset
-- user profile and friend relationships
-- notifications
-- workgroups and categories
-- images, items, lists, and elections
-- vote retrieval and decision submission
-- election statistics
+## Backend Endpoint Map
+
+Authentication and account recovery:
+
+- `POST /login`: primary email/password login
+- `POST /login/verify2fa`: second-factor verification during login and profile flows
+- `POST /login/2fa`: initiate 2FA setup from the profile screen
+- `POST /login/resetreq`: request a password reset email
+- `PUT /login/password/:userId`: complete password reset with token-backed credentials
+
+Registration:
+
+- `POST /register`: create a pending account
+- `POST /register/confirm/:tokenId`: confirm registration token
+
+User profile and relationships:
+
+- `GET /user/:userId`: load the signed-in user profile
+- `PUT /user/:userId`: update profile details
+- `GET /user/friend`: list friend and relationship records
+- `POST /user/request`: send a friend request by email
+- `POST /user/accept/:token`: accept a friend request from a notification token
+- `DELETE /user/relationship/:id`: remove a relationship
+- `PUT /user/block/:userId`: block a user
+
+Notifications:
+
+- `GET /notification`: list notifications
+- `GET /notification/unreadcount`: fetch unread notification count for app chrome and dashboard widgets
+- `PUT /notification/status/:notificationId/:statusId`: update notification read/archive state
+- `DELETE /notification/:notificationId`: remove a notification
+
+Preferences:
+
+- `GET /preference`
+- `GET /preference/:preferenceId`
+- `POST /preference`
+- `PUT /preference/:preferenceId`
+- `DELETE /preference/:preferenceId`
+
+Voting and election insights:
+
+- `GET /election`: list elections for dashboard and elections pages
+- `GET /election/:electionId`: load election details
+- `GET /election/:electionId/stats`: load election statistics
+- `GET /vote/next/all`: fetch the next available vote across visible workgroups
+- `GET /vote/:electionId/next`: fetch the next vote inside a specific election
+- `POST /cast/:voteId/decision`: submit a vote decision
+
+Workgroup-scoped content management:
+
+- `GET /workgroup`: populate the workgroup scope selector and content forms
+- `GET /category`: populate category assignments
+- `GET /group`: populate list and election targeting data
+- `GET|POST|PUT|DELETE /image` and `/image/:id`
+- `POST /image/file/:imageId`: upload image binary content
+- `GET|POST|PUT|DELETE /item` and `/item/:id`
+- `GET|POST|PUT|DELETE /list` and `/list/:id`
+- `POST /list/:listId/bulkitemadd`: add items to a list in bulk
+- `POST /list/:listId/bulkitemdel`: remove items from a list in bulk
+- `GET|POST|PUT|DELETE /election` and `/election/:id`
+
+Most collection requests use `page` and `items` query parameters. Workgroup-scoped resources also pass `workgroupId` when the user selects a specific scope.
 
 `src/lib/api.js` centralizes axios setup, bearer token injection, JSON defaults, and unauthorized-session handling.
 
 ## Docker
 
 The included `Dockerfile` builds the Vite bundle with Node 20 Alpine and serves the static output from `nginx:1.27-alpine` on port `80`.
+
+Build and run locally:
+
+```bash
+docker build -t wotlwedu-ui .
+docker run --rm -p 8080:80 wotlwedu-ui
+```
+
+Build with a custom backend origin:
+
+```bash
+docker build \
+  --build-arg VITE_WOTLWEDU_API_BASE_URL=https://api.example.com \
+  --build-arg VITE_APP_VERSION=0.1.0 \
+  -t wotlwedu-ui .
+```
+
+## Deployment Notes
+
+- This is a static single-page application. Deep links such as `/app/profile` or `/app/election/123` must be rewritten to `index.html` by the serving layer.
+- The current `Dockerfile` uses the default Nginx configuration and does not add an SPA fallback rule. In production, either add a custom Nginx config to the image or ensure an upstream reverse proxy or CDN handles the rewrite.
+- `VITE_WOTLWEDU_API_BASE_URL` is compiled into the bundle at build time. Changing the backend origin requires a rebuild unless the user overrides it in browser storage.
+- The frontend sends bearer tokens from local storage. Deploy only over HTTPS and ensure the API allows the frontend origin via CORS.
+- Because the API base URL defaults to `https://api.wotlwedu.com:9876`, production builds should set this explicitly for each environment instead of relying on the default.
 
 ## Project Layout
 
@@ -89,4 +167,3 @@ The included `Dockerfile` builds the Vite bundle with Node 20 Alpine and serves 
 - `src/pages/`: route-level screens
 - `src/lib/`: API, session, and workgroup scope utilities
 - `src/styles.css`: global styling and layout system
-
