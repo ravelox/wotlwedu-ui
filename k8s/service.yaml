@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: wotlwedu-ui
+  labels:
+    app.kubernetes.io/name: wotlwedu-ui
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: wotlwedu-ui
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP

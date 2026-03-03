@@ -160,6 +160,48 @@ docker build \
 - The frontend sends bearer tokens from local storage. Deploy only over HTTPS and ensure the API allows the frontend origin via CORS.
 - Because the API base URL defaults to `https://api.wotlwedu.com:9876`, production builds should set this explicitly for each environment instead of relying on the default.
 
+## Kubernetes
+
+Raw manifests live in `k8s/`:
+
+- `configmap.yaml`: overrides the default Nginx site config with `try_files $uri $uri/ /index.html` for SPA route support
+- `deployment.yaml`: runs two replicas of the frontend container and mounts the Nginx config
+- `service.yaml`: exposes the pods internally on port `80`
+- `ingress.yaml`: publishes the app at `ui.wotlwedu.com`
+- `kustomization.yaml`: applies the full manifest set together
+
+Apply the plain manifests:
+
+```bash
+kubectl apply -k k8s/
+```
+
+## Helm
+
+The Helm chart lives in `helm/wotlwedu-ui/` and mirrors the raw manifests with environment-specific ingress overrides.
+
+Render the chart:
+
+```bash
+helm template wotlwedu-ui ./helm/wotlwedu-ui
+```
+
+Install the chart:
+
+```bash
+helm upgrade --install wotlwedu-ui ./helm/wotlwedu-ui
+```
+
+Useful overrides:
+
+- `image.repository`
+- `image.tag`
+- `replicaCount`
+- `ingress.hosts`
+- `ingress.tls`
+- `environment` plus `environments.<name>` overrides
+- `nginx.defaultServerConfig` if the SPA fallback or asset policy needs to change
+
 ## Project Layout
 
 - `src/App.jsx`: route graph and session bootstrap

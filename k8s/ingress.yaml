@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: wotlwedu-ui
+  labels:
+    app.kubernetes.io/name: wotlwedu-ui
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - host: ui.wotlwedu.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: wotlwedu-ui
+                port:
+                  number: 80
+  tls:
+    - secretName: wotlwedu-ui-tls
+      hosts:
+        - ui.wotlwedu.com

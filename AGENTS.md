@@ -44,6 +44,8 @@ npm run preview
 - API/session/workgroup helpers: `src/lib/`
 - Global styling: `src/styles.css`
 - Build and container config: `package.json`, `vite.config.js`, `Dockerfile`
+- Raw Kubernetes manifests: `k8s/`
+- Helm chart: `helm/wotlwedu-ui/`
 
 ## Route Areas
 
@@ -58,3 +60,4 @@ npm run preview
 - Preserve legacy route redirects unless the migration plan explicitly removes them.
 - When changing API contracts, verify corresponding backend endpoints and request payloads still match.
 - If you change deployment behavior, document whether SPA route rewrites are handled by the image, ingress, or CDN.
+- Keep the raw manifests and Helm chart behavior aligned, especially the Nginx SPA fallback config.
