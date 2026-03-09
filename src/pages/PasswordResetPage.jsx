@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import bcrypt from "bcryptjs";
 import PublicAuthCard from "../components/PublicAuthCard";
 import { ErrorBanner, SuccessBanner } from "../components/Feedback";
 import { toApiError } from "../lib/api";
@@ -25,10 +24,9 @@ export default function PasswordResetPage({ api, appVersion }) {
 
     setLoading(true);
     try {
-      const newPassword = await bcrypt.hash(password, 12);
       const response = await api.put(`/login/password/${userId}`, {
         resetToken,
-        newPassword,
+        newPassword: password,
       });
       if (response.status >= 400) {
         throw toApiError(response, "Password reset failed");

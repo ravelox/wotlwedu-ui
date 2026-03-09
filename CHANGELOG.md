@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1 - 2026-03-09
+
+- Harden auth/session persistence handling for local storage restoration.
+- Improve registration and password-reset flows with stricter token and error-state handling.
+- Align UI behavior with backend security updates introduced in the same release window.
+
 ## 0.1.0 - 2026-03-02
 
 - Initialized `wotlwedu-ui` as an independent Git repository.

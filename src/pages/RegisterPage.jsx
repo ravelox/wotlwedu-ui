@@ -1,5 +1,4 @@
 import { useState } from "react";
-import bcrypt from "bcryptjs";
 import PublicAuthCard from "../components/PublicAuthCard";
 import { ErrorBanner, SuccessBanner } from "../components/Feedback";
 import { toApiError } from "../lib/api";
@@ -33,13 +32,12 @@ export default function RegisterPage({ api, appVersion }) {
 
     setLoading(true);
     try {
-      const auth = await bcrypt.hash(form.password, 12);
       const response = await api.post("/register", {
         email: form.email,
         firstName: form.firstName,
         lastName: form.lastName,
         alias: form.alias,
-        auth,
+        password: form.password,
       });
 
       if (response.status >= 400) {

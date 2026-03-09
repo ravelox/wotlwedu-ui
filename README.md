@@ -24,7 +24,7 @@ npm run preview
 The app reads these Vite variables at build time:
 
 - `VITE_WOTLWEDU_API_BASE_URL`: backend API origin. Defaults to `https://api.wotlwedu.com:9876`.
-- `VITE_APP_VERSION`: version label shown in the app chrome. Defaults to `0.1.0`.
+- `VITE_APP_VERSION`: version label shown in the app chrome. Defaults to `0.1.1`.
 
 The selected API base URL is also persisted in browser storage under `wotlwedu_ui_api_base_url`.
 
@@ -148,7 +148,7 @@ Build with a custom backend origin:
 ```bash
 docker build \
   --build-arg VITE_WOTLWEDU_API_BASE_URL=https://api.example.com \
-  --build-arg VITE_APP_VERSION=0.1.0 \
+  --build-arg VITE_APP_VERSION=0.1.1 \
   -t wotlwedu-ui .
 ```
 
