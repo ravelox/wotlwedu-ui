@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2 - 2026-03-21
+
+- Add a Google sign-in button on the login screen when `VITE_GOOGLE_CLIENT_ID` is configured.
+- Wire the UI login flow to `POST /login/google` so verified Google web sign-in can enter the backend JIT provisioning path.
+- Document the Google client ID build-time configuration for containerized and local builds.
+
 ## 0.1.1 - 2026-03-09
 
 - Harden auth/session persistence handling for local storage restoration.

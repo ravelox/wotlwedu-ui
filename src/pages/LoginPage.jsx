@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ErrorBanner } from "../components/Feedback";
+
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
 export default function LoginPage({ api, appVersion, onLogin }) {
   const [email, setEmail] = useState("root@localhost.localdomain");
@@ -10,6 +12,80 @@ export default function LoginPage({ api, appVersion, onLogin }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [pending2fa, setPending2fa] = useState(null);
+  const googleButtonRef = useRef(null);
+
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID || pending2fa) return undefined;
+
+    let cancelled = false;
+    let script = document.querySelector('script[data-google-gsi="true"]');
+
+    async function handleGoogleCredentialResponse(response) {
+      setLoading(true);
+      setError("");
+
+      try {
+        const loginResponse = await api.post("/login/google", {
+          idToken: response?.credential,
+        });
+        if (loginResponse.status >= 400) {
+          setError(loginResponse.data?.message || "Google sign-in failed");
+          return;
+        }
+        onLogin(loginResponse.data);
+      } catch (err) {
+        setError(err.message || "Google sign-in failed");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    function renderGoogleButton() {
+      if (
+        cancelled ||
+        !window.google?.accounts?.id ||
+        !googleButtonRef.current
+      ) {
+        return;
+      }
+
+      googleButtonRef.current.innerHTML = "";
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleCredentialResponse,
+      });
+      window.google.accounts.id.renderButton(googleButtonRef.current, {
+        theme: "outline",
+        size: "large",
+        width: "320",
+        text: "signin_with",
+        shape: "pill",
+      });
+    }
+
+    if (window.google?.accounts?.id) {
+      renderGoogleButton();
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    if (!script) {
+      script = document.createElement("script");
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.defer = true;
+      script.dataset.googleGsi = "true";
+      document.head.appendChild(script);
+    }
+
+    script.addEventListener("load", renderGoogleButton);
+
+    return () => {
+      cancelled = true;
+      script?.removeEventListener("load", renderGoogleButton);
+    };
+  }, [api, onLogin, pending2fa]);
 
   function parse2faRedirect(toURL) {
     if (!toURL || typeof toURL !== "string") return null;
@@ -125,6 +201,16 @@ export default function LoginPage({ api, appVersion, onLogin }) {
               <button className="btn" disabled={loading} type="submit">
                 {loading ? "Signing in..." : "Sign In"}
               </button>
+              {GOOGLE_CLIENT_ID ? (
+                <>
+                  <div className="auth-divider" aria-hidden="true">
+                    <span />
+                    <span>or continue with Google</span>
+                    <span />
+                  </div>
+                  <div className="google-signin-slot" ref={googleButtonRef} />
+                </>
+              ) : null}
               <div className="auth-actions">
                 <Link className="text-link" to="/pwdrequest">
                   Forgot password?

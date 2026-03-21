@@ -195,6 +195,28 @@ a {
   margin-top: 18px;
 }
 
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.auth-divider span:first-child,
+.auth-divider span:last-child {
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.google-signin-slot {
+  display: grid;
+  justify-items: center;
+}
+
 .hero-card,
 .surface-card {
   border-radius: 24px;
