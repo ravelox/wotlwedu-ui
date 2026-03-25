@@ -217,6 +217,20 @@ a {
   justify-items: center;
 }
 
+.invite-banner {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: rgba(125, 211, 167, 0.12);
+  border: 1px solid rgba(125, 211, 167, 0.22);
+  color: var(--text);
+}
+
+.invite-link {
+  word-break: break-all;
+}
+
 .hero-card,
 .surface-card {
   border-radius: 24px;

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ErrorBanner, SuccessBanner } from "../components/Feedback";
-import { extractEntity, toApiError } from "../lib/api";
+import { extractCollection, extractEntity, toApiError } from "../lib/api";
 
 export default function ProfilePage({
   api,
@@ -23,16 +23,28 @@ export default function ProfilePage({
   const [resetPassword, setResetPassword] = useState(false);
   const [setup2fa, setSetup2fa] = useState(null);
   const [totp, setTotp] = useState("");
+  const [organization, setOrganization] = useState(null);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [organizationInvites, setOrganizationInvites] = useState([]);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
   async function loadProfile() {
-    const response = await api.get(`/user/${session?.userId}`);
-    if (response.status >= 400) {
-      throw toApiError(response, "Failed to load profile");
+    const requests = [api.get(`/user/${session?.userId}`)];
+    const canManageOrganization =
+      session?.organizationId && (session?.organizationAdmin || session?.systemAdmin);
+
+    if (canManageOrganization) {
+      requests.push(api.get(`/organization/${session.organizationId}`));
+      requests.push(api.get(`/organization/${session.organizationId}/invite`));
     }
 
-    const user = extractEntity(response, "user");
+    const [userResponse, organizationResponse, inviteResponse] = await Promise.all(requests);
+    if (userResponse.status >= 400) {
+      throw toApiError(userResponse, "Failed to load profile");
+    }
+
+    const user = extractEntity(userResponse, "user");
     setCurrentUser(user);
     setForm({
       email: user?.email || "",
@@ -41,6 +53,24 @@ export default function ProfilePage({
       alias: user?.alias || "",
       enable2fa: user?.enable2fa === true,
     });
+
+    if (organizationResponse) {
+      if (organizationResponse.status >= 400) {
+        throw toApiError(organizationResponse, "Failed to load organization");
+      }
+      setOrganization(extractEntity(organizationResponse, "organization"));
+    } else {
+      setOrganization(null);
+    }
+
+    if (inviteResponse) {
+      if (inviteResponse.status >= 400) {
+        throw toApiError(inviteResponse, "Failed to load organization invites");
+      }
+      setOrganizationInvites(extractCollection(inviteResponse, "invites"));
+    } else {
+      setOrganizationInvites([]);
+    }
   }
 
   useEffect(() => {
@@ -163,6 +193,75 @@ export default function ProfilePage({
     }
   }
 
+  async function submitInvite(event) {
+    event.preventDefault();
+    if (!session?.organizationId) return;
+
+    setSaving(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const response = await api.post(`/organization/${session.organizationId}/invite`, {
+        email: inviteEmail,
+      });
+      if (response.status >= 400) {
+        throw toApiError(response, "Failed to invite user");
+      }
+      setInviteEmail("");
+      setSuccess("Invitation sent.");
+      await loadProfile();
+    } catch (err) {
+      setError(err.message || "Failed to invite user");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function resendInvite(inviteId) {
+    if (!session?.organizationId || !inviteId) return;
+
+    setSaving(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const response = await api.post(
+        `/organization/${session.organizationId}/invite/${inviteId}/resend`
+      );
+      if (response.status >= 400) {
+        throw toApiError(response, "Failed to resend invite");
+      }
+      setSuccess("Invitation resent with a new link.");
+      await loadProfile();
+    } catch (err) {
+      setError(err.message || "Failed to resend invite");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function revokeInvite(inviteId) {
+    if (!session?.organizationId || !inviteId) return;
+
+    setSaving(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const response = await api.delete(`/organization/${session.organizationId}/invite/${inviteId}`);
+      if (response.status >= 400) {
+        throw toApiError(response, "Failed to revoke invite");
+      }
+      setSuccess("Invitation revoked.");
+      await loadProfile();
+    } catch (err) {
+      setError(err.message || "Failed to revoke invite");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="screen-stack">
@@ -183,7 +282,7 @@ export default function ProfilePage({
           </div>
           <div>
             <span className="detail-label">Organization</span>
-            <span>{session?.organizationId || "Not assigned"}</span>
+            <span>{organization?.name || session?.organizationId || "Not assigned"}</span>
           </div>
           <div>
             <span className="detail-label">Verification</span>
@@ -195,6 +294,76 @@ export default function ProfilePage({
           </div>
         </div>
       </section>
+
+      {session?.organizationId && (session?.organizationAdmin || session?.systemAdmin) ? (
+        <section className="surface-card">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">Organization</p>
+              <h3>Invitations</h3>
+            </div>
+          </div>
+          <p className="subtle-copy">
+            Invite a Google account by email. The invite is consumed when that user signs in
+            through the invite link and the Google account email matches.
+          </p>
+          <form className="stack-form" onSubmit={submitInvite}>
+            <label className="field">
+              <span>Invite Email</span>
+              <input
+                type="email"
+                value={inviteEmail}
+                onChange={(event) => setInviteEmail(event.target.value)}
+                placeholder="name@example.com"
+                required
+              />
+            </label>
+            <button className="btn" disabled={saving} type="submit">
+              {saving ? "Sending..." : "Send Invite"}
+            </button>
+          </form>
+          <div className="record-stack">
+            {organizationInvites.length ? (
+              organizationInvites.map((inviteRow) => {
+                const inviteUrl = `${window.location.origin}/login?invite=${encodeURIComponent(
+                  inviteRow.token
+                )}`;
+                return (
+                  <div className="record-card" key={inviteRow.id}>
+                    <strong>{inviteRow.email}</strong>
+                    <p className="tiny-meta">
+                      {inviteRow.expiresAt
+                        ? `Expires ${new Date(inviteRow.expiresAt).toLocaleString()}`
+                        : "No expiration"}
+                    </p>
+                    <p className="tiny-meta invite-link">{inviteUrl}</p>
+                    <div className="split-actions">
+                      <button
+                        className="btn btn-tonal"
+                        disabled={saving}
+                        onClick={() => resendInvite(inviteRow.id)}
+                        type="button"
+                      >
+                        Resend
+                      </button>
+                      <button
+                        className="btn btn-secondary"
+                        disabled={saving}
+                        onClick={() => revokeInvite(inviteRow.id)}
+                        type="button"
+                      >
+                        Revoke
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="empty-state">No pending invites.</div>
+            )}
+          </div>
+        </section>
+      ) : null}
 
       <section className="surface-card">
         <div className="section-heading">

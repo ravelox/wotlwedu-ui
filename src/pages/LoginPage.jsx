@@ -12,7 +12,46 @@ export default function LoginPage({ api, appVersion, onLogin }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [pending2fa, setPending2fa] = useState(null);
+  const [invite, setInvite] = useState(null);
+  const [inviteLoading, setInviteLoading] = useState(false);
   const googleButtonRef = useRef(null);
+  const inviteTokenRef = useRef("");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const inviteToken = params.get("invite") || "";
+    inviteTokenRef.current = inviteToken;
+
+    if (!inviteToken) return undefined;
+
+    let cancelled = false;
+
+    async function loadInvite() {
+      setInviteLoading(true);
+      try {
+        const response = await api.get(`/login/invite/${encodeURIComponent(inviteToken)}`);
+        if (response.status >= 400) {
+          if (!cancelled) {
+            setInvite(null);
+            setError(response.data?.message || "Invite not found");
+          }
+          return;
+        }
+        if (!cancelled) {
+          setInvite(response.data?.data?.invite || response.data?.invite || null);
+        }
+      } catch (err) {
+        if (!cancelled) setError(err.message || "Invite not found");
+      } finally {
+        if (!cancelled) setInviteLoading(false);
+      }
+    }
+
+    loadInvite();
+    return () => {
+      cancelled = true;
+    };
+  }, [api]);
 
   useEffect(() => {
     if (!GOOGLE_CLIENT_ID || pending2fa) return undefined;
@@ -27,6 +66,7 @@ export default function LoginPage({ api, appVersion, onLogin }) {
       try {
         const loginResponse = await api.post("/login/google", {
           idToken: response?.credential,
+          inviteToken: inviteTokenRef.current || undefined,
         });
         if (loginResponse.status >= 400) {
           setError(loginResponse.data?.message || "Google sign-in failed");
@@ -166,6 +206,15 @@ export default function LoginPage({ api, appVersion, onLogin }) {
           <p className="login-version">Version {appVersion}</p>
 
           <ErrorBanner error={error} />
+          {invite ? (
+            <div className="invite-banner">
+              <strong>Invitation ready</strong>
+              <span>
+                Sign in with Google to join {invite.organizationName} as {invite.email}.
+              </span>
+            </div>
+          ) : null}
+          {inviteLoading ? <div className="chip">Checking invite...</div> : null}
 
           {!pending2fa ? (
             <form className="stack-form" onSubmit={submitCredentials}>

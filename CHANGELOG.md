@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.3 - 2026-03-24
+
+- Add invite-aware login UX that resolves invite context from `?invite=` and passes invite tokens through Google sign-in.
+- Add org-admin invitation operations in the profile screen, including pending invite listing plus resend and revoke actions.
+- Document the expanded invite lifecycle endpoints required by the UI.
+
 ## 0.1.2 - 2026-03-21
 
 - Add a Google sign-in button on the login screen when `VITE_GOOGLE_CLIENT_ID` is configured.

@@ -24,7 +24,7 @@ npm run preview
 The app reads these Vite variables at build time:
 
 - `VITE_WOTLWEDU_API_BASE_URL`: backend API origin. Defaults to `https://api.wotlwedu.com:9876`.
-- `VITE_APP_VERSION`: version label shown in the app chrome. Defaults to `0.1.2`.
+- `VITE_APP_VERSION`: version label shown in the app chrome. Defaults to `0.1.3`.
 - `VITE_GOOGLE_CLIENT_ID`: Google web client ID used to render the Google sign-in button.
 
 The selected API base URL is also persisted in browser storage under `wotlwedu_ui_api_base_url`.
@@ -74,6 +74,7 @@ Authentication and account recovery:
 - `POST /login`: primary email/password login
 - `POST /login/google`: verify a Google ID token and continue through the backend JIT provisioning flow
 - `POST /login/social`: JIT social sign-in; first login links or provisions a user and may auto-create an organization
+- `GET /login/invite/:token`: resolve invite context before Google sign-in
 - `POST /login/verify2fa`: second-factor verification during login and profile flows
 - `POST /login/2fa`: initiate 2FA setup from the profile screen
 - `POST /login/resetreq`: request a password reset email
@@ -112,7 +113,10 @@ Preferences:
 Organizations:
 
 - `GET /organization/:organizationId`: load the signed-in organization when needed
+- `GET /organization/:organizationId/invite`: list pending invites for org-admin tooling
 - `POST /organization/:organizationId/invite`: invite an email address into an organization before first social sign-in
+- `POST /organization/:organizationId/invite/:inviteId/resend`: regenerate and resend an invite link
+- `DELETE /organization/:organizationId/invite/:inviteId`: revoke a pending invite
 
 Voting and election insights:
 
@@ -156,7 +160,7 @@ Build with a custom backend origin:
 ```bash
 docker build \
   --build-arg VITE_WOTLWEDU_API_BASE_URL=https://api.example.com \
-  --build-arg VITE_APP_VERSION=0.1.2 \
+  --build-arg VITE_APP_VERSION=0.1.3 \
   -t wotlwedu-ui .
 ```
 
