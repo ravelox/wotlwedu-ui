@@ -27,6 +27,8 @@ The app reads these Vite variables at build time:
 - `VITE_APP_VERSION`: version label shown in the app chrome. Defaults to `0.1.4`.
 - `VITE_GOOGLE_CLIENT_ID`: Google web client ID used to render the Google sign-in button.
 
+An example file is included at [`.env.example`](/Users/dkelly/Projects/wotlwedu/wotlwedu-ui/.env.example).
+
 The selected API base URL is also persisted in browser storage under `wotlwedu_ui_api_base_url`.
 
 ## Local Storage
@@ -63,6 +65,12 @@ Authenticated app routes:
 
 Legacy top-level paths redirect into `/app/*` routes to preserve compatibility with older links.
 
+The profile route now includes:
+
+- linked sign-in method visibility with unlink controls for removable social identities
+- recent account activity sourced from the backend auth audit feed
+- organization invite history and organization audit activity for organization admins
+
 ## Backend Dependencies
 
 The UI expects the backend to expose the following endpoint groups.
@@ -89,6 +97,9 @@ User profile and relationships:
 
 - `GET /user/:userId`: load the signed-in user profile
 - `PUT /user/:userId`: update profile details
+- `GET /user/:userId/signin-method`: load linked sign-in methods and password-login status
+- `DELETE /user/:userId/signin-method/:identityId`: unlink a removable social identity
+- `GET /user/:userId/authaudit`: load recent auth and invite-related account activity
 - `GET /user/friend`: list friend and relationship records
 - `POST /user/request`: send a friend request by email
 - `POST /user/accept/:token`: accept a friend request from a notification token
@@ -117,6 +128,7 @@ Organizations:
 - `POST /organization/:organizationId/invite`: invite an email address into an organization before first social sign-in
 - `POST /organization/:organizationId/invite/:inviteId/resend`: regenerate and resend an invite link
 - `DELETE /organization/:organizationId/invite/:inviteId`: revoke a pending invite
+- `GET /organization/:organizationId/authaudit`: load organization-level auth and invite activity for admin review
 
 Voting and election insights:
 

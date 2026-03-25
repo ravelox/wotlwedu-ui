@@ -26,12 +26,23 @@ export default function ProfilePage({
   const [organization, setOrganization] = useState(null);
   const [inviteEmail, setInviteEmail] = useState("");
   const [organizationInvites, setOrganizationInvites] = useState([]);
+  const [signInMethods, setSignInMethods] = useState({
+    passwordEnabled: false,
+    linkedProviders: [],
+  });
+  const [userAudits, setUserAudits] = useState([]);
+  const [organizationAudits, setOrganizationAudits] = useState([]);
   const [inviteFilter, setInviteFilter] = useState("all");
+  const [auditOutcomeFilter, setAuditOutcomeFilter] = useState("all");
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
   async function loadProfile() {
-    const requests = [api.get(`/user/${session?.userId}`)];
+    const requests = [
+      api.get(`/user/${session?.userId}`),
+      api.get(`/user/${session?.userId}/signin-method`),
+      api.get(`/user/${session?.userId}/authaudit`, { params: { items: 10 } }),
+    ];
     const canManageOrganization =
       session?.organizationId && (session?.organizationAdmin || session?.systemAdmin);
 
@@ -42,15 +53,41 @@ export default function ProfilePage({
           params: inviteFilter === "all" ? undefined : { status: inviteFilter },
         })
       );
+      requests.push(
+        api.get(`/organization/${session.organizationId}/authaudit`, {
+          params: {
+            items: 20,
+            ...(auditOutcomeFilter === "all" ? {} : { outcome: auditOutcomeFilter }),
+          },
+        })
+      );
     }
 
-    const [userResponse, organizationResponse, inviteResponse] = await Promise.all(requests);
+    const [
+      userResponse,
+      signInResponse,
+      userAuditResponse,
+      organizationResponse,
+      inviteResponse,
+      organizationAuditResponse,
+    ] = await Promise.all(requests);
     if (userResponse.status >= 400) {
       throw toApiError(userResponse, "Failed to load profile");
+    }
+    if (signInResponse.status >= 400) {
+      throw toApiError(signInResponse, "Failed to load sign-in methods");
+    }
+    if (userAuditResponse.status >= 400) {
+      throw toApiError(userAuditResponse, "Failed to load audit history");
     }
 
     const user = extractEntity(userResponse, "user");
     setCurrentUser(user);
+    setSignInMethods(extractEntity(signInResponse, "methods") || {
+      passwordEnabled: false,
+      linkedProviders: [],
+    });
+    setUserAudits(extractCollection(userAuditResponse, "audits"));
     setForm({
       email: user?.email || "",
       firstName: user?.firstName || "",
@@ -75,6 +112,15 @@ export default function ProfilePage({
       setOrganizationInvites(extractCollection(inviteResponse, "invites"));
     } else {
       setOrganizationInvites([]);
+    }
+
+    if (organizationAuditResponse) {
+      if (organizationAuditResponse.status >= 400) {
+        throw toApiError(organizationAuditResponse, "Failed to load organization audits");
+      }
+      setOrganizationAudits(extractCollection(organizationAuditResponse, "audits"));
+    } else {
+      setOrganizationAudits([]);
     }
   }
 
@@ -101,7 +147,7 @@ export default function ProfilePage({
     return () => {
       cancelled = true;
     };
-  }, [api, inviteFilter, session?.userId]);
+  }, [api, inviteFilter, auditOutcomeFilter, session?.userId]);
 
   function inviteStatusLabel(status) {
     if (status === "pending") return "Pending";
@@ -113,6 +159,12 @@ export default function ProfilePage({
 
   function updateField(key, value) {
     setForm((current) => ({ ...current, [key]: value }));
+  }
+
+  function formatAudit(audit) {
+    const who = audit?.email || audit?.provider || "Event";
+    const detail = audit?.message || audit?.eventType || "Activity";
+    return `${who}: ${detail}`;
   }
 
   async function submitProfile(event) {
@@ -219,6 +271,12 @@ export default function ProfilePage({
         email: inviteEmail,
       });
       if (response.status >= 400) {
+        const conflict = response.data?.data?.conflict;
+        if (conflict?.organizationName) {
+          throw new Error(
+            `${response.data?.message || "Invite conflict"}: ${conflict.organizationName}. ${conflict.resolution || ""}`.trim()
+          );
+        }
         throw toApiError(response, "Failed to invite user");
       }
       setInviteEmail("");
@@ -226,6 +284,27 @@ export default function ProfilePage({
       await loadProfile();
     } catch (err) {
       setError(err.message || "Failed to invite user");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function unlinkMethod(identityId) {
+    if (!session?.userId || !identityId) return;
+
+    setSaving(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const response = await api.delete(`/user/${session.userId}/signin-method/${identityId}`);
+      if (response.status >= 400) {
+        throw toApiError(response, "Failed to unlink sign-in method");
+      }
+      setSuccess("Linked sign-in method removed.");
+      await loadProfile();
+    } catch (err) {
+      setError(err.message || "Failed to unlink sign-in method");
     } finally {
       setSaving(false);
     }
@@ -308,6 +387,80 @@ export default function ProfilePage({
         </div>
       </section>
 
+      <section className="surface-card">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Access</p>
+            <h3>Sign-in methods</h3>
+          </div>
+        </div>
+        <div className="record-stack">
+          <div className="record-card">
+            <div className="split-heading">
+              <strong>Password</strong>
+              <span className="chip">
+                {signInMethods.passwordEnabled ? "Enabled" : "Disabled"}
+              </span>
+            </div>
+            <p className="tiny-meta">
+              Password login remains available even after linking Google.
+            </p>
+          </div>
+          {(signInMethods.linkedProviders || []).map((method) => (
+            <div className="record-card" key={method.id}>
+              <div className="split-heading">
+                <strong>{method.provider}</strong>
+                <span className="chip">{method.email || "Linked"}</span>
+              </div>
+              <p className="tiny-meta">
+                Last updated{" "}
+                {method.updatedAt ? new Date(method.updatedAt).toLocaleString() : "Unknown"}
+              </p>
+              <div className="split-actions">
+                <button
+                  className="btn btn-secondary"
+                  disabled={saving}
+                  onClick={() => unlinkMethod(method.id)}
+                  type="button"
+                >
+                  Unlink
+                </button>
+              </div>
+            </div>
+          ))}
+          {!signInMethods.linkedProviders?.length ? (
+            <div className="empty-state">No linked social sign-in methods.</div>
+          ) : null}
+        </div>
+      </section>
+
+      <section className="surface-card">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Security</p>
+            <h3>Recent account activity</h3>
+          </div>
+        </div>
+        <div className="record-stack">
+          {userAudits.length ? (
+            userAudits.map((audit) => (
+              <div className="record-card" key={audit.id}>
+                <div className="split-heading">
+                  <strong>{audit.eventType}</strong>
+                  <span className="chip">{audit.outcome}</span>
+                </div>
+                <p>{formatAudit(audit)}</p>
+                <p className="tiny-meta">
+                  {audit.createdAt ? new Date(audit.createdAt).toLocaleString() : "Unknown"}
+                </p>
+              </div>
+            ))
+          ) : (
+            <div className="empty-state">No account activity recorded yet.</div>
+          )}
+        </div>
+      </section>
+
       {session?.organizationId && (session?.organizationAdmin || session?.systemAdmin) ? (
         <section className="surface-card">
           <div className="section-heading">
@@ -362,18 +515,29 @@ export default function ProfilePage({
                       <span className="chip">{inviteStatusLabel(inviteRow.status)}</span>
                     </div>
                     <p className="tiny-meta">
+                      Created{" "}
+                      {inviteRow.createdAt
+                        ? new Date(inviteRow.createdAt).toLocaleString()
+                        : "Unknown"}
+                    </p>
+                    <p className="tiny-meta">
                       {inviteRow.expiresAt
                         ? `Expires ${new Date(inviteRow.expiresAt).toLocaleString()}`
                         : "No expiration"}
                     </p>
+                    {inviteRow.invitedByName ? (
+                      <p className="tiny-meta">Invited by {inviteRow.invitedByName}</p>
+                    ) : null}
                     {inviteRow.acceptedAt ? (
                       <p className="tiny-meta">
                         Accepted {new Date(inviteRow.acceptedAt).toLocaleString()}
+                        {inviteRow.acceptedByName ? ` by ${inviteRow.acceptedByName}` : ""}
                       </p>
                     ) : null}
                     {inviteRow.revokedAt ? (
                       <p className="tiny-meta">
                         Revoked {new Date(inviteRow.revokedAt).toLocaleString()}
+                        {inviteRow.revokedByName ? ` by ${inviteRow.revokedByName}` : ""}
                       </p>
                     ) : null}
                     {isPending ? <p className="tiny-meta invite-link">{inviteUrl}</p> : null}
@@ -402,6 +566,43 @@ export default function ProfilePage({
               })
             ) : (
               <div className="empty-state">No invites for this filter.</div>
+            )}
+          </div>
+          <div className="section-heading" style={{ marginTop: 24 }}>
+            <div>
+              <p className="eyebrow">Support</p>
+              <h3>Organization audit feed</h3>
+            </div>
+          </div>
+          <div className="chip-row wrap-actions">
+            {["all", "success", "pending", "blocked"].map((status) => (
+              <button
+                key={status}
+                className={`btn ${auditOutcomeFilter === status ? "" : "btn-tonal"}`}
+                disabled={saving}
+                onClick={() => setAuditOutcomeFilter(status)}
+                type="button"
+              >
+                {status === "all" ? "All" : status}
+              </button>
+            ))}
+          </div>
+          <div className="record-stack">
+            {organizationAudits.length ? (
+              organizationAudits.map((audit) => (
+                <div className="record-card" key={audit.id}>
+                  <div className="split-heading">
+                    <strong>{audit.eventType}</strong>
+                    <span className="chip">{audit.outcome}</span>
+                  </div>
+                  <p>{formatAudit(audit)}</p>
+                  <p className="tiny-meta">
+                    {audit.createdAt ? new Date(audit.createdAt).toLocaleString() : "Unknown"}
+                  </p>
+                </div>
+              ))
+            ) : (
+              <div className="empty-state">No organization activity for this filter.</div>
             )}
           </div>
         </section>
