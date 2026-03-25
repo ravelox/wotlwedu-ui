@@ -743,6 +743,11 @@ export default function ProfilePage({
           <Link className="text-link" to="/app/election">
             Elections
           </Link>
+          {session?.systemAdmin || session?.organizationAdmin ? (
+            <Link className="text-link" to="/app/support">
+              Support
+            </Link>
+          ) : null}
         </div>
       </section>
 

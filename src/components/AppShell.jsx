@@ -2,14 +2,6 @@ import { NavLink } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { extractCollection } from "../lib/api";
 
-const NAV_ITEMS = [
-  { label: "Home", to: "/app/home", icon: "◐" },
-  { label: "Vote", to: "/app/cast-vote", icon: "◎" },
-  { label: "Elections", to: "/app/elections", icon: "◒" },
-  { label: "Friends", to: "/app/friend", icon: "◌" },
-  { label: "Profile", to: "/app/profile", icon: "◍" },
-];
-
 export default function AppShell({
   children,
   session,
@@ -20,6 +12,16 @@ export default function AppShell({
 }) {
   const [workgroups, setWorkgroups] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const navItems = [
+    { label: "Home", to: "/app/home", icon: "◐" },
+    { label: "Vote", to: "/app/cast-vote", icon: "◎" },
+    { label: "Elections", to: "/app/elections", icon: "◒" },
+    { label: "Friends", to: "/app/friend", icon: "◌" },
+    ...((session?.systemAdmin || session?.organizationAdmin)
+      ? [{ label: "Support", to: "/app/support", icon: "◈" }]
+      : []),
+    { label: "Profile", to: "/app/profile", icon: "◍" },
+  ];
 
   useEffect(() => {
     let cancelled = false;
@@ -94,8 +96,11 @@ export default function AppShell({
 
           <main className="shell-content">{children}</main>
 
-          <nav className="bottom-nav">
-            {NAV_ITEMS.map((item) => (
+          <nav
+            className="bottom-nav"
+            style={{ gridTemplateColumns: `repeat(${navItems.length}, minmax(0, 1fr))` }}
+          >
+            {navItems.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}

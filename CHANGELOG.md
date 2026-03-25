@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.7 - 2026-03-24
+
+- Add a dedicated `/app/support` view to the React UI for organization and system admins.
+- Surface support overview metrics, support audit feed filtering, and targeted user investigation from the backend support endpoints.
+- Expose support navigation in the main app shell and profile quick links so admin workflows stay in parity with the browser console.
+
 ## 0.1.4 - 2026-03-24
 
 - Add invite history filtering to the profile organization admin screen for pending, accepted, revoked, and expired invite states.

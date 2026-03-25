@@ -17,6 +17,7 @@ import FriendsPage from "./pages/FriendsPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import PreferencesPage from "./pages/PreferencesPage";
 import ProfilePage from "./pages/ProfilePage";
+import SupportPage from "./pages/SupportPage";
 import ContentManagerPage from "./pages/ContentManagerPage";
 import ErrorPage from "./pages/ErrorPage";
 import StatisticsPage from "./pages/StatisticsPage";
@@ -24,7 +25,7 @@ import VotingPage from "./pages/VotingPage";
 
 const DEFAULT_API_BASE_URL =
   import.meta.env.VITE_WOTLWEDU_API_BASE_URL || "https://api.wotlwedu.com:9876";
-const APP_VERSION = import.meta.env.VITE_APP_VERSION || "0.1.4";
+const APP_VERSION = import.meta.env.VITE_APP_VERSION || "0.1.7";
 const API_STORAGE_KEY = "wotlwedu_ui_api_base_url";
 
 function RequireAuth({ session, children }) {
@@ -286,6 +287,7 @@ export default function App() {
                     />
                   }
                 />
+                <Route path="/support" element={<SupportPage api={api} session={session} />} />
                 <Route path="*" element={<Navigate to="/app/home" replace />} />
               </Routes>
             </AppShell>
