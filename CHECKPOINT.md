@@ -2,7 +2,7 @@
 
 Last updated: 2026-03-24
 Repo: `wotlwedu-ui`
-Current version: `0.1.5`
+Current version: `0.1.6`
 
 ## Current Focus
 
@@ -19,7 +19,7 @@ This repo has been updated to surface the backend hardening work in the main Rea
   - organization audit activity for admins from `/organization/:organizationId/authaudit`
   - richer invite conflict messaging when the backend reports an existing-user-other-organization collision
 
-## Main Files Changed In This Uncommitted Slice
+## Key Files For This Baseline
 
 - [src/pages/LoginPage.jsx](/Users/dkelly/Projects/wotlwedu/wotlwedu-ui/src/pages/LoginPage.jsx)
 - [src/pages/ProfilePage.jsx](/Users/dkelly/Projects/wotlwedu/wotlwedu-ui/src/pages/ProfilePage.jsx)
@@ -40,5 +40,5 @@ npm run build
 
 ## Likely Next Actions
 
-1. Stage, commit, tag, and push this uncommitted slice if accepted.
-2. Optionally add UI polish for audit filtering or support/admin diagnostics if requested.
+1. Keep parity with backend auth/invite/audit flows.
+2. Add a dedicated support/admin view only if this UI also needs the browser console’s operational workflow.
