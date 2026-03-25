@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.4 - 2026-03-24
+
+- Add invite history filtering to the profile organization admin screen for pending, accepted, revoked, and expired invite states.
+- Show invite status metadata in the UI while keeping resend and revoke actions limited to pending invites.
+- Document the broader invite-history contract exposed by the backend.
+
 ## 0.1.3 - 2026-03-24
 
 - Add invite-aware login UX that resolves invite context from `?invite=` and passes invite tokens through Google sign-in.

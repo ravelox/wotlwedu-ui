@@ -26,6 +26,7 @@ export default function ProfilePage({
   const [organization, setOrganization] = useState(null);
   const [inviteEmail, setInviteEmail] = useState("");
   const [organizationInvites, setOrganizationInvites] = useState([]);
+  const [inviteFilter, setInviteFilter] = useState("all");
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
@@ -36,7 +37,11 @@ export default function ProfilePage({
 
     if (canManageOrganization) {
       requests.push(api.get(`/organization/${session.organizationId}`));
-      requests.push(api.get(`/organization/${session.organizationId}/invite`));
+      requests.push(
+        api.get(`/organization/${session.organizationId}/invite`, {
+          params: inviteFilter === "all" ? undefined : { status: inviteFilter },
+        })
+      );
     }
 
     const [userResponse, organizationResponse, inviteResponse] = await Promise.all(requests);
@@ -96,7 +101,15 @@ export default function ProfilePage({
     return () => {
       cancelled = true;
     };
-  }, [api, session?.userId]);
+  }, [api, inviteFilter, session?.userId]);
+
+  function inviteStatusLabel(status) {
+    if (status === "pending") return "Pending";
+    if (status === "accepted") return "Accepted";
+    if (status === "revoked") return "Revoked";
+    if (status === "expired") return "Expired";
+    return "Unknown";
+  }
 
   function updateField(key, value) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -322,44 +335,73 @@ export default function ProfilePage({
               {saving ? "Sending..." : "Send Invite"}
             </button>
           </form>
+          <div className="chip-row wrap-actions">
+            {["all", "pending", "accepted", "revoked", "expired"].map((status) => (
+              <button
+                key={status}
+                className={`btn ${inviteFilter === status ? "" : "btn-tonal"}`}
+                disabled={saving}
+                onClick={() => setInviteFilter(status)}
+                type="button"
+              >
+                {status === "all" ? "All" : inviteStatusLabel(status)}
+              </button>
+            ))}
+          </div>
           <div className="record-stack">
             {organizationInvites.length ? (
               organizationInvites.map((inviteRow) => {
                 const inviteUrl = `${window.location.origin}/login?invite=${encodeURIComponent(
                   inviteRow.token
                 )}`;
+                const isPending = inviteRow.status === "pending";
                 return (
                   <div className="record-card" key={inviteRow.id}>
-                    <strong>{inviteRow.email}</strong>
+                    <div className="split-heading">
+                      <strong>{inviteRow.email}</strong>
+                      <span className="chip">{inviteStatusLabel(inviteRow.status)}</span>
+                    </div>
                     <p className="tiny-meta">
                       {inviteRow.expiresAt
                         ? `Expires ${new Date(inviteRow.expiresAt).toLocaleString()}`
                         : "No expiration"}
                     </p>
-                    <p className="tiny-meta invite-link">{inviteUrl}</p>
-                    <div className="split-actions">
-                      <button
-                        className="btn btn-tonal"
-                        disabled={saving}
-                        onClick={() => resendInvite(inviteRow.id)}
-                        type="button"
-                      >
-                        Resend
-                      </button>
-                      <button
-                        className="btn btn-secondary"
-                        disabled={saving}
-                        onClick={() => revokeInvite(inviteRow.id)}
-                        type="button"
-                      >
-                        Revoke
-                      </button>
-                    </div>
+                    {inviteRow.acceptedAt ? (
+                      <p className="tiny-meta">
+                        Accepted {new Date(inviteRow.acceptedAt).toLocaleString()}
+                      </p>
+                    ) : null}
+                    {inviteRow.revokedAt ? (
+                      <p className="tiny-meta">
+                        Revoked {new Date(inviteRow.revokedAt).toLocaleString()}
+                      </p>
+                    ) : null}
+                    {isPending ? <p className="tiny-meta invite-link">{inviteUrl}</p> : null}
+                    {isPending ? (
+                      <div className="split-actions">
+                        <button
+                          className="btn btn-tonal"
+                          disabled={saving}
+                          onClick={() => resendInvite(inviteRow.id)}
+                          type="button"
+                        >
+                          Resend
+                        </button>
+                        <button
+                          className="btn btn-secondary"
+                          disabled={saving}
+                          onClick={() => revokeInvite(inviteRow.id)}
+                          type="button"
+                        >
+                          Revoke
+                        </button>
+                      </div>
+                    ) : null}
                   </div>
                 );
               })
             ) : (
-              <div className="empty-state">No pending invites.</div>
+              <div className="empty-state">No invites for this filter.</div>
             )}
           </div>
         </section>

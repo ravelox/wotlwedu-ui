@@ -24,7 +24,7 @@ import VotingPage from "./pages/VotingPage";
 
 const DEFAULT_API_BASE_URL =
   import.meta.env.VITE_WOTLWEDU_API_BASE_URL || "https://api.wotlwedu.com:9876";
-const APP_VERSION = import.meta.env.VITE_APP_VERSION || "0.1.3";
+const APP_VERSION = import.meta.env.VITE_APP_VERSION || "0.1.4";
 const API_STORAGE_KEY = "wotlwedu_ui_api_base_url";
 
 function RequireAuth({ session, children }) {

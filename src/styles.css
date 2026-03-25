@@ -282,6 +282,13 @@ a {
   gap: 10px;
 }
 
+.split-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
 .section-heading.compact {
   align-items: flex-start;
 }
@@ -296,6 +303,7 @@ a {
 }
 
 .card-list,
+.record-stack,
 .timeline,
 .stack-form {
   display: grid;

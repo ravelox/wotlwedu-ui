@@ -24,7 +24,7 @@ npm run preview
 The app reads these Vite variables at build time:
 
 - `VITE_WOTLWEDU_API_BASE_URL`: backend API origin. Defaults to `https://api.wotlwedu.com:9876`.
-- `VITE_APP_VERSION`: version label shown in the app chrome. Defaults to `0.1.3`.
+- `VITE_APP_VERSION`: version label shown in the app chrome. Defaults to `0.1.4`.
 - `VITE_GOOGLE_CLIENT_ID`: Google web client ID used to render the Google sign-in button.
 
 The selected API base URL is also persisted in browser storage under `wotlwedu_ui_api_base_url`.
@@ -113,7 +113,7 @@ Preferences:
 Organizations:
 
 - `GET /organization/:organizationId`: load the signed-in organization when needed
-- `GET /organization/:organizationId/invite`: list pending invites for org-admin tooling
+- `GET /organization/:organizationId/invite`: list invites for org-admin tooling, optionally filtered by status
 - `POST /organization/:organizationId/invite`: invite an email address into an organization before first social sign-in
 - `POST /organization/:organizationId/invite/:inviteId/resend`: regenerate and resend an invite link
 - `DELETE /organization/:organizationId/invite/:inviteId`: revoke a pending invite
@@ -160,7 +160,7 @@ Build with a custom backend origin:
 ```bash
 docker build \
   --build-arg VITE_WOTLWEDU_API_BASE_URL=https://api.example.com \
-  --build-arg VITE_APP_VERSION=0.1.3 \
+  --build-arg VITE_APP_VERSION=0.1.4 \
   -t wotlwedu-ui .
 ```
 
