@@ -17,6 +17,17 @@ npm install
 npm run dev
 npm run build
 npm run preview
+npm run validate:support-console
+```
+
+Live support-console validation:
+
+```bash
+export WOTLWEDU_VALIDATE_BASE_URL="https://api.example.com"
+export WOTLWEDU_VALIDATE_TOKEN="REPLACE_WITH_BEARER_TOKEN"
+export WOTLWEDU_VALIDATE_ORGANIZATION_ID="org_123"   # optional
+export WOTLWEDU_VALIDATE_USER_ID="user_123"          # optional
+npm run validate:support-console
 ```
 
 ## Environment
@@ -24,7 +35,7 @@ npm run preview
 The app reads these Vite variables at build time:
 
 - `VITE_WOTLWEDU_API_BASE_URL`: backend API origin. Defaults to `https://api.wotlwedu.com:9876`.
-- `VITE_APP_VERSION`: version label shown in the app chrome. Defaults to `0.1.7`.
+- `VITE_APP_VERSION`: version label shown in the app chrome. Defaults to `0.1.8`.
 - `VITE_GOOGLE_CLIENT_ID`: Google web client ID used to render the Google sign-in button.
 
 An example file is included at [`.env.example`](/Users/dkelly/Projects/wotlwedu/wotlwedu-ui/.env.example).
@@ -172,7 +183,7 @@ Build with a custom backend origin:
 ```bash
 docker build \
   --build-arg VITE_WOTLWEDU_API_BASE_URL=https://api.example.com \
-  --build-arg VITE_APP_VERSION=0.1.7 \
+  --build-arg VITE_APP_VERSION=0.1.8 \
   -t wotlwedu-ui .
 ```
 
