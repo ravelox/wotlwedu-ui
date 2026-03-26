@@ -102,9 +102,9 @@ User profile and relationships:
 - `GET /user/:userId/authaudit`: load recent auth and invite-related account activity
 - `GET /user/friend`: list friend and relationship records
 - `POST /user/request`: send a friend request by email
-- `POST /user/accept/:token`: accept a friend request from a notification token
-- `DELETE /user/relationship/:id`: remove a relationship
-- `PUT /user/block/:userId`: block a user
+- `POST /user/accept/:tokenId`: accept a friend request from a notification token
+- `DELETE /user/relationship/:relationshipId`: remove a relationship
+- `PUT /user/block/:blockUser`: block a user
 
 Notifications:
 
