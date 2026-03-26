@@ -2,7 +2,7 @@
 
 Last updated: 2026-03-24
 Repo: `wotlwedu-ui`
-Current version: `0.1.8`
+Current version: `0.1.9`
 
 ## Current Focus
 
@@ -22,7 +22,7 @@ This repo now includes a dedicated support/admin console in the main React UI so
   - auth overview metrics from `/support/auth/overview`
   - paged support audit feed from `/support/auth/audit`
   - targeted user lookup with sign-in method inspection and recent audit activity
-- A live support-console validation hook now exists via `npm run validate:support-console`.
+- A live support-console validation hook now exists via `npm run validate:support-console`, including login-based auto-discovery of user/org scope.
 - Support navigation is now exposed directly in the main app shell for organization and system admins.
 
 ## Key Files For This Baseline
