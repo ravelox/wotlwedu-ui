@@ -16,7 +16,7 @@ function formatDate(value) {
   }).format(date);
 }
 
-export default function DashboardPage({ api, activeWorkgroupId }) {
+export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [unreadCount, setUnreadCount] = useState(0);
@@ -77,12 +77,15 @@ export default function DashboardPage({ api, activeWorkgroupId }) {
       <ErrorBanner error={error} />
 
       <section className="hero-card">
-        <p className="eyebrow">Home</p>
-        <h2>Your election activity</h2>
-        <p>
-          The minimal client home only surfaced elections. This version stays consumer-focused
-          and adds direct access to your pending votes and notifications.
-        </p>
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Home</p>
+            <h2>Your poll activity</h2>
+          </div>
+          <button className="btn btn-danger" onClick={onLogout} type="button">
+            Logout
+          </button>
+        </div>
         <div className="metric-grid">
           <div className="metric-card">
             <strong>{elections.length}</strong>
@@ -149,7 +152,7 @@ export default function DashboardPage({ api, activeWorkgroupId }) {
               <article className="list-card" key={election.id}>
                 <div>
                   <strong>{election.name || "Untitled poll"}</strong>
-                  <p>{election.description || "No description provided."}</p>
+                  {election.description ? <p>{election.description}</p> : null}
                 </div>
                 <div className="chip-row">
                   <span className="chip">{formatDate(election.expiration)}</span>
@@ -159,7 +162,7 @@ export default function DashboardPage({ api, activeWorkgroupId }) {
                 </div>
                 <div className="split-actions">
                   <Link className="text-link" to={`/app/cast-vote/${election.id}`}>
-                    Vote in this election
+                    Vote
                   </Link>
                   <Link className="text-link" to={`/app/statistics/${election.id}`}>
                     View stats

@@ -183,11 +183,23 @@ export default function App() {
                 <Route path="/" element={<Navigate to="/app/home" replace />} />
                 <Route
                   path="/home"
-                  element={<DashboardPage api={api} activeWorkgroupId={activeWorkgroupId} />}
+                  element={
+                    <DashboardPage
+                      api={api}
+                      activeWorkgroupId={activeWorkgroupId}
+                      onLogout={handleLogout}
+                    />
+                  }
                 />
                 <Route
                   path="/dashboard"
-                  element={<DashboardPage api={api} activeWorkgroupId={activeWorkgroupId} />}
+                  element={
+                    <DashboardPage
+                      api={api}
+                      activeWorkgroupId={activeWorkgroupId}
+                      onLogout={handleLogout}
+                    />
+                  }
                 />
                 <Route path="/cast-vote" element={<VotingPage api={api} />} />
                 <Route path="/cast-vote/:electionId" element={<VotingPage api={api} />} />

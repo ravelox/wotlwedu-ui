@@ -89,10 +89,6 @@ export default function VotingPage({ api }) {
             Refresh
           </button>
         </div>
-        <p className="subtle-copy">
-          This follows the minimal app flow: fetch the next pending vote and let the user cast
-          `Yes`, `No`, or `Maybe`.
-        </p>
         <SuccessBanner message={success} />
         <ErrorBanner error={error} />
 
@@ -127,7 +123,7 @@ export default function VotingPage({ api }) {
                 ) : null}
                 <div>
                   <strong>{currentVote.election?.name || "Untitled poll"}</strong>
-                  <p>{currentVote.election?.description || "No description provided."}</p>
+                  {currentVote.election?.description ? <p>{currentVote.election.description}</p> : null}
                 </div>
               </div>
             </div>
@@ -144,7 +140,7 @@ export default function VotingPage({ api }) {
                 ) : null}
                 <div>
                   <strong>{currentVote.item?.name || "Unnamed option"}</strong>
-                  <p>{currentVote.item?.description || "No description provided."}</p>
+                  {currentVote.item?.description ? <p>{currentVote.item.description}</p> : null}
                   {currentVote.item?.location ? (
                     <p className="tiny-meta">{currentVote.item.location}</p>
                   ) : null}

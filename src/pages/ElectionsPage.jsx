@@ -77,10 +77,6 @@ export default function ElectionsPage({ api, activeWorkgroupId }) {
             </button>
           </div>
         </div>
-        <p className="subtle-copy">
-          Scoped to the active workgroup when one is selected. Open a vote to cast decisions
-          for the current poll.
-        </p>
         <ErrorBanner error={error} />
 
         <div className="card-list">
@@ -92,7 +88,7 @@ export default function ElectionsPage({ api, activeWorkgroupId }) {
                 <div className="section-heading compact">
                   <div>
                     <strong>{election.name || "Untitled poll"}</strong>
-                    <p>{election.description || "No description provided."}</p>
+                    {election.description ? <p>{election.description}</p> : null}
                   </div>
                   <span className={`status-pill status-${getElectionStatus(election.expiration).toLowerCase()}`}>
                     {getElectionStatus(election.expiration)}

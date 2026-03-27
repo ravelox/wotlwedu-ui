@@ -375,7 +375,7 @@ export default function ProfilePage({
             <h3>Sign-in methods</h3>
           </div>
         </div>
-        <div className="record-stack">
+          <div className="record-stack">
           <div className="record-card">
             <div className="split-heading">
               <strong>Password</strong>
@@ -383,9 +383,6 @@ export default function ProfilePage({
                 {signInMethods.passwordEnabled ? "Enabled" : "Disabled"}
               </span>
             </div>
-            <p className="tiny-meta">
-              Password login remains available even after linking Google.
-            </p>
           </div>
           {(signInMethods.linkedProviders || []).map((method) => (
             <div className="record-card" key={method.id}>
@@ -450,10 +447,6 @@ export default function ProfilePage({
               <h3>Invitations</h3>
             </div>
           </div>
-          <p className="subtle-copy">
-            Invite a Google account by email. The invite is consumed when that user signs in
-            through the invite link and the Google account email matches.
-          </p>
           <form className="stack-form" onSubmit={submitInvite}>
             <label className="field">
               <span>Invite Email</span>
@@ -615,9 +608,6 @@ export default function ProfilePage({
             <h3>Two-factor authentication</h3>
           </div>
         </div>
-        <p className="subtle-copy">
-          Current status: {form.enable2fa ? "Enabled" : "Disabled"}
-        </p>
         {!form.enable2fa && !setup2fa ? (
           <button className="btn btn-secondary" onClick={begin2faSetup} type="button">
             Enable 2FA
@@ -662,7 +652,7 @@ export default function ProfilePage({
         <div className="section-heading">
           <div>
             <p className="eyebrow">More</p>
-            <h3>Consumer routes</h3>
+            <h3>App sections</h3>
           </div>
         </div>
         <div className="chip-row wrap-actions">
