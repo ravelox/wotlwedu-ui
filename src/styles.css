@@ -1,24 +1,24 @@
 :root {
   font-family: "Manrope", "Avenir Next", "Segoe UI", sans-serif;
-  color: #f5f7fb;
+  color: #f7f3eb;
   background:
-    radial-gradient(circle at top, rgba(255, 177, 122, 0.18), transparent 28%),
-    radial-gradient(circle at 20% 20%, rgba(81, 140, 255, 0.24), transparent 32%),
-    linear-gradient(180deg, #09111f 0%, #10213a 38%, #162f4a 100%);
+    radial-gradient(circle at top, rgba(217, 143, 61, 0.18), transparent 28%),
+    radial-gradient(circle at 20% 20%, rgba(29, 92, 82, 0.22), transparent 30%),
+    linear-gradient(180deg, #0b1716 0%, #102522 38%, #17312d 100%);
   color-scheme: dark;
-  --bg: rgba(10, 21, 37, 0.76);
-  --bg-strong: rgba(7, 15, 28, 0.92);
-  --panel: rgba(14, 31, 53, 0.72);
-  --panel-strong: rgba(18, 39, 66, 0.92);
+  --bg: rgba(14, 22, 21, 0.78);
+  --bg-strong: rgba(10, 17, 16, 0.94);
+  --panel: rgba(20, 34, 32, 0.76);
+  --panel-strong: rgba(25, 42, 39, 0.92);
   --panel-soft: rgba(255, 255, 255, 0.06);
-  --text: #f5f7fb;
-  --muted: #a5b7d0;
-  --line: rgba(205, 223, 248, 0.12);
-  --brand: #7dd3a7;
-  --brand-2: #69a7ff;
-  --danger: #ff6f7d;
-  --warning: #ffbc70;
-  --shadow: 0 22px 48px rgba(2, 10, 22, 0.35);
+  --text: #f7f3eb;
+  --muted: #b7b09f;
+  --line: rgba(235, 228, 213, 0.12);
+  --brand: #72c0a0;
+  --brand-2: #d98f3d;
+  --danger: #d96b6b;
+  --warning: #d9a15d;
+  --shadow: 0 22px 48px rgba(5, 10, 9, 0.38);
 }
 
 * {
@@ -74,8 +74,8 @@ a {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 20% 0%, rgba(127, 211, 167, 0.18), transparent 34%),
-    radial-gradient(circle at 90% 10%, rgba(105, 167, 255, 0.22), transparent 26%),
+    radial-gradient(circle at 20% 0%, rgba(114, 192, 160, 0.18), transparent 34%),
+    radial-gradient(circle at 90% 10%, rgba(217, 143, 61, 0.2), transparent 26%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 30%);
   pointer-events: none;
 }
@@ -487,17 +487,17 @@ a {
 }
 
 .audit-chip-success {
-  background: rgba(125, 211, 167, 0.18);
+  background: rgba(114, 192, 160, 0.18);
 }
 
 .audit-chip-pending {
-  background: rgba(255, 188, 112, 0.18);
+  background: rgba(217, 161, 93, 0.18);
 }
 
 .audit-chip-blocked,
 .audit-chip-error,
 .audit-chip-failed {
-  background: rgba(255, 111, 125, 0.18);
+  background: rgba(217, 107, 107, 0.18);
 }
 
 .toggle-field {
@@ -536,7 +536,7 @@ a {
 }
 
 .btn-danger {
-  background: linear-gradient(135deg, #ff8d8d, var(--danger));
+  background: linear-gradient(135deg, #f09a9a, var(--danger));
 }
 
 .banner {
@@ -546,15 +546,15 @@ a {
 }
 
 .banner-error {
-  background: rgba(255, 111, 125, 0.12);
-  color: #ffc4cb;
-  border: 1px solid rgba(255, 111, 125, 0.24);
+  background: rgba(217, 107, 107, 0.12);
+  color: #ffd2d2;
+  border: 1px solid rgba(217, 107, 107, 0.24);
 }
 
 .banner-success {
-  background: rgba(125, 211, 167, 0.12);
-  color: #c8ffe1;
-  border: 1px solid rgba(125, 211, 167, 0.24);
+  background: rgba(114, 192, 160, 0.12);
+  color: #d8f5e8;
+  border: 1px solid rgba(114, 192, 160, 0.24);
 }
 
 .empty-state,
@@ -567,16 +567,16 @@ a {
 }
 
 .status-open {
-  background: rgba(125, 211, 167, 0.14);
+  background: rgba(114, 192, 160, 0.14);
 }
 
 .status-closed {
-  background: rgba(255, 111, 125, 0.14);
+  background: rgba(217, 107, 107, 0.14);
 }
 
 .status-draft,
 .status-scheduled {
-  background: rgba(255, 188, 112, 0.16);
+  background: rgba(217, 161, 93, 0.16);
 }
 
 pre {
@@ -639,9 +639,9 @@ pre {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at top, rgba(255, 188, 112, 0.25), transparent 26%),
-    radial-gradient(circle at 20% 20%, rgba(125, 211, 167, 0.24), transparent 22%),
-    linear-gradient(180deg, #08101d 0%, #10213a 50%, #152f4c 100%);
+    radial-gradient(circle at top, rgba(217, 161, 93, 0.24), transparent 26%),
+    radial-gradient(circle at 20% 20%, rgba(114, 192, 160, 0.22), transparent 22%),
+    linear-gradient(180deg, #0a1413 0%, #102522 50%, #17312d 100%);
 }
 
 .login-card {
