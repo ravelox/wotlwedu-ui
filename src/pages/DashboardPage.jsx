@@ -116,7 +116,7 @@ export default function DashboardPage({ api, activeWorkgroupId }) {
             votes.map((vote) => (
               <article className="list-card" key={vote.id}>
                 <div>
-                  <strong>{vote.election?.name || "Election"}</strong>
+                  <strong>{vote.election?.name || "Poll"}</strong>
                   <p>{vote.item?.name || "Pending vote item"}</p>
                 </div>
                 <div className="split-actions">
@@ -135,7 +135,7 @@ export default function DashboardPage({ api, activeWorkgroupId }) {
         <div className="section-heading">
           <div>
             <p className="eyebrow">Upcoming</p>
-            <h3>Elections</h3>
+            <h3>Polls</h3>
           </div>
           <Link className="text-link" to="/app/elections">
             View all
@@ -143,12 +143,12 @@ export default function DashboardPage({ api, activeWorkgroupId }) {
         </div>
         <div className="card-list">
           {elections.length === 0 ? (
-            <div className="empty-state">No elections are visible for the current scope.</div>
+            <div className="empty-state">No polls are visible for the current scope.</div>
           ) : (
             elections.map((election) => (
               <article className="list-card" key={election.id}>
                 <div>
-                  <strong>{election.name || "Untitled election"}</strong>
+                  <strong>{election.name || "Untitled poll"}</strong>
                   <p>{election.description || "No description provided."}</p>
                 </div>
                 <div className="chip-row">

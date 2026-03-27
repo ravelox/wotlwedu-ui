@@ -116,17 +116,17 @@ export default function VotingPage({ api }) {
         ) : (
           <div className="stack-form">
             <div className="vote-panel">
-              <div className="vote-section-label">Election</div>
+              <div className="vote-section-label">Poll</div>
               <div className="vote-card">
                 {imageUrl(currentVote.election) ? (
                   <img
-                    alt={currentVote.election?.name || "Election"}
+                    alt={currentVote.election?.name || "Poll"}
                     className="vote-image"
                     src={imageUrl(currentVote.election)}
                   />
                 ) : null}
                 <div>
-                  <strong>{currentVote.election?.name || "Untitled election"}</strong>
+                  <strong>{currentVote.election?.name || "Untitled poll"}</strong>
                   <p>{currentVote.election?.description || "No description provided."}</p>
                 </div>
               </div>

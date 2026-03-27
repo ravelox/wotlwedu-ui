@@ -62,7 +62,7 @@ export default function StatisticsPage({ api }) {
         <div className="section-heading">
           <div>
             <p className="eyebrow">Statistics</p>
-            <h2>{election?.name || "Election statistics"}</h2>
+            <h2>{election?.name || "Poll statistics"}</h2>
           </div>
           <Link className="text-link" to={`/app/cast-vote/${electionId}`}>
             Back to vote

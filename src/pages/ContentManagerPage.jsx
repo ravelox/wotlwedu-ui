@@ -25,7 +25,7 @@ const CONFIG = {
     singular: "list",
   },
   election: {
-    label: "Elections",
+    label: "Polls",
     path: "/election",
     key: "elections",
     singular: "election",
@@ -620,7 +620,7 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
                 </select>
               </label>
               <label className="field">
-                <span>Election Type</span>
+                <span>Poll Type</span>
                 <input
                   inputMode="numeric"
                   value={form.electionType}

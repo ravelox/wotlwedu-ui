@@ -741,7 +741,7 @@ export default function ProfilePage({
             Lists
           </Link>
           <Link className="text-link" to="/app/election">
-            Elections
+            Polls
           </Link>
           {session?.systemAdmin || session?.organizationAdmin ? (
             <Link className="text-link" to="/app/support">

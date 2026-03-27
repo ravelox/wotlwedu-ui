@@ -43,11 +43,11 @@ export default function ElectionsPage({ api, activeWorkgroupId }) {
         },
       });
 
-      if (response.status >= 400) throw toApiError(response, "Failed to load elections");
+      if (response.status >= 400) throw toApiError(response, "Failed to load polls");
       setElections(extractCollection(response, "elections"));
       setError("");
     } catch (err) {
-      setError(err.message || "Failed to load elections");
+      setError(err.message || "Failed to load polls");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -58,7 +58,7 @@ export default function ElectionsPage({ api, activeWorkgroupId }) {
     load();
   }, [api, activeWorkgroupId]);
 
-  if (loading) return <Loading text="Loading elections..." />;
+  if (loading) return <Loading text="Loading polls..." />;
 
   return (
     <div className="screen-stack">
@@ -66,7 +66,7 @@ export default function ElectionsPage({ api, activeWorkgroupId }) {
         <div className="section-heading">
           <div>
             <p className="eyebrow">Voting</p>
-            <h2>Election feed</h2>
+            <h2>Poll feed</h2>
           </div>
           <div className="split-actions">
             <Link className="text-link" to="/app/election">
@@ -79,19 +79,19 @@ export default function ElectionsPage({ api, activeWorkgroupId }) {
         </div>
         <p className="subtle-copy">
           Scoped to the active workgroup when one is selected. Open a vote to cast decisions
-          for the current election.
+          for the current poll.
         </p>
         <ErrorBanner error={error} />
 
         <div className="card-list">
           {elections.length === 0 ? (
-            <div className="empty-state">No elections available for this scope.</div>
+            <div className="empty-state">No polls available for this scope.</div>
           ) : (
             elections.map((election) => (
               <article className="election-card" key={election.id}>
                 <div className="section-heading compact">
                   <div>
-                    <strong>{election.name || "Untitled election"}</strong>
+                    <strong>{election.name || "Untitled poll"}</strong>
                     <p>{election.description || "No description provided."}</p>
                   </div>
                   <span className={`status-pill status-${getElectionStatus(election.expiration).toLowerCase()}`}>
