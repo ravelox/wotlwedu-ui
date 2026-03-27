@@ -17,7 +17,6 @@ import FriendsPage from "./pages/FriendsPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import PreferencesPage from "./pages/PreferencesPage";
 import ProfilePage from "./pages/ProfilePage";
-import SupportPage from "./pages/SupportPage";
 import ContentManagerPage from "./pages/ContentManagerPage";
 import ErrorPage from "./pages/ErrorPage";
 import StatisticsPage from "./pages/StatisticsPage";
@@ -287,7 +286,6 @@ export default function App() {
                     />
                   }
                 />
-                <Route path="/support" element={<SupportPage api={api} session={session} />} />
                 <Route path="*" element={<Navigate to="/app/home" replace />} />
               </Routes>
             </AppShell>

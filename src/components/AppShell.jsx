@@ -17,9 +17,6 @@ export default function AppShell({
     { label: "Vote", to: "/app/cast-vote", icon: "◎" },
     { label: "Polls", to: "/app/elections", icon: "◒" },
     { label: "Friends", to: "/app/friend", icon: "◌" },
-    ...((session?.systemAdmin || session?.organizationAdmin)
-      ? [{ label: "Support", to: "/app/support", icon: "◈" }]
-      : []),
     { label: "Profile", to: "/app/profile", icon: "◍" },
   ];
 

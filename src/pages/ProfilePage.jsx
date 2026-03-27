@@ -31,9 +31,7 @@ export default function ProfilePage({
     linkedProviders: [],
   });
   const [userAudits, setUserAudits] = useState([]);
-  const [organizationAudits, setOrganizationAudits] = useState([]);
   const [inviteFilter, setInviteFilter] = useState("all");
-  const [auditOutcomeFilter, setAuditOutcomeFilter] = useState("all");
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
@@ -53,14 +51,6 @@ export default function ProfilePage({
           params: inviteFilter === "all" ? undefined : { status: inviteFilter },
         })
       );
-      requests.push(
-        api.get(`/organization/${session.organizationId}/authaudit`, {
-          params: {
-            items: 20,
-            ...(auditOutcomeFilter === "all" ? {} : { outcome: auditOutcomeFilter }),
-          },
-        })
-      );
     }
 
     const [
@@ -69,7 +59,6 @@ export default function ProfilePage({
       userAuditResponse,
       organizationResponse,
       inviteResponse,
-      organizationAuditResponse,
     ] = await Promise.all(requests);
     if (userResponse.status >= 400) {
       throw toApiError(userResponse, "Failed to load profile");
@@ -114,14 +103,6 @@ export default function ProfilePage({
       setOrganizationInvites([]);
     }
 
-    if (organizationAuditResponse) {
-      if (organizationAuditResponse.status >= 400) {
-        throw toApiError(organizationAuditResponse, "Failed to load organization audits");
-      }
-      setOrganizationAudits(extractCollection(organizationAuditResponse, "audits"));
-    } else {
-      setOrganizationAudits([]);
-    }
   }
 
   useEffect(() => {
@@ -147,7 +128,7 @@ export default function ProfilePage({
     return () => {
       cancelled = true;
     };
-  }, [api, inviteFilter, auditOutcomeFilter, session?.userId]);
+  }, [api, inviteFilter, session?.userId]);
 
   function inviteStatusLabel(status) {
     if (status === "pending") return "Pending";
@@ -568,43 +549,6 @@ export default function ProfilePage({
               <div className="empty-state">No invites for this filter.</div>
             )}
           </div>
-          <div className="section-heading" style={{ marginTop: 24 }}>
-            <div>
-              <p className="eyebrow">Support</p>
-              <h3>Organization audit feed</h3>
-            </div>
-          </div>
-          <div className="chip-row wrap-actions">
-            {["all", "success", "pending", "blocked"].map((status) => (
-              <button
-                key={status}
-                className={`btn ${auditOutcomeFilter === status ? "" : "btn-tonal"}`}
-                disabled={saving}
-                onClick={() => setAuditOutcomeFilter(status)}
-                type="button"
-              >
-                {status === "all" ? "All" : status}
-              </button>
-            ))}
-          </div>
-          <div className="record-stack">
-            {organizationAudits.length ? (
-              organizationAudits.map((audit) => (
-                <div className="record-card" key={audit.id}>
-                  <div className="split-heading">
-                    <strong>{audit.eventType}</strong>
-                    <span className="chip">{audit.outcome}</span>
-                  </div>
-                  <p>{formatAudit(audit)}</p>
-                  <p className="tiny-meta">
-                    {audit.createdAt ? new Date(audit.createdAt).toLocaleString() : "Unknown"}
-                  </p>
-                </div>
-              ))
-            ) : (
-              <div className="empty-state">No organization activity for this filter.</div>
-            )}
-          </div>
         </section>
       ) : null}
 
@@ -743,11 +687,6 @@ export default function ProfilePage({
           <Link className="text-link" to="/app/election">
             Polls
           </Link>
-          {session?.systemAdmin || session?.organizationAdmin ? (
-            <Link className="text-link" to="/app/support">
-              Support
-            </Link>
-          ) : null}
         </div>
       </section>
 
