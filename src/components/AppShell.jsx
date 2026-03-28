@@ -70,6 +70,10 @@ export default function AppShell({
           <section className="shell-meta">
             <div className="scope-card">
               <div>
+                <div className="scope-label">Organization</div>
+                <div>{session?.organizationId || "Personal"}</div>
+              </div>
+              <div>
                 <div className="scope-label">Workgroup Scope</div>
                 <select
                   value={activeWorkgroupId || ""}

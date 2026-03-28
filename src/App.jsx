@@ -37,6 +37,7 @@ function RequireAuth({ session, children }) {
 
 export default function App() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [session, setSessionState] = useState(getSession());
   const [baseUrl, setBaseUrlState] = useState(
     localStorage.getItem(API_STORAGE_KEY) || DEFAULT_API_BASE_URL
@@ -115,7 +116,16 @@ export default function App() {
     <Routes>
       <Route
         path="/login"
-        element={<LoginPage api={api} appVersion={APP_VERSION} onLogin={handleLogin} />}
+        element={
+          session?.authToken ? (
+            <Navigate
+              to={location.search ? `/app/profile${location.search}` : "/app/home"}
+              replace
+            />
+          ) : (
+            <LoginPage api={api} appVersion={APP_VERSION} onLogin={handleLogin} />
+          )
+        }
       />
       <Route path="/register" element={<RegisterPage api={api} appVersion={APP_VERSION} />} />
       <Route

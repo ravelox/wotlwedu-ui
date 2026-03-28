@@ -32,6 +32,12 @@ const CONFIG = {
   },
 };
 
+const ELECTION_TYPE_OPTIONS = [
+  { value: "0", label: "Ranked choice" },
+  { value: "1", label: "Single choice" },
+  { value: "2", label: "Approval" },
+];
+
 function emptyForm(kind, activeWorkgroupId) {
   if (kind === "image") {
     return {
@@ -86,6 +92,11 @@ function normalizeDateTime(value) {
   return date.toISOString().slice(0, 16);
 }
 
+function defaultExpirationValue() {
+  const date = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  return date.toISOString().slice(0, 16);
+}
+
 function summarizeRow(kind, row) {
   if (kind === "item") return row.location || row.url || row.description || "No summary";
   if (kind === "list") return row.description || `${row.items?.length || 0} items`;
@@ -118,6 +129,12 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
   const [originalItemIds, setOriginalItemIds] = useState([]);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  const isElection = kind === "election";
+  const selectedList = refs.lists.find((row) => row.id === form.listId) || null;
+  const selectedGroup = refs.groups.find((row) => row.id === form.groupId) || null;
+  const selectedImage = refs.images.find((row) => row.id === form.imageId) || null;
+  const canStartPoll = Boolean(form.listId && form.groupId);
 
   async function loadRows() {
     const response = await api.get(config.path, {
@@ -255,6 +272,39 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
     };
   }, [api, kind, recordId, activeWorkgroupId]);
 
+  useEffect(() => {
+    const isNewRecord = !recordId || recordId === "add";
+    if (!isElection || !isNewRecord) return;
+
+    setForm((current) => {
+      const next = { ...current };
+      let changed = false;
+
+      if (!next.workgroupId && activeWorkgroupId) {
+        next.workgroupId = activeWorkgroupId;
+        changed = true;
+      }
+      if (!next.electionType) {
+        next.electionType = ELECTION_TYPE_OPTIONS[0].value;
+        changed = true;
+      }
+      if (!next.expiration) {
+        next.expiration = defaultExpirationValue();
+        changed = true;
+      }
+      if (!next.listId && refs.lists.length === 1) {
+        next.listId = refs.lists[0].id;
+        changed = true;
+      }
+      if (!next.groupId && refs.groups.length === 1) {
+        next.groupId = refs.groups[0].id;
+        changed = true;
+      }
+
+      return changed ? next : current;
+    });
+  }, [activeWorkgroupId, isElection, recordId, refs.groups, refs.lists]);
+
   async function uploadImageFile(imageId) {
     if (!form.imageFile || !imageId) return;
 
@@ -285,8 +335,8 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
     }
   }
 
-  async function save(event) {
-    event.preventDefault();
+  async function save(event, { startAfterSave = false } = {}) {
+    event?.preventDefault?.();
     setSaving(true);
     setError("");
     setSuccess("");
@@ -365,10 +415,23 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
           });
           if (patchRes.status >= 400) throw toApiError(patchRes, "Failed to attach election image");
         }
+
+        if (startAfterSave) {
+          if (!payload.listId || !payload.groupId) {
+            throw new Error("Select both a list and an audience group before starting the poll.");
+          }
+          const startRes = await api.post(`/election/${createdId}/start`);
+          if (startRes.status >= 400) throw toApiError(startRes, "Failed to start poll");
+        }
       }
 
-      setSuccess(`${config.singular} saved.`);
-      navigate(`/app/${kind}/${createdId || "add"}`, { replace: true });
+      setSuccess(
+        startAfterSave && isElection ? "Poll saved and started." : `${config.singular} saved.`
+      );
+      navigate(
+        startAfterSave && isElection ? "/app/cast-vote" : `/app/${kind}/${createdId || "add"}`,
+        { replace: true }
+      );
       await Promise.all([loadRows(), loadRefs(), loadDetail()]);
     } catch (err) {
       setError(err.message || "Failed to save");
@@ -577,6 +640,27 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
 
           {kind === "election" ? (
             <>
+              <div className="detail-grid">
+                <div>
+                  <span className="detail-label">What people vote on</span>
+                  <span>{selectedList?.name || "Choose a list"}</span>
+                </div>
+                <div>
+                  <span className="detail-label">Who can vote</span>
+                  <span>{selectedGroup?.name || "Choose an audience group"}</span>
+                </div>
+                <div>
+                  <span className="detail-label">Type</span>
+                  <span>
+                    {ELECTION_TYPE_OPTIONS.find((option) => option.value === String(form.electionType))?.label ||
+                      "Choose a poll type"}
+                  </span>
+                </div>
+                <div>
+                  <span className="detail-label">Cover image</span>
+                  <span>{selectedImage?.name || "Optional"}</span>
+                </div>
+              </div>
               <label className="field">
                 <span>List</span>
                 <select
@@ -621,11 +705,16 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
               </label>
               <label className="field">
                 <span>Poll Type</span>
-                <input
-                  inputMode="numeric"
+                <select
                   value={form.electionType}
                   onChange={(event) => updateField("electionType", event.target.value)}
-                />
+                >
+                  {ELECTION_TYPE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
               </label>
               <label className="field">
                 <span>Expiration</span>
@@ -640,8 +729,18 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
 
           <div className="split-actions">
             <button className="btn" disabled={saving} type="submit">
-              {saving ? "Saving..." : "Save"}
+              {saving ? "Saving..." : isElection ? "Save Draft" : "Save"}
             </button>
+            {isElection ? (
+              <button
+                className="btn btn-secondary"
+                disabled={saving || !canStartPoll}
+                onClick={(event) => save(event, { startAfterSave: true })}
+                type="button"
+              >
+                {saving ? "Saving..." : "Save & Start"}
+              </button>
+            ) : null}
             {form.id ? (
               <button className="btn btn-danger" disabled={saving} onClick={remove} type="button">
                 Delete

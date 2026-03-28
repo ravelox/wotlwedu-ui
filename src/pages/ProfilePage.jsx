@@ -24,8 +24,14 @@ export default function ProfilePage({
   const [setup2fa, setSetup2fa] = useState(null);
   const [totp, setTotp] = useState("");
   const [organization, setOrganization] = useState(null);
+  const [organizationMembership, setOrganizationMembership] = useState({
+    members: [],
+    workgroups: [],
+    pendingInviteCount: 0,
+  });
   const [inviteEmail, setInviteEmail] = useState("");
   const [organizationInvites, setOrganizationInvites] = useState([]);
+  const [pendingInvite, setPendingInvite] = useState(null);
   const [signInMethods, setSignInMethods] = useState({
     passwordEnabled: false,
     linkedProviders: [],
@@ -46,11 +52,15 @@ export default function ProfilePage({
 
     if (canManageOrganization) {
       requests.push(api.get(`/organization/${session.organizationId}`));
+      requests.push(api.get(`/organization/${session.organizationId}/membership`));
       requests.push(
         api.get(`/organization/${session.organizationId}/invite`, {
           params: inviteFilter === "all" ? undefined : { status: inviteFilter },
         })
       );
+    } else if (session?.organizationId) {
+      requests.push(api.get(`/organization/${session.organizationId}`));
+      requests.push(api.get(`/organization/${session.organizationId}/membership`));
     }
 
     const [
@@ -58,6 +68,7 @@ export default function ProfilePage({
       signInResponse,
       userAuditResponse,
       organizationResponse,
+      membershipResponse,
       inviteResponse,
     ] = await Promise.all(requests);
     if (userResponse.status >= 400) {
@@ -92,6 +103,21 @@ export default function ProfilePage({
       setOrganization(extractEntity(organizationResponse, "organization"));
     } else {
       setOrganization(null);
+    }
+
+    if (membershipResponse) {
+      if (membershipResponse.status >= 400) {
+        throw toApiError(membershipResponse, "Failed to load organization membership");
+      }
+      setOrganizationMembership(
+        membershipResponse.data?.data?.membership || {
+          members: [],
+          workgroups: [],
+          pendingInviteCount: 0,
+        }
+      );
+    } else {
+      setOrganizationMembership({ members: [], workgroups: [], pendingInviteCount: 0 });
     }
 
     if (inviteResponse) {
@@ -130,6 +156,37 @@ export default function ProfilePage({
     };
   }, [api, inviteFilter, session?.userId]);
 
+  useEffect(() => {
+    const inviteToken = new URLSearchParams(window.location.search).get("invite") || "";
+    if (!inviteToken || !session?.authToken) {
+      setPendingInvite(null);
+      return;
+    }
+
+    let cancelled = false;
+    async function loadInvite() {
+      try {
+        const response = await api.get(`/login/invite/${encodeURIComponent(inviteToken)}`);
+        if (response.status >= 400) {
+          throw toApiError(response, "Invite not found");
+        }
+        if (!cancelled) {
+          setPendingInvite(response.data?.data?.invite || response.data?.invite || null);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setPendingInvite(null);
+          setError(err.message || "Invite not found");
+        }
+      }
+    }
+
+    loadInvite();
+    return () => {
+      cancelled = true;
+    };
+  }, [api, session?.authToken]);
+
   function inviteStatusLabel(status) {
     if (status === "pending") return "Pending";
     if (status === "accepted") return "Accepted";
@@ -146,6 +203,12 @@ export default function ProfilePage({
     const who = audit?.email || audit?.provider || "Event";
     const detail = audit?.message || audit?.eventType || "Activity";
     return `${who}: ${detail}`;
+  }
+
+  function clearInviteQuery() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("invite");
+    window.history.replaceState({}, "", `${url.pathname}${url.search}`);
   }
 
   async function submitProfile(event) {
@@ -335,6 +398,53 @@ export default function ProfilePage({
     }
   }
 
+  async function acceptPendingInvite() {
+    const inviteToken = new URLSearchParams(window.location.search).get("invite") || "";
+    if (!inviteToken) return;
+
+    setSaving(true);
+    setError("");
+    setSuccess("");
+    try {
+      const response = await api.post(`/login/invite/${encodeURIComponent(inviteToken)}/accept`);
+      if (response.status >= 400) {
+        throw toApiError(response, "Failed to accept invitation");
+      }
+      onSessionRefresh?.(response.data);
+      clearInviteQuery();
+      setPendingInvite(null);
+      setSuccess("Invitation accepted.");
+      await loadProfile();
+    } catch (err) {
+      setError(err.message || "Failed to accept invitation");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function declinePendingInvite() {
+    const inviteToken = new URLSearchParams(window.location.search).get("invite") || "";
+    if (!inviteToken) return;
+
+    setSaving(true);
+    setError("");
+    setSuccess("");
+    try {
+      const response = await api.post(`/login/invite/${encodeURIComponent(inviteToken)}/decline`);
+      if (response.status >= 400) {
+        throw toApiError(response, "Failed to decline invitation");
+      }
+      clearInviteQuery();
+      setPendingInvite(null);
+      setSuccess("Invitation declined.");
+      await loadProfile();
+    } catch (err) {
+      setError(err.message || "Failed to decline invitation");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="screen-stack">
@@ -367,6 +477,112 @@ export default function ProfilePage({
           </div>
         </div>
       </section>
+
+      {pendingInvite ? (
+        <section className="surface-card">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">Invitation</p>
+              <h3>{pendingInvite.organizationName || "Organization"} invite</h3>
+            </div>
+          </div>
+          <div className="record-card">
+            <p className="tiny-meta">{pendingInvite.email}</p>
+            <p className="tiny-meta">
+              {pendingInvite.expiresAt
+                ? `Expires ${new Date(pendingInvite.expiresAt).toLocaleString()}`
+                : "No expiration"}
+            </p>
+            <div className="split-actions">
+              <button className="btn" disabled={saving} onClick={acceptPendingInvite} type="button">
+                Accept Invite
+              </button>
+              <button
+                className="btn btn-secondary"
+                disabled={saving}
+                onClick={declinePendingInvite}
+                type="button"
+              >
+                Decline
+              </button>
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {session?.organizationId ? (
+        <section className="surface-card">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">Organization</p>
+              <h3>{organization?.name || session.organizationId}</h3>
+            </div>
+          </div>
+          <div className="detail-grid">
+            <div>
+              <span className="detail-label">Members</span>
+              <span>{organizationMembership.members.length}</span>
+            </div>
+            <div>
+              <span className="detail-label">Workgroups</span>
+              <span>{organizationMembership.workgroups.length}</span>
+            </div>
+            <div>
+              <span className="detail-label">Pending Invites</span>
+              <span>{organizationMembership.pendingInviteCount || 0}</span>
+            </div>
+          </div>
+          <div className="record-stack">
+            {organizationMembership.members.slice(0, 8).map((member) => (
+              <div className="record-card" key={member.id}>
+                <div className="split-heading">
+                  <strong>{member.fullName || member.alias || member.email || member.id}</strong>
+                  <span className="chip">
+                    {member.organizationAdmin ? "Org admin" : member.workgroupAdmin ? "Workgroup admin" : "Member"}
+                  </span>
+                </div>
+                <p className="tiny-meta">{member.email || member.alias || member.id}</p>
+              </div>
+            ))}
+            {!organizationMembership.members.length ? (
+              <div className="empty-state">No members available.</div>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
+
+      {session?.organizationId ? (
+        <section className="surface-card">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">Workgroups</p>
+              <h3>Switch and review membership</h3>
+            </div>
+          </div>
+          <div className="record-stack">
+            {organizationMembership.workgroups.length ? (
+              organizationMembership.workgroups.map((workgroup) => (
+                <div className="record-card" key={workgroup.id}>
+                  <div className="split-heading">
+                    <strong>{workgroup.name || workgroup.id}</strong>
+                    <span className="chip">
+                      {activeWorkgroupId === workgroup.id
+                        ? "Active"
+                        : workgroup.isMember
+                          ? "Member"
+                          : "Visible"}
+                    </span>
+                  </div>
+                  <p className="tiny-meta">{workgroup.description || "No description"}</p>
+                  <p className="tiny-meta">{workgroup.memberCount} members</p>
+                </div>
+              ))
+            ) : (
+              <div className="empty-state">No workgroups available.</div>
+            )}
+          </div>
+        </section>
+      ) : null}
 
       <section className="surface-card">
         <div className="section-heading">

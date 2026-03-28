@@ -4,6 +4,11 @@ import Loading from "../components/Loading";
 import { ErrorBanner } from "../components/Feedback";
 import { extractCollection } from "../lib/api";
 
+const DASHBOARD_VIEWS = {
+  votes: "votes",
+  polls: "polls",
+};
+
 function formatDate(value) {
   if (!value) return "No expiration";
   const date = new Date(value);
@@ -21,7 +26,9 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
   const [error, setError] = useState("");
   const [unreadCount, setUnreadCount] = useState(0);
   const [elections, setElections] = useState([]);
+  const [myPolls, setMyPolls] = useState([]);
   const [votes, setVotes] = useState([]);
+  const [dashboardView, setDashboardView] = useState(DASHBOARD_VIEWS.votes);
 
   useEffect(() => {
     let cancelled = false;
@@ -31,7 +38,7 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
       setError("");
 
       try {
-        const [unreadRes, electionRes, voteRes] =
+        const [unreadRes, electionRes, myPollsRes, voteRes] =
           await Promise.all([
             api.get("/notification/unreadcount"),
             api.get("/election", {
@@ -39,6 +46,12 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
                 page: 1,
                 items: 6,
                 workgroupId: activeWorkgroupId || undefined,
+              },
+            }),
+            api.get("/election", {
+              params: {
+                page: 1,
+                items: 6,
               },
             }),
             api.get("/vote/next/all"),
@@ -55,6 +68,7 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
           ) || 0
         );
         setElections(extractCollection(electionRes, "elections").slice(0, 4));
+        setMyPolls(extractCollection(myPollsRes, "elections").slice(0, 4));
         setVotes((voteRes.data?.data?.rows || voteRes.data?.rows || []).slice(0, 4));
       } catch (err) {
         if (!cancelled) setError(err.message || "Failed to load dashboard");
@@ -69,6 +83,16 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
       cancelled = true;
     };
   }, [api, activeWorkgroupId]);
+
+  useEffect(() => {
+    if (votes.length > 0) {
+      setDashboardView(DASHBOARD_VIEWS.votes);
+      return;
+    }
+    if (myPolls.length > 0) {
+      setDashboardView(DASHBOARD_VIEWS.polls);
+    }
+  }, [myPolls.length, votes.length]);
 
   if (loading) return <Loading text="Loading dashboard..." />;
 
@@ -88,8 +112,8 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
         </div>
         <div className="metric-grid">
           <div className="metric-card">
-            <strong>{elections.length}</strong>
-            <span>Visible elections</span>
+            <strong>{myPolls.length}</strong>
+            <span>My polls</span>
           </div>
           <div className="metric-card">
             <strong>{votes.length}</strong>
@@ -100,38 +124,88 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
             <span>Unread alerts</span>
           </div>
         </div>
+        <div className="split-actions">
+          <Link className="btn" to="/app/election/add">
+            Create Poll
+          </Link>
+          <Link className="btn btn-tonal" to="/app/notifications">
+            View Notifications
+          </Link>
+        </div>
       </section>
 
       <section className="surface-card">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">Action</p>
-            <h3>Vote now</h3>
+            <p className="eyebrow">Participate</p>
+            <h3>{dashboardView === DASHBOARD_VIEWS.votes ? "Pending votes" : "My polls"}</h3>
           </div>
-          <Link className="text-link" to="/app/cast-vote">
-            Open voting
-          </Link>
+          <div className="chip-row">
+            <button
+              className={`btn ${dashboardView === DASHBOARD_VIEWS.votes ? "" : "btn-tonal"}`}
+              onClick={() => setDashboardView(DASHBOARD_VIEWS.votes)}
+              type="button"
+            >
+              Pending Votes
+            </button>
+            <button
+              className={`btn ${dashboardView === DASHBOARD_VIEWS.polls ? "" : "btn-tonal"}`}
+              onClick={() => setDashboardView(DASHBOARD_VIEWS.polls)}
+              type="button"
+            >
+              My Polls
+            </button>
+          </div>
         </div>
-        <div className="card-list">
-          {votes.length === 0 ? (
-            <div className="empty-state">You do not have any pending votes right now.</div>
-          ) : (
-            votes.map((vote) => (
-              <article className="list-card" key={vote.id}>
-                <div>
-                  <strong>{vote.election?.name || "Poll"}</strong>
-                  <p>{vote.item?.name || "Pending vote item"}</p>
-                </div>
-                <div className="split-actions">
-                  <Link className="btn btn-secondary" to={`/app/cast-vote/${vote.election?.id || ""}`}>
-                    Cast Vote
-                  </Link>
-                  <span className="tiny-meta">Vote ID {vote.id}</span>
-                </div>
-              </article>
-            ))
-          )}
-        </div>
+        {dashboardView === DASHBOARD_VIEWS.votes ? (
+          <div className="card-list">
+            {votes.length === 0 ? (
+              <div className="empty-state">You do not have any pending votes right now.</div>
+            ) : (
+              votes.map((vote) => (
+                <article className="list-card" key={vote.id}>
+                  <div>
+                    <strong>{vote.election?.name || "Poll"}</strong>
+                    <p>{vote.item?.name || "Pending vote item"}</p>
+                  </div>
+                  <div className="split-actions">
+                    <Link className="btn btn-secondary" to={`/app/cast-vote/${vote.election?.id || ""}`}>
+                      Cast Vote
+                    </Link>
+                    <span className="tiny-meta">Vote ID {vote.id}</span>
+                  </div>
+                </article>
+              ))
+            )}
+          </div>
+        ) : (
+          <div className="card-list">
+            {myPolls.length === 0 ? (
+              <div className="empty-state">You have not created any polls yet.</div>
+            ) : (
+              myPolls.map((poll) => (
+                <article className="list-card" key={poll.id}>
+                  <div>
+                    <strong>{poll.name || "Untitled poll"}</strong>
+                    {poll.description ? <p>{poll.description}</p> : null}
+                  </div>
+                  <div className="chip-row">
+                    {poll.expiration ? <span className="chip">{formatDate(poll.expiration)}</span> : null}
+                    {poll.workgroupId ? <span className="chip chip-soft">{poll.workgroupId}</span> : null}
+                  </div>
+                  <div className="split-actions">
+                    <Link className="btn btn-secondary" to={`/app/election/${poll.id}`}>
+                      Edit Poll
+                    </Link>
+                    <Link className="text-link" to={`/app/statistics/${poll.id}`}>
+                      Results
+                    </Link>
+                  </div>
+                </article>
+              ))
+            )}
+          </div>
+        )}
       </section>
 
       <section className="surface-card">

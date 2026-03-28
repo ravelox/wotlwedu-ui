@@ -9,6 +9,33 @@ const NOTIFICATION_STATUS = {
   read: 101,
 };
 
+function notificationRoute(notification) {
+  const objectId = notification?.objectId || "";
+  const text = (notification?.text || "").toLowerCase();
+
+  if (objectId.startsWith("election_")) {
+    if (text.includes("ended")) return `/app/statistics/${objectId}`;
+    return `/app/cast-vote/${objectId}`;
+  }
+  if (objectId.startsWith("list_")) return `/app/list/${objectId}`;
+  if (objectId.startsWith("item_")) return `/app/item/${objectId}`;
+  if (objectId.startsWith("image_")) return `/app/image/${objectId}`;
+  return null;
+}
+
+function notificationActionLabel(notification) {
+  const objectId = notification?.objectId || "";
+  const text = (notification?.text || "").toLowerCase();
+
+  if (objectId.startsWith("election_")) {
+    return text.includes("ended") ? "View Results" : "Open Poll";
+  }
+  if (objectId.startsWith("list_")) return "Open List";
+  if (objectId.startsWith("item_")) return "Open Item";
+  if (objectId.startsWith("image_")) return "Open Image";
+  return null;
+}
+
 export default function NotificationsPage({ api }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -169,9 +196,9 @@ export default function NotificationsPage({ api }) {
                         </button>
                       </>
                     ) : null}
-                    {notification.objectId && notification.type === 104 ? (
-                      <Link className="text-link" to={`/app/cast-vote/${notification.objectId}`}>
-                        Open related vote
+                    {notificationRoute(notification) ? (
+                      <Link className="text-link" to={notificationRoute(notification)}>
+                        {notificationActionLabel(notification)}
                       </Link>
                     ) : null}
                     {notification.status?.name !== "Read" ? (
