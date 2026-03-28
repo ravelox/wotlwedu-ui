@@ -29,6 +29,7 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
   const [myPolls, setMyPolls] = useState([]);
   const [votes, setVotes] = useState([]);
   const [dashboardView, setDashboardView] = useState(DASHBOARD_VIEWS.votes);
+  const [participationByElectionId, setParticipationByElectionId] = useState({});
 
   useEffect(() => {
     let cancelled = false;
@@ -68,8 +69,23 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
           ) || 0
         );
         setElections(extractCollection(electionRes, "elections").slice(0, 4));
-        setMyPolls(extractCollection(myPollsRes, "elections").slice(0, 4));
+        const nextMyPolls = extractCollection(myPollsRes, "elections").slice(0, 4);
+        setMyPolls(nextMyPolls);
         setVotes((voteRes.data?.data?.rows || voteRes.data?.rows || []).slice(0, 4));
+        const participationEntries = await Promise.all(
+          nextMyPolls.map(async (poll) => {
+            try {
+              const response = await api.get(`/election/${poll.id}/participation`);
+              if (response.status >= 400) return [poll.id, null];
+              return [poll.id, response.data?.data || null];
+            } catch {
+              return [poll.id, null];
+            }
+          })
+        );
+        if (!cancelled) {
+          setParticipationByElectionId(Object.fromEntries(participationEntries));
+        }
       } catch (err) {
         if (!cancelled) setError(err.message || "Failed to load dashboard");
       } finally {
@@ -185,22 +201,52 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
             ) : (
               myPolls.map((poll) => (
                 <article className="list-card" key={poll.id}>
-                  <div>
-                    <strong>{poll.name || "Untitled poll"}</strong>
-                    {poll.description ? <p>{poll.description}</p> : null}
-                  </div>
-                  <div className="chip-row">
-                    {poll.expiration ? <span className="chip">{formatDate(poll.expiration)}</span> : null}
-                    {poll.workgroupId ? <span className="chip chip-soft">{poll.workgroupId}</span> : null}
-                  </div>
-                  <div className="split-actions">
-                    <Link className="btn btn-secondary" to={`/app/election/${poll.id}`}>
-                      Edit Poll
-                    </Link>
-                    <Link className="text-link" to={`/app/statistics/${poll.id}`}>
-                      Results
-                    </Link>
-                  </div>
+                  {(() => {
+                    const summary = participationByElectionId[poll.id];
+                    const participation = summary?.participation;
+                    const audience = summary?.audience;
+                    return (
+                      <>
+                        <div>
+                          <strong>{poll.name || "Untitled poll"}</strong>
+                          {poll.description ? <p>{poll.description}</p> : null}
+                        </div>
+                        <div className="chip-row">
+                          {poll.expiration ? <span className="chip">{formatDate(poll.expiration)}</span> : null}
+                          {poll.workgroupId ? <span className="chip chip-soft">{poll.workgroupId}</span> : null}
+                          {audience?.group?.name ? <span className="chip chip-soft">{audience.group.name}</span> : null}
+                        </div>
+                        {participation ? (
+                          <div className="detail-grid">
+                            <div>
+                              <span className="detail-label">Participants</span>
+                              <span>{participation.expectedParticipants}</span>
+                            </div>
+                            <div>
+                              <span className="detail-label">Completed</span>
+                              <span>{participation.completedCount}</span>
+                            </div>
+                            <div>
+                              <span className="detail-label">Needs Follow-up</span>
+                              <span>{participation.followUpCount}</span>
+                            </div>
+                            <div>
+                              <span className="detail-label">Completion</span>
+                              <span>{participation.completionRate}%</span>
+                            </div>
+                          </div>
+                        ) : null}
+                        <div className="split-actions">
+                          <Link className="btn btn-secondary" to={`/app/election/${poll.id}`}>
+                            Edit Poll
+                          </Link>
+                          <Link className="text-link" to={`/app/statistics/${poll.id}`}>
+                            Results
+                          </Link>
+                        </div>
+                      </>
+                    );
+                  })()}
                 </article>
               ))
             )}

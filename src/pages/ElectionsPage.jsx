@@ -29,6 +29,7 @@ export default function ElectionsPage({ api, activeWorkgroupId }) {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [elections, setElections] = useState([]);
+  const [participationByElectionId, setParticipationByElectionId] = useState({});
 
   async function load({ silent = false } = {}) {
     if (silent) setRefreshing(true);
@@ -44,7 +45,20 @@ export default function ElectionsPage({ api, activeWorkgroupId }) {
       });
 
       if (response.status >= 400) throw toApiError(response, "Failed to load polls");
-      setElections(extractCollection(response, "elections"));
+      const nextElections = extractCollection(response, "elections");
+      setElections(nextElections);
+      const summaries = await Promise.all(
+        nextElections.map(async (election) => {
+          try {
+            const summaryRes = await api.get(`/election/${election.id}/participation`);
+            if (summaryRes.status >= 400) return [election.id, null];
+            return [election.id, summaryRes.data?.data || null];
+          } catch {
+            return [election.id, null];
+          }
+        })
+      );
+      setParticipationByElectionId(Object.fromEntries(summaries));
       setError("");
     } catch (err) {
       setError(err.message || "Failed to load polls");
@@ -85,6 +99,12 @@ export default function ElectionsPage({ api, activeWorkgroupId }) {
           ) : (
             elections.map((election) => (
               <article className="election-card" key={election.id}>
+                {(() => {
+                  const summary = participationByElectionId[election.id];
+                  const participation = summary?.participation;
+                  const audience = summary?.audience;
+                  return (
+                    <>
                 <div className="section-heading compact">
                   <div>
                     <strong>{election.name || "Untitled poll"}</strong>
@@ -106,13 +126,45 @@ export default function ElectionsPage({ api, activeWorkgroupId }) {
                   </div>
                   <div>
                     <span className="detail-label">Audience</span>
-                    <span>{election.groupId || "Not set"}</span>
+                    <span>{audience?.group?.name || election.groupId || "Not set"}</span>
                   </div>
                   <div>
                     <span className="detail-label">List</span>
-                    <span>{election.listId || "Not set"}</span>
+                    <span>{audience?.list?.name || election.listId || "Not set"}</span>
                   </div>
                 </div>
+
+                {participation ? (
+                  <div className="detail-grid">
+                    <div>
+                      <span className="detail-label">Participants</span>
+                      <span>{participation.expectedParticipants}</span>
+                    </div>
+                    <div>
+                      <span className="detail-label">Completed</span>
+                      <span>{participation.completedCount}</span>
+                    </div>
+                    <div>
+                      <span className="detail-label">Needs Follow-up</span>
+                      <span>{participation.followUpCount}</span>
+                    </div>
+                    <div>
+                      <span className="detail-label">Completion</span>
+                      <span>{participation.completionRate}%</span>
+                    </div>
+                  </div>
+                ) : null}
+
+                {audience?.participants?.length ? (
+                  <p className="tiny-meta">
+                    Next follow-up:{" "}
+                    {audience.participants
+                      .filter((participant) => participant.state !== "completed")
+                      .slice(0, 3)
+                      .map((participant) => participant.fullName || participant.email || participant.id)
+                      .join(", ") || "No follow-up needed"}
+                  </p>
+                ) : null}
 
                 <div className="split-actions">
                   <Link className="btn btn-secondary" to={`/app/cast-vote/${election.id}`}>
@@ -126,6 +178,9 @@ export default function ElectionsPage({ api, activeWorkgroupId }) {
                   </Link>
                   <span className="tiny-meta">ID {election.id}</span>
                 </div>
+                    </>
+                  );
+                })()}
               </article>
             ))
           )}
