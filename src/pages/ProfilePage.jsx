@@ -767,6 +767,9 @@ export default function ProfilePage({
             <p className="eyebrow">Profile</p>
             <h3>Edit account</h3>
           </div>
+          <Link className="text-link" to="/app/friend">
+            Friends
+          </Link>
         </div>
         <ErrorBanner error={error} />
         <SuccessBanner message={success} />

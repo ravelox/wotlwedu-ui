@@ -14,6 +14,7 @@ import Verify2FAPage from "./pages/Verify2FAPage";
 import DashboardPage from "./pages/DashboardPage";
 import ElectionsPage from "./pages/ElectionsPage";
 import FriendsPage from "./pages/FriendsPage";
+import AudienceGroupsPage from "./pages/AudienceGroupsPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import PreferencesPage from "./pages/PreferencesPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -173,6 +174,9 @@ export default function App() {
       />
       <Route path="/profile" element={<Navigate to="/app/profile" replace />} />
       <Route path="/friend" element={<Navigate to="/app/friend" replace />} />
+      <Route path="/group" element={<Navigate to="/app/group" replace />} />
+      <Route path="/group/add" element={<Navigate to="/app/group/add" replace />} />
+      <Route path="/group/:recordId" element={<LegacyAppRedirect to="/app/group/:recordId" />} />
       <Route path="/notification" element={<Navigate to="/app/notification" replace />} />
       <Route path="/image" element={<Navigate to="/app/image" replace />} />
       <Route path="/image/add" element={<Navigate to="/app/image/add" replace />} />
@@ -235,6 +239,18 @@ export default function App() {
                 />
                 <Route path="/cast-vote" element={<VotingPage api={api} />} />
                 <Route path="/cast-vote/:electionId" element={<VotingPage api={api} />} />
+                <Route
+                  path="/group"
+                  element={<AudienceGroupsPage api={api} session={session} />}
+                />
+                <Route
+                  path="/group/add"
+                  element={<AudienceGroupsPage api={api} session={session} />}
+                />
+                <Route
+                  path="/group/:recordId"
+                  element={<AudienceGroupsPage api={api} session={session} />}
+                />
                 <Route
                   path="/elections"
                   element={<ElectionsPage api={api} activeWorkgroupId={activeWorkgroupId} />}

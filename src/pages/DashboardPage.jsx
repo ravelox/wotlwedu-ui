@@ -147,6 +147,9 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
           <Link className="btn btn-tonal" to="/app/notifications">
             View Notifications
           </Link>
+          <Link className="text-link" to="/app/friend">
+            Friends
+          </Link>
         </div>
       </section>
 

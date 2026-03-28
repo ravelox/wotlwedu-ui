@@ -108,6 +108,10 @@ function toOptionalValue(value) {
   return value === "" ? null : value;
 }
 
+function ensureArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
 export default function ContentManagerPage({ api, activeWorkgroupId, kindOverride }) {
   const navigate = useNavigate();
   const { kind: routeKind, recordId } = useParams();
@@ -131,6 +135,10 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
   const [success, setSuccess] = useState("");
 
   const isElection = kind === "election";
+  const itemChoices = refs.items.filter((row) => {
+    if (!form.workgroupId) return true;
+    return !row.workgroupId || row.workgroupId === form.workgroupId;
+  });
   const selectedList = refs.lists.find((row) => row.id === form.listId) || null;
   const selectedGroup = refs.groups.find((row) => row.id === form.groupId) || null;
   const selectedImage = refs.images.find((row) => row.id === form.imageId) || null;
@@ -320,9 +328,10 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
   }
 
   async function syncListItems(listId, previousItemIds = []) {
-    const nextIds = form.itemIds;
-    const addIds = nextIds.filter((id) => !previousItemIds.includes(id));
-    const removeIds = previousItemIds.filter((id) => !nextIds.includes(id));
+    const nextIds = ensureArray(form.itemIds);
+    const priorIds = ensureArray(previousItemIds);
+    const addIds = nextIds.filter((id) => !priorIds.includes(id));
+    const removeIds = priorIds.filter((id) => !nextIds.includes(id));
 
     if (addIds.length > 0) {
       const response = await api.post(`/list/${listId}/bulkitemadd`, { itemList: addIds });
@@ -388,7 +397,7 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
         if (response.status >= 400) throw toApiError(response, "Failed to save list");
         createdId = extractEntity(response, "list")?.id || form.id;
         await syncListItems(createdId, isEdit ? originalItemIds : []);
-        setOriginalItemIds(form.itemIds);
+        setOriginalItemIds(ensureArray(form.itemIds));
       } else {
         const payload = {
           name: form.name,
@@ -616,25 +625,36 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
           {kind === "list" ? (
             <label className="field">
               <span>Items</span>
-              <div className="selection-grid">
-                {refs.items.map((row) => (
-                  <label className="toggle-field" key={row.id}>
-                    <span>{row.name || row.id}</span>
-                    <input
-                      checked={form.itemIds.includes(row.id)}
-                      onChange={(event) =>
-                        updateField(
-                          "itemIds",
-                          event.target.checked
-                            ? [...form.itemIds, row.id]
-                            : form.itemIds.filter((id) => id !== row.id)
-                        )
-                      }
-                      type="checkbox"
-                    />
-                  </label>
-                ))}
-              </div>
+              {itemChoices.length === 0 ? (
+                <div className="empty-state">
+                  <div>No items are available for this workgroup yet.</div>
+                  <div className="split-actions wrap-actions">
+                    <Link className="btn btn-secondary" to="/app/item/add">
+                      Create Item
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                <div className="selection-grid">
+                  {itemChoices.map((row) => (
+                    <label className="toggle-field" key={row.id}>
+                      <span>{row.name || row.id}</span>
+                      <input
+                        checked={ensureArray(form.itemIds).includes(row.id)}
+                        onChange={(event) =>
+                          updateField(
+                            "itemIds",
+                            event.target.checked
+                              ? [...ensureArray(form.itemIds), row.id]
+                              : ensureArray(form.itemIds).filter((id) => id !== row.id)
+                          )
+                        }
+                        type="checkbox"
+                      />
+                    </label>
+                  ))}
+                </div>
+              )}
             </label>
           ) : null}
 
@@ -677,17 +697,28 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
               </label>
               <label className="field">
                 <span>Audience Group</span>
-                <select
-                  value={form.groupId}
-                  onChange={(event) => updateField("groupId", event.target.value)}
-                >
-                  <option value="">None</option>
-                  {refs.groups.map((row) => (
-                    <option key={row.id} value={row.id}>
-                      {row.name || row.id}
-                    </option>
-                  ))}
-                </select>
+                {refs.groups.length === 0 ? (
+                  <div className="empty-state">
+                    <div>No audience groups are available yet.</div>
+                    <div className="split-actions wrap-actions">
+                      <Link className="btn btn-secondary" to="/app/group/add">
+                        Create Audience Group
+                      </Link>
+                    </div>
+                  </div>
+                ) : (
+                  <select
+                    value={form.groupId}
+                    onChange={(event) => updateField("groupId", event.target.value)}
+                  >
+                    <option value="">None</option>
+                    {refs.groups.map((row) => (
+                      <option key={row.id} value={row.id}>
+                        {row.name || row.id}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </label>
               <label className="field">
                 <span>Image</span>

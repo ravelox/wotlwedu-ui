@@ -18,7 +18,7 @@ export default function AppShell({
     { label: "Home", to: "/app/home", icon: "◐" },
     { label: "Vote", to: "/app/cast-vote", icon: "◎" },
     { label: "Polls", to: "/app/elections", icon: "◒" },
-    { label: "Friends", to: "/app/friend", icon: "◌" },
+    { label: "Groups", to: "/app/group", icon: "◌" },
     { label: "Profile", to: "/app/profile", icon: "◍" },
   ];
 
