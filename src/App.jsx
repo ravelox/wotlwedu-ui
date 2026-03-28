@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AppShell from "./components/AppShell";
 import LegacyAppRedirect from "./components/LegacyAppRedirect";
 import { clearSession, getSession, setSession } from "./lib/session";
@@ -21,6 +21,11 @@ import ContentManagerPage from "./pages/ContentManagerPage";
 import ErrorPage from "./pages/ErrorPage";
 import StatisticsPage from "./pages/StatisticsPage";
 import VotingPage from "./pages/VotingPage";
+import {
+  applyThemeMode,
+  getStoredThemeMode,
+  persistThemeMode,
+} from "./lib/theme";
 
 const DEFAULT_API_BASE_URL =
   import.meta.env.VITE_WOTLWEDU_API_BASE_URL || "https://api.wotlwedu.com:9876";
@@ -43,6 +48,7 @@ export default function App() {
     localStorage.getItem(API_STORAGE_KEY) || DEFAULT_API_BASE_URL
   );
   const [activeWorkgroupId, setActiveWorkgroupIdState] = useState(getActiveWorkgroupId());
+  const [themeMode, setThemeMode] = useState(getStoredThemeMode());
 
   const api = useMemo(() => {
     return createApi(baseUrl, () => {
@@ -53,6 +59,20 @@ export default function App() {
       navigate("/login", { replace: true });
     });
   }, [baseUrl, navigate]);
+
+  useEffect(() => {
+    applyThemeMode(themeMode);
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return undefined;
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = () => applyThemeMode(themeMode);
+    media.addEventListener("change", handleChange);
+    return () => media.removeEventListener("change", handleChange);
+  }, [themeMode]);
+
+  function handleThemeModeChange(nextMode) {
+    persistThemeMode(nextMode);
+    setThemeMode(nextMode);
+  }
 
   function handleLogin(payload) {
     const data = payload?.data || payload;
@@ -188,6 +208,8 @@ export default function App() {
               session={session}
               activeWorkgroupId={activeWorkgroupId}
               onChangeActiveWorkgroupId={handleChangeActiveWorkgroupId}
+              themeMode={themeMode}
+              onChangeThemeMode={handleThemeModeChange}
             >
               <Routes>
                 <Route path="/" element={<Navigate to="/app/home" replace />} />

@@ -9,6 +9,8 @@ export default function AppShell({
   appVersion,
   activeWorkgroupId,
   onChangeActiveWorkgroupId,
+  themeMode,
+  onChangeThemeMode,
 }) {
   const [workgroups, setWorkgroups] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -57,13 +59,16 @@ export default function AppShell({
         <div className="device-background" />
         <div className="device-screen">
           <header className="shell-topbar">
-            <div>
-              <p className="eyebrow">wotlwedu UI</p>
-              <h1>{session?.alias || session?.email || "Workspace"}</h1>
+            <div className="app-brand-block">
+              <div className="brand-mark">W</div>
+              <div>
+                <p className="eyebrow">wotlwedu</p>
+                <h1>{session?.alias || session?.email || "Workspace"}</h1>
+              </div>
             </div>
             <div className="topbar-pill">
               <span className="status-dot" />
-              {unreadCount} alerts
+              {unreadCount} notifications
             </div>
           </header>
 
@@ -89,6 +94,17 @@ export default function AppShell({
                       {workgroup.name || workgroup.id}
                     </option>
                   ))}
+                </select>
+              </div>
+              <div>
+                <div className="scope-label">Theme</div>
+                <select
+                  value={themeMode}
+                  onChange={(event) => onChangeThemeMode(event.target.value)}
+                >
+                  <option value="system">System</option>
+                  <option value="light">Light</option>
+                  <option value="dark">Dark</option>
                 </select>
               </div>
               <div className="version-badge">v{appVersion}</div>
