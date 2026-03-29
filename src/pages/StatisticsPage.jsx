@@ -3,6 +3,8 @@ import { Link, useParams } from "react-router-dom";
 import Loading from "../components/Loading";
 import { ErrorBanner } from "../components/Feedback";
 import { extractEntity, toApiError } from "../lib/api";
+import TutorialPanel from "../components/TutorialPanel";
+import { getPollTutorial } from "../lib/tutorial";
 
 const STATUS_COLUMNS = ["Yes", "No", "Maybe", "Pending"];
 
@@ -19,6 +21,7 @@ export default function StatisticsPage({ api }) {
   const [lookup, setLookup] = useState({});
   const [participation, setParticipation] = useState(null);
   const [audience, setAudience] = useState(null);
+  const [tutorial, setTutorial] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -33,6 +36,7 @@ export default function StatisticsPage({ api }) {
           api.get(`/election/${electionId}/stats`),
           api.get(`/election/${electionId}/participation`),
         ]);
+        const tutorialValue = await getPollTutorial(api);
         if (electionRes.status >= 400) {
           throw toApiError(electionRes, "Failed to load election");
         }
@@ -45,6 +49,7 @@ export default function StatisticsPage({ api }) {
           setLookup(statsRes.data?.data?.lookup || statsRes.data?.lookup || {});
           setParticipation(participationRes.data?.data?.participation || null);
           setAudience(participationRes.data?.data?.audience || null);
+          setTutorial(tutorialValue);
         }
       } catch (err) {
         if (!cancelled) setError(err.message || "Failed to load statistics");
@@ -63,6 +68,7 @@ export default function StatisticsPage({ api }) {
 
   return (
     <div className="screen-stack">
+      {tutorial ? <TutorialPanel tutorial={tutorial} compact title="Poll tutorial" /> : null}
       <section className="surface-card">
         <div className="section-heading">
           <div>

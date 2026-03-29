@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import Loading from "../components/Loading";
 import { ErrorBanner } from "../components/Feedback";
 import { extractCollection } from "../lib/api";
+import TutorialPanel from "../components/TutorialPanel";
+import { getPollTutorial, startPollTutorial } from "../lib/tutorial";
 
 const DASHBOARD_VIEWS = {
   votes: "votes",
@@ -30,6 +32,8 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
   const [votes, setVotes] = useState([]);
   const [dashboardView, setDashboardView] = useState(DASHBOARD_VIEWS.votes);
   const [participationByElectionId, setParticipationByElectionId] = useState({});
+  const [tutorial, setTutorial] = useState(null);
+  const [startingTutorial, setStartingTutorial] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -39,7 +43,7 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
       setError("");
 
       try {
-        const [unreadRes, electionRes, myPollsRes, voteRes] =
+        const [unreadRes, electionRes, myPollsRes, voteRes, tutorialValue] =
           await Promise.all([
             api.get("/notification/unreadcount"),
             api.get("/election", {
@@ -56,6 +60,7 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
               },
             }),
             api.get("/vote/next/all"),
+            getPollTutorial(api),
           ]);
 
         if (cancelled) return;
@@ -72,6 +77,7 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
         const nextMyPolls = extractCollection(myPollsRes, "elections").slice(0, 4);
         setMyPolls(nextMyPolls);
         setVotes((voteRes.data?.data?.rows || voteRes.data?.rows || []).slice(0, 4));
+        setTutorial(tutorialValue);
         const participationEntries = await Promise.all(
           nextMyPolls.map(async (poll) => {
             try {
@@ -112,6 +118,19 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
 
   if (loading) return <Loading text="Loading dashboard..." />;
 
+  async function handleStartTutorial() {
+    setStartingTutorial(true);
+    setError("");
+    try {
+      const nextTutorial = await startPollTutorial(api, {});
+      setTutorial(nextTutorial);
+    } catch (err) {
+      setError(err.message || "Failed to start tutorial");
+    } finally {
+      setStartingTutorial(false);
+    }
+  }
+
   return (
     <div className="screen-stack">
       <ErrorBanner error={error} />
@@ -144,6 +163,9 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
           <Link className="btn" to="/app/election/add">
             Create Poll
           </Link>
+          <Link className="btn btn-secondary" to="/app/workgroup/add">
+            Create Workgroup
+          </Link>
           <Link className="btn btn-tonal" to="/app/notifications">
             View Notifications
           </Link>
@@ -152,6 +174,13 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
           </Link>
         </div>
       </section>
+
+      <TutorialPanel
+        tutorial={tutorial}
+        onStart={tutorial ? null : handleStartTutorial}
+        starting={startingTutorial}
+        title="Create your first poll"
+      />
 
       <section className="surface-card">
         <div className="section-heading">

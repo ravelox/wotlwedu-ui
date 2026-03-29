@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.19 - 2026-03-28
+
+- Add a poll tutorial panel that starts and tracks the real backend tutorial payload from `/tutorial/poll` and `/tutorial/poll/start`.
+- Surface tutorial guidance inside the existing list, audience, poll, and statistics screens instead of introducing a separate flow.
+- Pre-fill tutorial resource names and bound poll inputs so the browser client walks a new user through creating a genuine poll.
+
 ## 0.1.7 - 2026-03-24
 
 - Add a dedicated `/app/support` view to the React UI for organization and system admins.

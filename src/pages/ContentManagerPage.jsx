@@ -3,6 +3,8 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import Loading from "../components/Loading";
 import { ErrorBanner, SuccessBanner } from "../components/Feedback";
 import { extractCollection, extractEntity, toApiError } from "../lib/api";
+import TutorialPanel from "../components/TutorialPanel";
+import { getPollTutorial, getRelevantTutorialStep, getTutorialStepStatus } from "../lib/tutorial";
 
 const CONFIG = {
   image: {
@@ -133,8 +135,10 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
   const [originalItemIds, setOriginalItemIds] = useState([]);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [tutorial, setTutorial] = useState(null);
 
   const isElection = kind === "election";
+  const isNewRecord = !recordId || recordId === "add";
   const itemChoices = refs.items.filter((row) => {
     if (!form.workgroupId) return true;
     return !row.workgroupId || row.workgroupId === form.workgroupId;
@@ -143,6 +147,17 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
   const selectedGroup = refs.groups.find((row) => row.id === form.groupId) || null;
   const selectedImage = refs.images.find((row) => row.id === form.imageId) || null;
   const canStartPoll = Boolean(form.listId && form.groupId);
+  const tutorialStep = getRelevantTutorialStep(
+    tutorial,
+    kind === "item"
+      ? ["add_items"]
+      : kind === "list"
+        ? ["create_options_list", "add_items"]
+        : kind === "election"
+          ? ["create_poll", "start_poll", "cast_vote", "view_stats"]
+          : []
+  );
+  const tutorialAddItemsStep = getTutorialStepStatus(tutorial, "add_items");
 
   async function loadRows() {
     const response = await api.get(config.path, {
@@ -266,6 +281,8 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
       setError("");
       setSuccess("");
       try {
+        const tutorialValue = await getPollTutorial(api);
+        if (!cancelled) setTutorial(tutorialValue);
         await Promise.all([loadRows(), loadRefs(), loadDetail()]);
       } catch (err) {
         if (!cancelled) setError(err.message || "Failed to load content");
@@ -281,7 +298,6 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
   }, [api, kind, recordId, activeWorkgroupId]);
 
   useEffect(() => {
-    const isNewRecord = !recordId || recordId === "add";
     if (!isElection || !isNewRecord) return;
 
     setForm((current) => {
@@ -312,6 +328,37 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
       return changed ? next : current;
     });
   }, [activeWorkgroupId, isElection, recordId, refs.groups, refs.lists]);
+
+  useEffect(() => {
+    if (!isNewRecord || !tutorial?.names) return;
+
+    setForm((current) => {
+      const next = { ...current };
+      let changed = false;
+
+      if (kind === "list" && tutorialStep?.key === "create_options_list" && !next.name) {
+        next.name = tutorial.names.listName || next.name;
+        changed = true;
+      }
+
+      if (kind === "election") {
+        if (tutorialStep?.key === "create_poll" && !next.name) {
+          next.name = tutorial.names.electionName || next.name;
+          changed = true;
+        }
+        if (!next.listId && tutorial.bindings?.listId) {
+          next.listId = tutorial.bindings.listId;
+          changed = true;
+        }
+        if (!next.groupId && tutorial.bindings?.groupId) {
+          next.groupId = tutorial.bindings.groupId;
+          changed = true;
+        }
+      }
+
+      return changed ? next : current;
+    });
+  }, [isNewRecord, kind, tutorial, tutorialStep]);
 
   async function uploadImageFile(imageId) {
     if (!form.imageFile || !imageId) return;
@@ -482,6 +529,7 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
 
   return (
     <div className="screen-stack">
+      {tutorial ? <TutorialPanel tutorial={tutorial} compact title="Poll tutorial" /> : null}
       <section className="surface-card">
         <div className="section-heading">
           <div>
@@ -532,6 +580,26 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
         <ErrorBanner error={error} />
         <SuccessBanner message={success} />
         <form className="stack-form" onSubmit={save}>
+          {tutorialStep ? (
+            <div className="tutorial-inline-hint">
+              <strong>{tutorialStep.title}</strong>
+              <p>{tutorialStep.detail}</p>
+              {tutorialStep.suggestedName ? (
+                <div className="chip-row">
+                  <span className="chip">Suggested name</span>
+                  <span className="chip chip-soft">{tutorialStep.suggestedName}</span>
+                </div>
+              ) : null}
+              {kind === "election" && tutorial?.bindings?.listId && tutorial?.bindings?.groupId ? (
+                <div className="chip-row">
+                  <span className="chip">Tutorial list</span>
+                  <span className="chip chip-soft">{tutorial.bindings.listId}</span>
+                  <span className="chip">Audience</span>
+                  <span className="chip chip-soft">{tutorial.bindings.groupId}</span>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
           <label className="field">
             <span>Name</span>
             <input
@@ -623,39 +691,47 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
           ) : null}
 
           {kind === "list" ? (
-            <label className="field">
-              <span>Items</span>
-              {itemChoices.length === 0 ? (
-                <div className="empty-state">
-                  <div>No items are available for this workgroup yet.</div>
-                  <div className="split-actions wrap-actions">
-                    <Link className="btn btn-secondary" to="/app/item/add">
-                      Create Item
-                    </Link>
+            <>
+              {tutorialAddItemsStep && isNewRecord ? (
+                <div className="tutorial-inline-hint">
+                  <strong>{tutorialAddItemsStep.title}</strong>
+                  <p>Select at least two real items and add them to this tutorial list.</p>
+                </div>
+              ) : null}
+              <label className="field">
+                <span>Items</span>
+                {itemChoices.length === 0 ? (
+                  <div className="empty-state">
+                    <div>No items are available for this workgroup yet.</div>
+                    <div className="split-actions wrap-actions">
+                      <Link className="btn btn-secondary" to="/app/item/add">
+                        Create Item
+                      </Link>
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="selection-grid">
-                  {itemChoices.map((row) => (
-                    <label className="toggle-field" key={row.id}>
-                      <span>{row.name || row.id}</span>
-                      <input
-                        checked={ensureArray(form.itemIds).includes(row.id)}
-                        onChange={(event) =>
-                          updateField(
-                            "itemIds",
-                            event.target.checked
-                              ? [...ensureArray(form.itemIds), row.id]
-                              : ensureArray(form.itemIds).filter((id) => id !== row.id)
-                          )
-                        }
-                        type="checkbox"
-                      />
-                    </label>
-                  ))}
-                </div>
-              )}
-            </label>
+                ) : (
+                  <div className="selection-grid">
+                    {itemChoices.map((row) => (
+                      <label className="toggle-field" key={row.id}>
+                        <span>{row.name || row.id}</span>
+                        <input
+                          checked={ensureArray(form.itemIds).includes(row.id)}
+                          onChange={(event) =>
+                            updateField(
+                              "itemIds",
+                              event.target.checked
+                                ? [...ensureArray(form.itemIds), row.id]
+                                : ensureArray(form.itemIds).filter((id) => id !== row.id)
+                            )
+                          }
+                          type="checkbox"
+                        />
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </label>
+            </>
           ) : null}
 
           {kind === "election" ? (

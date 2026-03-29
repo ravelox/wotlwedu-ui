@@ -4,6 +4,8 @@ import { useParams } from "react-router-dom";
 import Loading from "../components/Loading";
 import { ErrorBanner, SuccessBanner } from "../components/Feedback";
 import { extractCollection, extractEntity, toApiError } from "../lib/api";
+import TutorialPanel from "../components/TutorialPanel";
+import { getPollTutorial, getRelevantTutorialStep } from "../lib/tutorial";
 
 function emptyForm() {
   return {
@@ -35,6 +37,12 @@ export default function AudienceGroupsPage({ api, session }) {
   const [originalMemberIds, setOriginalMemberIds] = useState([]);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [tutorial, setTutorial] = useState(null);
+  const isNewRecord = !recordId || recordId === "add";
+  const tutorialStep = getRelevantTutorialStep(
+    tutorial,
+    ["create_audience", "add_yourself_to_audience"]
+  );
 
   const selectedCategory = useMemo(
     () => categories.find((category) => category.id === form.categoryId) || null,
@@ -58,7 +66,7 @@ export default function AudienceGroupsPage({ api, session }) {
       throw toApiError(userRes, "Failed to load available members");
     }
 
-    setCategories(extractCollection(categoryRes, "categories"));
+      setCategories(extractCollection(categoryRes, "categories"));
 
     const membershipUsers =
       userRes.data?.data?.membership?.members ||
@@ -134,6 +142,8 @@ export default function AudienceGroupsPage({ api, session }) {
       setLoading(true);
       setError("");
       try {
+        const tutorialValue = await getPollTutorial(api);
+        if (!cancelled) setTutorial(tutorialValue);
         await Promise.all([loadLookups(), loadGroups(recordId && recordId !== "add" ? recordId : "")]);
       } catch (err) {
         if (!cancelled) setError(err.message || "Failed to load audience groups");
@@ -147,6 +157,14 @@ export default function AudienceGroupsPage({ api, session }) {
       cancelled = true;
     };
   }, [api, recordId, session?.organizationId]);
+
+  useEffect(() => {
+    if (!isNewRecord || !tutorial?.names?.groupName) return;
+    setForm((current) => {
+      if (current.name) return current;
+      return { ...current, name: tutorial.names.groupName };
+    });
+  }, [isNewRecord, tutorial]);
 
   function updateField(key, value) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -231,28 +249,46 @@ export default function AudienceGroupsPage({ api, session }) {
 
   return (
     <div className="screen-stack">
+      {tutorial ? <TutorialPanel tutorial={tutorial} compact title="Poll tutorial" /> : null}
       <section className="surface-card">
         <div className="section-heading">
           <div>
             <p className="eyebrow">Audience</p>
             <h2>Audience Groups</h2>
           </div>
-          <button
-            className="btn btn-tonal"
-            onClick={() => {
-              setSelectedGroupId("");
-              setForm(emptyForm());
-              setOriginalMemberIds([]);
-              setSuccess("");
-              setError("");
-            }}
-            type="button"
-          >
-            New Group
-          </button>
+          <div className="split-actions">
+            <Link className="text-link" to="/app/workgroup">
+              Manage Workgroups
+            </Link>
+            <button
+              className="btn btn-tonal"
+              onClick={() => {
+                setSelectedGroupId("");
+                setForm(emptyForm());
+                setOriginalMemberIds([]);
+                setSuccess("");
+                setError("");
+              }}
+              type="button"
+            >
+              New Group
+            </button>
+          </div>
         </div>
         <ErrorBanner error={error} />
         <SuccessBanner message={success} />
+        {tutorialStep ? (
+          <div className="tutorial-inline-hint">
+            <strong>{tutorialStep.title}</strong>
+            <p>{tutorialStep.detail}</p>
+            {tutorialStep.suggestedName ? (
+              <div className="chip-row">
+                <span className="chip">Suggested name</span>
+                <span className="chip chip-soft">{tutorialStep.suggestedName}</span>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
         <div className="card-list">
           {groups.length === 0 ? (
             <div className="empty-state">No audience groups created yet.</div>

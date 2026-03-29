@@ -260,6 +260,56 @@ a {
   word-break: break-all;
 }
 
+.tutorial-panel,
+.tutorial-inline-hint,
+.tutorial-callout {
+  display: grid;
+  gap: 10px;
+}
+
+.tutorial-panel-compact {
+  gap: 8px;
+}
+
+.tutorial-copy,
+.tutorial-step p,
+.tutorial-callout p,
+.tutorial-inline-hint p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.tutorial-step-list {
+  display: grid;
+  gap: 10px;
+}
+
+.tutorial-step,
+.tutorial-inline-hint {
+  padding: 14px;
+  border-radius: 18px;
+  background: var(--panel-soft);
+  border: 1px solid var(--line);
+}
+
+.tutorial-step {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tutorial-step strong,
+.tutorial-inline-hint strong,
+.tutorial-callout strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.tutorial-step-complete {
+  background: rgba(29, 92, 82, 0.08);
+}
+
 .hero-card,
 .surface-card {
   border-radius: 24px;
