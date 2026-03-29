@@ -13,6 +13,24 @@ export async function startPollTutorial(api, options = {}) {
   return response.data?.data?.tutorial || response.data?.tutorial || null;
 }
 
+export async function skipPollTutorial(api) {
+  const response = await api.post("/tutorial/poll/skip", {});
+  if (response.status >= 400) throw toApiError(response, "Failed to skip tutorial");
+  return response.data?.data?.tutorial || response.data?.tutorial || null;
+}
+
+export async function enablePollTutorial(api, options = {}) {
+  const response = await api.post("/tutorial/poll/enable", options);
+  if (response.status >= 400) throw toApiError(response, "Failed to re-enable tutorial");
+  return response.data?.data?.tutorial || response.data?.tutorial || null;
+}
+
+export async function adminEnablePollTutorial(api, userId, options = {}) {
+  const response = await api.post(`/support/users/${userId}/tutorial/poll/enable`, options);
+  if (response.status >= 400) throw toApiError(response, "Failed to re-enable user tutorial");
+  return response.data?.data?.tutorial || response.data?.tutorial || null;
+}
+
 export function getRelevantTutorialStep(tutorial, keys = []) {
   if (!tutorial?.steps?.length) return null;
   return tutorial.steps.find((step) => keys.includes(step.key) && step.complete !== true) || null;

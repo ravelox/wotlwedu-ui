@@ -4,7 +4,12 @@ import Loading from "../components/Loading";
 import { ErrorBanner } from "../components/Feedback";
 import { extractCollection } from "../lib/api";
 import TutorialPanel from "../components/TutorialPanel";
-import { getPollTutorial, startPollTutorial } from "../lib/tutorial";
+import {
+  enablePollTutorial,
+  getPollTutorial,
+  skipPollTutorial,
+  startPollTutorial,
+} from "../lib/tutorial";
 
 const DASHBOARD_VIEWS = {
   votes: "votes",
@@ -34,6 +39,7 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
   const [participationByElectionId, setParticipationByElectionId] = useState({});
   const [tutorial, setTutorial] = useState(null);
   const [startingTutorial, setStartingTutorial] = useState(false);
+  const [updatingTutorial, setUpdatingTutorial] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -131,6 +137,42 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
     }
   }
 
+  async function handleSkipTutorial() {
+    setUpdatingTutorial(true);
+    setError("");
+    try {
+      setTutorial(await skipPollTutorial(api));
+    } catch (err) {
+      setError(err.message || "Failed to skip tutorial");
+    } finally {
+      setUpdatingTutorial(false);
+    }
+  }
+
+  async function handleEnableTutorial() {
+    setUpdatingTutorial(true);
+    setError("");
+    try {
+      setTutorial(await enablePollTutorial(api, {}));
+    } catch (err) {
+      setError(err.message || "Failed to resume tutorial");
+    } finally {
+      setUpdatingTutorial(false);
+    }
+  }
+
+  async function handleRestartTutorial() {
+    setUpdatingTutorial(true);
+    setError("");
+    try {
+      setTutorial(await enablePollTutorial(api, { restart: true }));
+    } catch (err) {
+      setError(err.message || "Failed to restart tutorial");
+    } finally {
+      setUpdatingTutorial(false);
+    }
+  }
+
   return (
     <div className="screen-stack">
       <ErrorBanner error={error} />
@@ -178,7 +220,11 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
       <TutorialPanel
         tutorial={tutorial}
         onStart={tutorial ? null : handleStartTutorial}
+        onSkip={tutorial?.status === "active" ? handleSkipTutorial : null}
+        onEnable={tutorial?.status === "skipped" ? handleEnableTutorial : null}
+        onRestart={tutorial ? handleRestartTutorial : null}
         starting={startingTutorial}
+        busy={updatingTutorial}
         title="Create your first poll"
       />
 

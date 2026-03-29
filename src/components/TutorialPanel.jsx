@@ -23,7 +23,11 @@ function stepPath(step) {
 export default function TutorialPanel({
   tutorial,
   onStart,
+  onSkip,
+  onEnable,
+  onRestart,
   starting = false,
+  busy = false,
   compact = false,
   title = "Poll tutorial",
 }) {
@@ -55,6 +59,8 @@ export default function TutorialPanel({
     tutorial.steps?.find((step) => step.key === tutorial.nextStepKey) ||
     tutorial.steps?.find((step) => !step.complete) ||
     null;
+  const isSkipped = tutorial.status === "skipped";
+  const isCompleted = tutorial.status === "completed";
 
   return (
     <section className={`surface-card tutorial-panel${compact ? " tutorial-panel-compact" : ""}`}>
@@ -68,7 +74,24 @@ export default function TutorialPanel({
         </span>
       </div>
 
-      {nextStep ? (
+      {isSkipped ? (
+        <div className="tutorial-callout">
+          <strong>Tutorial skipped</strong>
+          <p>You can resume the saved walkthrough or restart it with a fresh tutorial poll.</p>
+          <div className="split-actions">
+            {onEnable ? (
+              <button className="btn btn-secondary" onClick={onEnable} type="button" disabled={busy}>
+                {busy ? "Working..." : "Resume Tutorial"}
+              </button>
+            ) : null}
+            {onRestart ? (
+              <button className="btn btn-tonal" onClick={onRestart} type="button" disabled={busy}>
+                Restart Tutorial
+              </button>
+            ) : null}
+          </div>
+        </div>
+      ) : nextStep ? (
         <div className="tutorial-callout">
           <strong>Next: {nextStep.title}</strong>
           <p>{nextStep.detail}</p>
@@ -82,23 +105,38 @@ export default function TutorialPanel({
             <Link className="btn btn-secondary" to={stepPath(nextStep)}>
               Open Step
             </Link>
+            {onSkip ? (
+              <button className="btn btn-tonal" onClick={onSkip} type="button" disabled={busy}>
+                {busy ? "Working..." : "Skip Tutorial"}
+              </button>
+            ) : null}
+            {onRestart ? (
+              <button className="btn btn-tonal" onClick={onRestart} type="button" disabled={busy}>
+                Restart
+              </button>
+            ) : null}
           </div>
         </div>
       ) : (
         <div className="tutorial-callout">
           <strong>Tutorial completed</strong>
           <p>The real poll, audience, and stats flow is complete.</p>
-          {tutorial.bindings?.electionId ? (
-            <div className="split-actions">
+          <div className="split-actions">
+            {tutorial.bindings?.electionId ? (
               <Link className="btn btn-secondary" to={`/app/statistics/${tutorial.bindings.electionId}`}>
                 View Stats
               </Link>
-            </div>
-          ) : null}
+            ) : null}
+            {onRestart && !compact ? (
+              <button className="btn btn-tonal" onClick={onRestart} type="button" disabled={busy}>
+                Restart Tutorial
+              </button>
+            ) : null}
+          </div>
         </div>
       )}
 
-      {!compact && tutorial.steps?.length ? (
+      {!compact && !isSkipped && tutorial.steps?.length ? (
         <div className="tutorial-step-list">
           {tutorial.steps.map((step) => (
             <div className={`tutorial-step${step.complete ? " tutorial-step-complete" : ""}`} key={step.key}>

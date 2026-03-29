@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ErrorBanner, SuccessBanner } from "../components/Feedback";
 import { extractCollection, extractEntity, toApiError } from "../lib/api";
+import { adminEnablePollTutorial } from "../lib/tutorial";
 
 function formatAuditMessage(audit) {
   if (!audit) return "Unknown activity";
@@ -41,7 +42,9 @@ export default function SupportPage({ api, session }) {
     linkedProviders: [],
   });
   const [selectedAudits, setSelectedAudits] = useState([]);
+  const [selectedTutorial, setSelectedTutorial] = useState(null);
   const [inspectingUser, setInspectingUser] = useState(false);
+  const [updatingTutorial, setUpdatingTutorial] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -116,6 +119,7 @@ export default function SupportPage({ api, session }) {
       setSelectedUser(null);
       setSelectedMethods({ passwordEnabled: false, linkedProviders: [] });
       setSelectedAudits([]);
+      setSelectedTutorial(null);
       return;
     }
 
@@ -143,6 +147,7 @@ export default function SupportPage({ api, session }) {
     if (!user?.id) return;
     setInspectingUser(true);
     setSelectedUser(user);
+    setSelectedTutorial(null);
     setError("");
 
     try {
@@ -165,6 +170,26 @@ export default function SupportPage({ api, session }) {
       setError(err.message || "Failed to inspect user");
     } finally {
       setInspectingUser(false);
+    }
+  }
+
+  async function handleEnableSelectedUserTutorial(options = {}) {
+    if (!selectedUser?.id) return;
+    setUpdatingTutorial(true);
+    setError("");
+    setSuccess("");
+    try {
+      const tutorial = await adminEnablePollTutorial(api, selectedUser.id, options);
+      setSelectedTutorial(tutorial);
+      setSuccess(
+        options.restart === true
+          ? "Tutorial restarted for the selected user."
+          : "Tutorial re-enabled for the selected user."
+      );
+    } catch (err) {
+      setError(err.message || "Failed to update tutorial");
+    } finally {
+      setUpdatingTutorial(false);
     }
   }
 
@@ -413,6 +438,37 @@ export default function SupportPage({ api, session }) {
                   </span>
                 ))}
               </div>
+              <div className="split-actions" style={{ marginTop: 12 }}>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => handleEnableSelectedUserTutorial({})}
+                  type="button"
+                  disabled={updatingTutorial}
+                >
+                  {updatingTutorial ? "Updating..." : "Re-enable Tutorial"}
+                </button>
+                <button
+                  className="btn btn-tonal"
+                  onClick={() => handleEnableSelectedUserTutorial({ restart: true })}
+                  type="button"
+                  disabled={updatingTutorial}
+                >
+                  Restart Tutorial
+                </button>
+              </div>
+              {selectedTutorial ? (
+                <div className="support-meta" style={{ marginTop: 10 }}>
+                  <span className="chip">Status: {selectedTutorial.status || "unknown"}</span>
+                  {selectedTutorial.nextStepKey ? (
+                    <span className="chip">Next: {selectedTutorial.nextStepKey}</span>
+                  ) : null}
+                  {selectedTutorial.startedAt ? (
+                    <span className="chip">
+                      Started: {new Date(selectedTutorial.startedAt).toLocaleString()}
+                    </span>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
 
             {selectedAudits.length ? (
