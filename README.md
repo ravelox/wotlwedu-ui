@@ -44,7 +44,7 @@ npm run validate:support-console
 The app reads these Vite variables at build time:
 
 - `VITE_WOTLWEDU_API_BASE_URL`: backend API origin. Defaults to `https://api.wotlwedu.com:9876`.
-- `VITE_APP_VERSION`: version label shown in the app chrome. Defaults to `0.1.10`.
+- `VITE_APP_VERSION`: version label shown in the app chrome. Defaults to `0.1.21`.
 - `VITE_GOOGLE_CLIENT_ID`: Google web client ID used to render the Google sign-in button.
 
 An example file is included at [`.env.example`](/Users/dkelly/Projects/wotlwedu/wotlwedu-ui/.env.example).
@@ -82,6 +82,7 @@ Authenticated app routes:
 - `/app/item`
 - `/app/list`
 - `/app/election`
+- `/app/workgroup`
 
 Legacy top-level paths redirect into `/app/*` routes to preserve compatibility with older links.
 
@@ -90,6 +91,7 @@ The profile route now includes:
 - linked sign-in method visibility with unlink controls for removable social identities
 - recent account activity sourced from the backend auth audit feed
 - organization invite history and organization audit activity for organization admins
+- a direct link into workgroup management for reviewing and administering membership scope
 
 ## Backend Dependencies
 

@@ -15,6 +15,7 @@ import DashboardPage from "./pages/DashboardPage";
 import ElectionsPage from "./pages/ElectionsPage";
 import FriendsPage from "./pages/FriendsPage";
 import AudienceGroupsPage from "./pages/AudienceGroupsPage";
+import WorkgroupsPage from "./pages/WorkgroupsPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import PreferencesPage from "./pages/PreferencesPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -177,6 +178,9 @@ export default function App() {
       <Route path="/group" element={<Navigate to="/app/group" replace />} />
       <Route path="/group/add" element={<Navigate to="/app/group/add" replace />} />
       <Route path="/group/:recordId" element={<LegacyAppRedirect to="/app/group/:recordId" />} />
+      <Route path="/workgroup" element={<Navigate to="/app/workgroup" replace />} />
+      <Route path="/workgroup/add" element={<Navigate to="/app/workgroup/add" replace />} />
+      <Route path="/workgroup/:recordId" element={<LegacyAppRedirect to="/app/workgroup/:recordId" />} />
       <Route path="/notification" element={<Navigate to="/app/notification" replace />} />
       <Route path="/image" element={<Navigate to="/app/image" replace />} />
       <Route path="/image/add" element={<Navigate to="/app/image/add" replace />} />
@@ -250,6 +254,39 @@ export default function App() {
                 <Route
                   path="/group/:recordId"
                   element={<AudienceGroupsPage api={api} session={session} />}
+                />
+                <Route
+                  path="/workgroup"
+                  element={
+                    <WorkgroupsPage
+                      api={api}
+                      session={session}
+                      activeWorkgroupId={activeWorkgroupId}
+                      onChangeActiveWorkgroupId={handleChangeActiveWorkgroupId}
+                    />
+                  }
+                />
+                <Route
+                  path="/workgroup/add"
+                  element={
+                    <WorkgroupsPage
+                      api={api}
+                      session={session}
+                      activeWorkgroupId={activeWorkgroupId}
+                      onChangeActiveWorkgroupId={handleChangeActiveWorkgroupId}
+                    />
+                  }
+                />
+                <Route
+                  path="/workgroup/:recordId"
+                  element={
+                    <WorkgroupsPage
+                      api={api}
+                      session={session}
+                      activeWorkgroupId={activeWorkgroupId}
+                      onChangeActiveWorkgroupId={handleChangeActiveWorkgroupId}
+                    />
+                  }
                 />
                 <Route
                   path="/elections"

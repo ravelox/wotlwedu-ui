@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.21 - 2026-04-08
+
+- Add a dedicated workgroup management screen for listing, creating, editing, and deleting workgroups.
+- Support assigning categories and bulk-managing workgroup membership from the browser UI.
+- Expose the new workgroup management flow from the profile screen and preserve legacy `/workgroup` route redirects.
+
 ## 0.1.20 - 2026-03-28
 
 - Add a poll tutorial panel that starts and tracks the real backend tutorial payload from `/tutorial/poll` and `/tutorial/poll/start`.

@@ -558,6 +558,9 @@ export default function ProfilePage({
               <p className="eyebrow">Workgroups</p>
               <h3>Switch and review membership</h3>
             </div>
+            <Link className="text-link" to="/app/workgroup">
+              Manage Workgroups
+            </Link>
           </div>
           <div className="record-stack">
             {organizationMembership.workgroups.length ? (
