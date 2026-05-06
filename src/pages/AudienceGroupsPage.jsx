@@ -22,7 +22,7 @@ function ensureArray(value) {
 }
 
 function displayUserName(user) {
-  return user?.fullName || user?.alias || user?.email || user?.id || "Unknown user";
+  return user?.fullName || user?.alias || user?.email || user?.id || "Unknown person";
 }
 
 export default function AudienceGroupsPage({ api, session }) {
@@ -55,7 +55,7 @@ export default function AudienceGroupsPage({ api, session }) {
     if (session?.organizationId) {
       requests.push(api.get(`/organization/${session.organizationId}/membership`));
     } else {
-      requests.push(api.get("/user", { params: { page: 1, items: 200 } }));
+      requests.push(api.get("/person", { params: { page: 1, items: 200 } }));
     }
 
     const [categoryRes, userRes] = await Promise.all(requests);
@@ -76,11 +76,11 @@ export default function AudienceGroupsPage({ api, session }) {
   }
 
   async function loadGroups(targetGroupId) {
-    const response = await api.get("/group", {
+    const response = await api.get("/circle", {
       params: { page: 1, items: 200, detail: "user,category" },
     });
     if (response.status >= 400) {
-      throw toApiError(response, "Failed to load audience groups");
+      throw toApiError(response, "Failed to load circles");
     }
 
     const nextGroups = extractCollection(response, "groups");
@@ -115,9 +115,9 @@ export default function AudienceGroupsPage({ api, session }) {
     let detailEntity = cached;
 
     if (!cached?.users || !cached?.category) {
-      const response = await api.get(`/group/${groupId}`, { params: { detail: "user,category" } });
+      const response = await api.get(`/circle/${groupId}`, { params: { detail: "user,category" } });
       if (response.status >= 400) {
-        throw toApiError(response, "Failed to load audience group");
+        throw toApiError(response, "Failed to load circle");
       }
       detailEntity = extractEntity(response, "group");
     }
@@ -146,7 +146,7 @@ export default function AudienceGroupsPage({ api, session }) {
         if (!cancelled) setTutorial(tutorialValue);
         await Promise.all([loadLookups(), loadGroups(recordId && recordId !== "add" ? recordId : "")]);
       } catch (err) {
-        if (!cancelled) setError(err.message || "Failed to load audience groups");
+        if (!cancelled) setError(err.message || "Failed to load circles");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -177,16 +177,16 @@ export default function AudienceGroupsPage({ api, session }) {
     const removeIds = priorIds.filter((id) => !nextIds.includes(id));
 
     if (addIds.length) {
-      const response = await api.put(`/group/${groupId}/bulkuseradd`, { userList: addIds });
+      const response = await api.put(`/circle/${groupId}/bulkpersonadd`, { personList: addIds });
       if (response.status >= 400) {
-        throw toApiError(response, "Failed to add audience members");
+        throw toApiError(response, "Failed to add circle members");
       }
     }
 
     if (removeIds.length) {
-      const response = await api.put(`/group/${groupId}/bulkuserdel`, { userList: removeIds });
+      const response = await api.put(`/circle/${groupId}/bulkpersondel`, { personList: removeIds });
       if (response.status >= 400) {
-        throw toApiError(response, "Failed to remove audience members");
+        throw toApiError(response, "Failed to remove circle members");
       }
     }
   }
@@ -205,18 +205,18 @@ export default function AudienceGroupsPage({ api, session }) {
       };
 
       const response = form.id
-        ? await api.put(`/group/${form.id}`, payload)
-        : await api.post("/group", payload);
+        ? await api.put(`/circle/${form.id}`, payload)
+        : await api.post("/circle", payload);
       if (response.status >= 400) {
-        throw toApiError(response, "Failed to save audience group");
+        throw toApiError(response, "Failed to save circle");
       }
 
       const savedGroupId = extractEntity(response, "group")?.id || form.id;
       await syncMembers(savedGroupId, form.id ? originalMemberIds : []);
       await loadGroups(savedGroupId);
-      setSuccess(form.id ? "Audience group updated." : "Audience group created.");
+      setSuccess(form.id ? "Circle updated." : "Circle created.");
     } catch (err) {
-      setError(err.message || "Failed to save audience group");
+      setError(err.message || "Failed to save circle");
     } finally {
       setSaving(false);
     }
@@ -229,23 +229,23 @@ export default function AudienceGroupsPage({ api, session }) {
     setSuccess("");
 
     try {
-      const response = await api.delete(`/group/${form.id}`);
+      const response = await api.delete(`/circle/${form.id}`);
       if (response.status >= 400) {
-        throw toApiError(response, "Failed to delete audience group");
+        throw toApiError(response, "Failed to delete circle");
       }
-      setSuccess("Audience group deleted.");
+      setSuccess("Circle deleted.");
       setSelectedGroupId("");
       setForm(emptyForm());
       setOriginalMemberIds([]);
       await loadGroups("");
     } catch (err) {
-      setError(err.message || "Failed to delete audience group");
+      setError(err.message || "Failed to delete circle");
     } finally {
       setSaving(false);
     }
   }
 
-  if (loading) return <Loading text="Loading audience groups..." />;
+  if (loading) return <Loading text="Loading circles..." />;
 
   return (
     <div className="screen-stack">
@@ -253,12 +253,12 @@ export default function AudienceGroupsPage({ api, session }) {
       <section className="surface-card">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">Audience</p>
-            <h2>Audience Groups</h2>
+            <p className="eyebrow">Circle</p>
+            <h2>Circles</h2>
           </div>
           <div className="split-actions">
-            <Link className="text-link" to="/app/workgroup">
-              Manage Workgroups
+            <Link className="text-link" to="/app/space">
+              Manage Spaces
             </Link>
             <button
               className="btn btn-tonal"
@@ -271,7 +271,7 @@ export default function AudienceGroupsPage({ api, session }) {
               }}
               type="button"
             >
-              New Group
+              New Circle
             </button>
           </div>
         </div>
@@ -291,7 +291,7 @@ export default function AudienceGroupsPage({ api, session }) {
         ) : null}
         <div className="card-list">
           {groups.length === 0 ? (
-            <div className="empty-state">No audience groups created yet.</div>
+            <div className="empty-state">No circles created yet.</div>
           ) : (
             groups.map((group) => (
               <button
@@ -317,7 +317,7 @@ export default function AudienceGroupsPage({ api, session }) {
         <div className="section-heading">
           <div>
             <p className="eyebrow">Editor</p>
-            <h3>{form.id ? "Edit audience group" : "Create audience group"}</h3>
+            <h3>{form.id ? "Edit circle" : "Create circle"}</h3>
           </div>
         </div>
         <form className="stack-form" onSubmit={save}>
@@ -366,7 +366,7 @@ export default function AudienceGroupsPage({ api, session }) {
           <label className="field">
             <span>Members</span>
             {users.length === 0 ? (
-              <div className="empty-state">No eligible users are available for this audience group.</div>
+              <div className="empty-state">No eligible people are available for this circle.</div>
             ) : (
               <div className="selection-grid">
                 {users.map((user) => (
@@ -392,14 +392,14 @@ export default function AudienceGroupsPage({ api, session }) {
 
           <div className="split-actions wrap-actions">
             <button className="btn" disabled={saving} type="submit">
-              {saving ? "Saving..." : form.id ? "Save Group" : "Create Group"}
+              {saving ? "Saving..." : form.id ? "Save Circle" : "Create Circle"}
             </button>
             {form.id ? (
               <button className="btn btn-danger" disabled={saving} onClick={removeGroup} type="button">
-                Delete Group
+                Delete Circle
               </button>
             ) : null}
-            <Link className="text-link" to="/app/election/add">
+            <Link className="text-link" to="/app/poll/add">
               Use in a poll
             </Link>
           </div>

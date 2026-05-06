@@ -1,10 +1,16 @@
 # Changelog
 
+## 0.1.22 - 2026-05-05
+
+- Update visible UI terminology to Circle, Picture, Person, Space, and Poll.
+- Replace Options terminology with Ideas in tutorial and voting UI copy.
+- Move frontend API calls to clean terminology endpoints and the `/v1` API base.
+
 ## 0.1.21 - 2026-04-08
 
 - Add a dedicated workgroup management screen for listing, creating, editing, and deleting workgroups.
 - Support assigning categories and bulk-managing workgroup membership from the browser UI.
-- Expose the new workgroup management flow from the profile screen and preserve legacy `/workgroup` route redirects.
+- Expose the new workgroup management flow from the profile screen and preserve legacy `/space` route redirects.
 
 ## 0.1.20 - 2026-03-28
 

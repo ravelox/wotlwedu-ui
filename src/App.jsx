@@ -31,7 +31,7 @@ import {
 
 const DEFAULT_API_BASE_URL =
   import.meta.env.VITE_WOTLWEDU_API_BASE_URL || "https://api.wotlwedu.com:9876";
-const APP_VERSION = import.meta.env.VITE_APP_VERSION || "0.1.10";
+const APP_VERSION = import.meta.env.VITE_APP_VERSION || "0.1.22";
 const API_STORAGE_KEY = "wotlwedu_ui_api_base_url";
 
 function RequireAuth({ session, children }) {
@@ -175,25 +175,25 @@ export default function App() {
       />
       <Route path="/profile" element={<Navigate to="/app/profile" replace />} />
       <Route path="/friend" element={<Navigate to="/app/friend" replace />} />
-      <Route path="/group" element={<Navigate to="/app/group" replace />} />
-      <Route path="/group/add" element={<Navigate to="/app/group/add" replace />} />
-      <Route path="/group/:recordId" element={<LegacyAppRedirect to="/app/group/:recordId" />} />
-      <Route path="/workgroup" element={<Navigate to="/app/workgroup" replace />} />
-      <Route path="/workgroup/add" element={<Navigate to="/app/workgroup/add" replace />} />
-      <Route path="/workgroup/:recordId" element={<LegacyAppRedirect to="/app/workgroup/:recordId" />} />
+      <Route path="/circle" element={<Navigate to="/app/circle" replace />} />
+      <Route path="/circle/add" element={<Navigate to="/app/circle/add" replace />} />
+      <Route path="/circle/:recordId" element={<LegacyAppRedirect to="/app/circle/:recordId" />} />
+      <Route path="/space" element={<Navigate to="/app/space" replace />} />
+      <Route path="/space/add" element={<Navigate to="/app/space/add" replace />} />
+      <Route path="/space/:recordId" element={<LegacyAppRedirect to="/app/space/:recordId" />} />
       <Route path="/notification" element={<Navigate to="/app/notification" replace />} />
-      <Route path="/image" element={<Navigate to="/app/image" replace />} />
-      <Route path="/image/add" element={<Navigate to="/app/image/add" replace />} />
-      <Route path="/image/:recordId" element={<LegacyAppRedirect to="/app/image/:recordId" />} />
+      <Route path="/picture" element={<Navigate to="/app/picture" replace />} />
+      <Route path="/picture/add" element={<Navigate to="/app/picture/add" replace />} />
+      <Route path="/picture/:recordId" element={<LegacyAppRedirect to="/app/picture/:recordId" />} />
       <Route path="/item" element={<Navigate to="/app/item" replace />} />
       <Route path="/item/add" element={<Navigate to="/app/item/add" replace />} />
       <Route path="/item/:recordId" element={<LegacyAppRedirect to="/app/item/:recordId" />} />
       <Route path="/list" element={<Navigate to="/app/list" replace />} />
       <Route path="/list/add" element={<Navigate to="/app/list/add" replace />} />
       <Route path="/list/:recordId" element={<LegacyAppRedirect to="/app/list/:recordId" />} />
-      <Route path="/election" element={<Navigate to="/app/election" replace />} />
-      <Route path="/election/add" element={<Navigate to="/app/election/add" replace />} />
-      <Route path="/election/:recordId" element={<LegacyAppRedirect to="/app/election/:recordId" />} />
+      <Route path="/poll" element={<Navigate to="/app/poll" replace />} />
+      <Route path="/poll/add" element={<Navigate to="/app/poll/add" replace />} />
+      <Route path="/poll/:recordId" element={<LegacyAppRedirect to="/app/poll/:recordId" />} />
       <Route path="/preference" element={<Navigate to="/app/preference" replace />} />
       <Route path="/preference/add" element={<Navigate to="/app/preference/add" replace />} />
       <Route
@@ -244,19 +244,19 @@ export default function App() {
                 <Route path="/cast-vote" element={<VotingPage api={api} />} />
                 <Route path="/cast-vote/:electionId" element={<VotingPage api={api} />} />
                 <Route
-                  path="/group"
+                  path="/circle"
                   element={<AudienceGroupsPage api={api} session={session} />}
                 />
                 <Route
-                  path="/group/add"
+                  path="/circle/add"
                   element={<AudienceGroupsPage api={api} session={session} />}
                 />
                 <Route
-                  path="/group/:recordId"
+                  path="/circle/:recordId"
                   element={<AudienceGroupsPage api={api} session={session} />}
                 />
                 <Route
-                  path="/workgroup"
+                  path="/space"
                   element={
                     <WorkgroupsPage
                       api={api}
@@ -267,7 +267,7 @@ export default function App() {
                   }
                 />
                 <Route
-                  path="/workgroup/add"
+                  path="/space/add"
                   element={
                     <WorkgroupsPage
                       api={api}
@@ -278,7 +278,7 @@ export default function App() {
                   }
                 />
                 <Route
-                  path="/workgroup/:recordId"
+                  path="/space/:recordId"
                   element={
                     <WorkgroupsPage
                       api={api}
@@ -289,26 +289,26 @@ export default function App() {
                   }
                 />
                 <Route
-                  path="/elections"
+                  path="/polls"
                   element={<ElectionsPage api={api} activeWorkgroupId={activeWorkgroupId} />}
                 />
                 <Route path="/friend" element={<FriendsPage api={api} />} />
                 <Route path="/notification" element={<NotificationsPage api={api} />} />
                 <Route path="/notifications" element={<NotificationsPage api={api} />} />
                 <Route
-                  path="/image"
+                  path="/picture"
                   element={
                     <ContentManagerPage api={api} activeWorkgroupId={activeWorkgroupId} kindOverride="image" />
                   }
                 />
                 <Route
-                  path="/image/add"
+                  path="/picture/add"
                   element={
                     <ContentManagerPage api={api} activeWorkgroupId={activeWorkgroupId} kindOverride="image" />
                   }
                 />
                 <Route
-                  path="/image/:recordId"
+                  path="/picture/:recordId"
                   element={
                     <ContentManagerPage api={api} activeWorkgroupId={activeWorkgroupId} kindOverride="image" />
                   }
@@ -350,19 +350,19 @@ export default function App() {
                   }
                 />
                 <Route
-                  path="/election"
+                  path="/poll"
                   element={
                     <ContentManagerPage api={api} activeWorkgroupId={activeWorkgroupId} kindOverride="election" />
                   }
                 />
                 <Route
-                  path="/election/add"
+                  path="/poll/add"
                   element={
                     <ContentManagerPage api={api} activeWorkgroupId={activeWorkgroupId} kindOverride="election" />
                   }
                 />
                 <Route
-                  path="/election/:recordId"
+                  path="/poll/:recordId"
                   element={
                     <ContentManagerPage api={api} activeWorkgroupId={activeWorkgroupId} kindOverride="election" />
                   }

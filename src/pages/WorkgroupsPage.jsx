@@ -20,7 +20,7 @@ function ensureArray(value) {
 }
 
 function displayUserName(user) {
-  return user?.fullName || user?.alias || user?.email || user?.id || "Unknown user";
+  return user?.fullName || user?.alias || user?.email || user?.id || "Unknown person";
 }
 
 export default function WorkgroupsPage({ api, session, activeWorkgroupId, onChangeActiveWorkgroupId }) {
@@ -55,7 +55,7 @@ export default function WorkgroupsPage({ api, session, activeWorkgroupId, onChan
         : api.get(`/organization/${session.organizationId}`),
       session?.organizationId
         ? api.get(`/organization/${session.organizationId}/membership`)
-        : api.get("/user", { params: { page: 1, items: 200 } }),
+        : api.get("/person", { params: { page: 1, items: 200 } }),
     ];
 
     const [categoryRes, organizationRes, userRes] = await Promise.all(requests);
@@ -78,7 +78,7 @@ export default function WorkgroupsPage({ api, session, activeWorkgroupId, onChan
   }
 
   async function loadWorkgroups(targetWorkgroupId) {
-    const response = await api.get("/workgroup", {
+    const response = await api.get("/space", {
       params: {
         page: 1,
         items: 200,
@@ -87,7 +87,7 @@ export default function WorkgroupsPage({ api, session, activeWorkgroupId, onChan
       },
     });
     if (response.status >= 400) {
-      throw toApiError(response, "Failed to load workgroups");
+      throw toApiError(response, "Failed to load spaces");
     }
 
     const nextWorkgroups = extractCollection(response, "workgroups");
@@ -122,11 +122,11 @@ export default function WorkgroupsPage({ api, session, activeWorkgroupId, onChan
     let detailEntity = cached;
 
     if (!cached?.users || !cached?.category) {
-      const response = await api.get(`/workgroup/${workgroupId}`, {
+      const response = await api.get(`/space/${workgroupId}`, {
         params: { detail: "user,category" },
       });
       if (response.status >= 400) {
-        throw toApiError(response, "Failed to load workgroup");
+        throw toApiError(response, "Failed to load space");
       }
       detailEntity = extractEntity(response, "workgroup");
     }
@@ -157,7 +157,7 @@ export default function WorkgroupsPage({ api, session, activeWorkgroupId, onChan
           loadWorkgroups(recordId && recordId !== "add" ? recordId : ""),
         ]);
       } catch (err) {
-        if (!cancelled) setError(err.message || "Failed to load workgroups");
+        if (!cancelled) setError(err.message || "Failed to load spaces");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -180,20 +180,20 @@ export default function WorkgroupsPage({ api, session, activeWorkgroupId, onChan
     const removeIds = priorIds.filter((id) => !nextIds.includes(id));
 
     if (addIds.length) {
-      const response = await api.put(`/workgroup/${workgroupId}/bulkuseradd`, {
-        userList: addIds,
+      const response = await api.put(`/space/${workgroupId}/bulkpersonadd`, {
+        personList: addIds,
       });
       if (response.status >= 400) {
-        throw toApiError(response, "Failed to add workgroup members");
+        throw toApiError(response, "Failed to add space members");
       }
     }
 
     if (removeIds.length) {
-      const response = await api.put(`/workgroup/${workgroupId}/bulkuserdel`, {
-        userList: removeIds,
+      const response = await api.put(`/space/${workgroupId}/bulkpersondel`, {
+        personList: removeIds,
       });
       if (response.status >= 400) {
-        throw toApiError(response, "Failed to remove workgroup members");
+        throw toApiError(response, "Failed to remove space members");
       }
     }
   }
@@ -213,10 +213,10 @@ export default function WorkgroupsPage({ api, session, activeWorkgroupId, onChan
       };
 
       const response = form.id
-        ? await api.put(`/workgroup/${form.id}`, payload)
-        : await api.post("/workgroup", payload);
+        ? await api.put(`/space/${form.id}`, payload)
+        : await api.post("/space", payload);
       if (response.status >= 400) {
-        throw toApiError(response, "Failed to save workgroup");
+        throw toApiError(response, "Failed to save space");
       }
 
       const savedWorkgroupId = extractEntity(response, "workgroup")?.id || form.id;
@@ -225,9 +225,9 @@ export default function WorkgroupsPage({ api, session, activeWorkgroupId, onChan
       if (!activeWorkgroupId && savedWorkgroupId) {
         onChangeActiveWorkgroupId?.(savedWorkgroupId);
       }
-      setSuccess(form.id ? "Workgroup updated." : "Workgroup created.");
+      setSuccess(form.id ? "Space updated." : "Space created.");
     } catch (err) {
-      setError(err.message || "Failed to save workgroup");
+      setError(err.message || "Failed to save space");
     } finally {
       setSaving(false);
     }
@@ -240,34 +240,34 @@ export default function WorkgroupsPage({ api, session, activeWorkgroupId, onChan
     setSuccess("");
 
     try {
-      const response = await api.delete(`/workgroup/${form.id}`);
+      const response = await api.delete(`/space/${form.id}`);
       if (response.status >= 400) {
-        throw toApiError(response, "Failed to delete workgroup");
+        throw toApiError(response, "Failed to delete space");
       }
       if (activeWorkgroupId === form.id) {
         onChangeActiveWorkgroupId?.(null);
       }
-      setSuccess("Workgroup deleted.");
+      setSuccess("Space deleted.");
       setSelectedWorkgroupId("");
       setForm(emptyForm(session?.organizationId || ""));
       setOriginalMemberIds([]);
       await loadWorkgroups("");
     } catch (err) {
-      setError(err.message || "Failed to delete workgroup");
+      setError(err.message || "Failed to delete space");
     } finally {
       setSaving(false);
     }
   }
 
-  if (loading) return <Loading text="Loading workgroups..." />;
+  if (loading) return <Loading text="Loading spaces..." />;
 
   return (
     <div className="screen-stack">
       <section className="surface-card">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">Workgroups</p>
-            <h2>Workgroup Management</h2>
+            <p className="eyebrow">Spaces</p>
+            <h2>Space Management</h2>
           </div>
           <button
             className="btn btn-tonal"
@@ -281,14 +281,14 @@ export default function WorkgroupsPage({ api, session, activeWorkgroupId, onChan
             }}
             type="button"
           >
-            New Workgroup
+            New Space
           </button>
         </div>
         <ErrorBanner error={error} />
         <SuccessBanner message={success} />
         <div className="card-list">
           {workgroups.length === 0 ? (
-            <div className="empty-state">No workgroups created yet.</div>
+            <div className="empty-state">No spaces created yet.</div>
           ) : (
             workgroups.map((workgroup) => (
               <button
@@ -314,7 +314,7 @@ export default function WorkgroupsPage({ api, session, activeWorkgroupId, onChan
         <div className="section-heading">
           <div>
             <p className="eyebrow">Editor</p>
-            <h3>{form.id ? "Edit workgroup" : "Create workgroup"}</h3>
+            <h3>{form.id ? "Edit space" : "Create space"}</h3>
           </div>
         </div>
         <form className="stack-form" onSubmit={save}>
@@ -380,14 +380,14 @@ export default function WorkgroupsPage({ api, session, activeWorkgroupId, onChan
             </div>
             <div>
               <span className="detail-label">Active Scope</span>
-              <span>{activeWorkgroupId || "All visible workgroups"}</span>
+              <span>{activeWorkgroupId || "All visible spaces"}</span>
             </div>
           </div>
 
           <label className="field">
             <span>Members</span>
             {users.length === 0 ? (
-              <div className="empty-state">No eligible users are available for this workgroup.</div>
+              <div className="empty-state">No eligible people are available for this space.</div>
             ) : (
               <div className="selection-grid">
                 {users.map((user) => (
@@ -417,7 +417,7 @@ export default function WorkgroupsPage({ api, session, activeWorkgroupId, onChan
               disabled={saving || (!canCreateWorkgroup && !form.id)}
               type="submit"
             >
-              {saving ? "Saving..." : form.id ? "Save Workgroup" : "Create Workgroup"}
+              {saving ? "Saving..." : form.id ? "Save Space" : "Create Space"}
             </button>
             {form.id ? (
               <button className="btn btn-secondary" onClick={() => onChangeActiveWorkgroupId?.(form.id)} type="button">
@@ -426,13 +426,13 @@ export default function WorkgroupsPage({ api, session, activeWorkgroupId, onChan
             ) : null}
             {form.id ? (
               <button className="btn btn-danger" disabled={saving} onClick={removeWorkgroup} type="button">
-                Delete Workgroup
+                Delete Space
               </button>
             ) : null}
-            <Link className="text-link" to="/app/group/add">
-              Create Audience Group
+            <Link className="text-link" to="/app/circle/add">
+              Create Circle
             </Link>
-            <Link className="text-link" to="/app/election/add">
+            <Link className="text-link" to="/app/poll/add">
               Create Poll
             </Link>
           </div>

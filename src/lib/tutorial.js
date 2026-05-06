@@ -26,8 +26,8 @@ export async function enablePollTutorial(api, options = {}) {
 }
 
 export async function adminEnablePollTutorial(api, userId, options = {}) {
-  const response = await api.post(`/support/users/${userId}/tutorial/poll/enable`, options);
-  if (response.status >= 400) throw toApiError(response, "Failed to re-enable user tutorial");
+  const response = await api.post(`/support/people/${userId}/tutorial/poll/enable`, options);
+  if (response.status >= 400) throw toApiError(response, "Failed to re-enable person tutorial");
   return response.data?.data?.tutorial || response.data?.tutorial || null;
 }
 

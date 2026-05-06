@@ -43,9 +43,9 @@ export default function ProfilePage({
 
   async function loadProfile() {
     const requests = [
-      api.get(`/user/${session?.userId}`),
-      api.get(`/user/${session?.userId}/signin-method`),
-      api.get(`/user/${session?.userId}/authaudit`, { params: { items: 10 } }),
+      api.get(`/person/${session?.userId}`),
+      api.get(`/person/${session?.userId}/signin-method`),
+      api.get(`/person/${session?.userId}/authaudit`, { params: { items: 10 } }),
     ];
     const canManageOrganization =
       session?.organizationId && (session?.organizationAdmin || session?.systemAdmin);
@@ -218,7 +218,7 @@ export default function ProfilePage({
     setError("");
 
     try {
-      const response = await api.put(`/user/${session.userId}`, {
+      const response = await api.put(`/person/${session.userId}`, {
         email: form.email,
         firstName: form.firstName,
         lastName: form.lastName,
@@ -321,13 +321,13 @@ export default function ProfilePage({
             `${response.data?.message || "Invite conflict"}: ${conflict.organizationName}. ${conflict.resolution || ""}`.trim()
           );
         }
-        throw toApiError(response, "Failed to invite user");
+        throw toApiError(response, "Failed to invite person");
       }
       setInviteEmail("");
       setSuccess("Invitation sent.");
       await loadProfile();
     } catch (err) {
-      setError(err.message || "Failed to invite user");
+      setError(err.message || "Failed to invite person");
     } finally {
       setSaving(false);
     }
@@ -341,7 +341,7 @@ export default function ProfilePage({
     setSuccess("");
 
     try {
-      const response = await api.delete(`/user/${session.userId}/signin-method/${identityId}`);
+      const response = await api.delete(`/person/${session.userId}/signin-method/${identityId}`);
       if (response.status >= 400) {
         throw toApiError(response, "Failed to unlink sign-in method");
       }
@@ -457,7 +457,7 @@ export default function ProfilePage({
     <div className="screen-stack">
       <section className="surface-card">
         <p className="eyebrow">Identity</p>
-        <h2>{currentUser?.alias || currentUser?.email || "User"}</h2>
+        <h2>{currentUser?.alias || currentUser?.email || "Person"}</h2>
         <div className="detail-grid">
           <div>
             <span className="detail-label">Email</span>
@@ -473,7 +473,7 @@ export default function ProfilePage({
           </div>
           <div>
             <span className="detail-label">Scope</span>
-            <span>{activeWorkgroupId || "All visible workgroups"}</span>
+            <span>{activeWorkgroupId || "All visible spaces"}</span>
           </div>
         </div>
       </section>
@@ -524,7 +524,7 @@ export default function ProfilePage({
               <span>{organizationMembership.members.length}</span>
             </div>
             <div>
-              <span className="detail-label">Workgroups</span>
+              <span className="detail-label">Spaces</span>
               <span>{organizationMembership.workgroups.length}</span>
             </div>
             <div>
@@ -538,7 +538,7 @@ export default function ProfilePage({
                 <div className="split-heading">
                   <strong>{member.fullName || member.alias || member.email || member.id}</strong>
                   <span className="chip">
-                    {member.organizationAdmin ? "Org admin" : member.workgroupAdmin ? "Workgroup admin" : "Member"}
+                    {member.organizationAdmin ? "Org admin" : member.workgroupAdmin ? "Space admin" : "Member"}
                   </span>
                 </div>
                 <p className="tiny-meta">{member.email || member.alias || member.id}</p>
@@ -555,11 +555,11 @@ export default function ProfilePage({
         <section className="surface-card">
           <div className="section-heading">
             <div>
-              <p className="eyebrow">Workgroups</p>
+              <p className="eyebrow">Spaces</p>
               <h3>Switch and review membership</h3>
             </div>
-            <Link className="text-link" to="/app/workgroup">
-              Manage Workgroups
+            <Link className="text-link" to="/app/space">
+              Manage Spaces
             </Link>
           </div>
           <div className="record-stack">
@@ -581,7 +581,7 @@ export default function ProfilePage({
                 </div>
               ))
             ) : (
-              <div className="empty-state">No workgroups available.</div>
+              <div className="empty-state">No spaces available.</div>
             )}
           </div>
         </section>
@@ -887,8 +887,8 @@ export default function ProfilePage({
           <Link className="text-link" to="/app/preference">
             Preferences
           </Link>
-          <Link className="text-link" to="/app/image">
-            Images
+          <Link className="text-link" to="/app/picture">
+            Pictures
           </Link>
           <Link className="text-link" to="/app/item">
             Items
@@ -896,7 +896,7 @@ export default function ProfilePage({
           <Link className="text-link" to="/app/list">
             Lists
           </Link>
-          <Link className="text-link" to="/app/election">
+          <Link className="text-link" to="/app/poll">
             Polls
           </Link>
         </div>

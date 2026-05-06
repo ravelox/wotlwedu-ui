@@ -44,7 +44,7 @@ npm run validate:support-console
 The app reads these Vite variables at build time:
 
 - `VITE_WOTLWEDU_API_BASE_URL`: backend API origin. Defaults to `https://api.wotlwedu.com:9876`.
-- `VITE_APP_VERSION`: version label shown in the app chrome. Defaults to `0.1.21`.
+- `VITE_APP_VERSION`: version label shown in the app chrome. Defaults to `0.1.22`.
 - `VITE_GOOGLE_CLIENT_ID`: Google web client ID used to render the Google sign-in button.
 
 An example file is included at [`.env.example`](/Users/dkelly/Projects/wotlwedu/wotlwedu-ui/.env.example).
@@ -72,17 +72,17 @@ Authenticated app routes:
 - `/app/home`
 - `/app/cast-vote`
 - `/app/cast-vote/:electionId`
-- `/app/elections`
+- `/app/polls`
 - `/app/friend`
 - `/app/notification`
 - `/app/profile`
 - `/app/preference`
 - `/app/statistics/:electionId`
-- `/app/image`
+- `/app/picture`
 - `/app/item`
 - `/app/list`
-- `/app/election`
-- `/app/workgroup`
+- `/app/poll`
+- `/app/space`
 
 Legacy top-level paths redirect into `/app/*` routes to preserve compatibility with older links.
 
@@ -117,16 +117,16 @@ Registration:
 
 User profile and relationships:
 
-- `GET /user/:userId`: load the signed-in user profile
-- `PUT /user/:userId`: update profile details
-- `GET /user/:userId/signin-method`: load linked sign-in methods and password-login status
-- `DELETE /user/:userId/signin-method/:identityId`: unlink a removable social identity
-- `GET /user/:userId/authaudit`: load recent auth and invite-related account activity
-- `GET /user/friend`: list friend and relationship records
-- `POST /user/request`: send a friend request by email
-- `POST /user/accept/:tokenId`: accept a friend request from a notification token
-- `DELETE /user/relationship/:relationshipId`: remove a relationship
-- `PUT /user/block/:blockUser`: block a user
+- `GET /person/:userId`: load the signed-in user profile
+- `PUT /person/:userId`: update profile details
+- `GET /person/:userId/signin-method`: load linked sign-in methods and password-login status
+- `DELETE /person/:userId/signin-method/:identityId`: unlink a removable social identity
+- `GET /person/:userId/authaudit`: load recent auth and invite-related account activity
+- `GET /person/friend`: list friend and relationship records
+- `POST /person/request`: send a friend request by email
+- `POST /person/accept/:tokenId`: accept a friend request from a notification token
+- `DELETE /person/relationship/:relationshipId`: remove a relationship
+- `PUT /person/block/:blockUser`: block a user
 
 Notifications:
 
@@ -154,25 +154,25 @@ Organizations:
 
 Voting and election insights:
 
-- `GET /election`: list elections for dashboard and elections pages
-- `GET /election/:electionId`: load election details
-- `GET /election/:electionId/stats`: load election statistics
+- `GET /poll`: list elections for dashboard and elections pages
+- `GET /poll/:electionId`: load election details
+- `GET /poll/:electionId/stats`: load election statistics
 - `GET /vote/next/all`: fetch the next available vote across visible workgroups
 - `GET /vote/:electionId/next`: fetch the next vote inside a specific election
 - `POST /cast/:voteId/decision`: submit a vote decision
 
 Workgroup-scoped content management:
 
-- `GET /workgroup`: populate the workgroup scope selector and content forms
+- `GET /space`: populate the workgroup scope selector and content forms
 - `GET /category`: populate category assignments
-- `GET /group`: populate list and election targeting data
-- `GET|POST|PUT|DELETE /image` and `/image/:id`
-- `POST /image/file/:imageId`: upload image binary content
+- `GET /circle`: populate list and election targeting data
+- `GET|POST|PUT|DELETE /picture` and `/picture/:id`
+- `POST /picture/file/:imageId`: upload image binary content
 - `GET|POST|PUT|DELETE /item` and `/item/:id`
 - `GET|POST|PUT|DELETE /list` and `/list/:id`
 - `POST /list/:listId/bulkitemadd`: add items to a list in bulk
 - `POST /list/:listId/bulkitemdel`: remove items from a list in bulk
-- `GET|POST|PUT|DELETE /election` and `/election/:id`
+- `GET|POST|PUT|DELETE /poll` and `/poll/:id`
 
 Most collection requests use `page` and `items` query parameters. Workgroup-scoped resources also pass `workgroupId` when the user selects a specific scope.
 
@@ -194,13 +194,13 @@ Build with a custom backend origin:
 ```bash
 docker build \
   --build-arg VITE_WOTLWEDU_API_BASE_URL=https://api.example.com \
-  --build-arg VITE_APP_VERSION=0.1.10 \
+  --build-arg VITE_APP_VERSION=0.1.22 \
   -t wotlwedu-ui .
 ```
 
 ## Deployment Notes
 
-- This is a static single-page application. Deep links such as `/app/profile` or `/app/election/123` must be rewritten to `index.html` by the serving layer.
+- This is a static single-page application. Deep links such as `/app/profile` or `/app/poll/123` must be rewritten to `index.html` by the serving layer.
 - The current `Dockerfile` uses the default Nginx configuration and does not add an SPA fallback rule. In production, either add a custom Nginx config to the image or ensure an upstream reverse proxy or CDN handles the rewrite.
 - `VITE_WOTLWEDU_API_BASE_URL` is compiled into the bundle at build time. Changing the backend origin requires a rebuild unless the user overrides it in browser storage.
 - The frontend sends bearer tokens from local storage. Deploy only over HTTPS and ensure the API allows the frontend origin via CORS.

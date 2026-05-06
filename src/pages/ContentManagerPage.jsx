@@ -8,10 +8,11 @@ import { getPollTutorial, getRelevantTutorialStep, getTutorialStepStatus } from 
 
 const CONFIG = {
   image: {
-    label: "Images",
-    path: "/image",
+    label: "Pictures",
+    path: "/picture",
     key: "images",
     singular: "image",
+    displaySingular: "picture",
     supportsUpload: true,
   },
   item: {
@@ -19,18 +20,21 @@ const CONFIG = {
     path: "/item",
     key: "items",
     singular: "item",
+    displaySingular: "item",
   },
   list: {
     label: "Lists",
     path: "/list",
     key: "lists",
     singular: "list",
+    displaySingular: "list",
   },
   election: {
     label: "Polls",
-    path: "/election",
+    path: "/poll",
     key: "elections",
     singular: "election",
+    displaySingular: "poll",
   },
 };
 
@@ -175,12 +179,12 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
 
   async function loadRefs() {
     const endpoints = [
-      api.get("/workgroup", { params: { page: 1, items: 100 } }),
+      api.get("/space", { params: { page: 1, items: 100 } }),
       api.get("/category", { params: { page: 1, items: 100 } }),
-      api.get("/image", { params: { page: 1, items: 100, workgroupId: activeWorkgroupId || undefined } }),
+      api.get("/picture", { params: { page: 1, items: 100, workgroupId: activeWorkgroupId || undefined } }),
       api.get("/item", { params: { page: 1, items: 100, workgroupId: activeWorkgroupId || undefined } }),
       api.get("/list", { params: { page: 1, items: 100, workgroupId: activeWorkgroupId || undefined } }),
-      api.get("/group", { params: { page: 1, items: 100 } }),
+      api.get("/circle", { params: { page: 1, items: 100 } }),
     ];
 
     const [workgroupsRes, categoriesRes, imagesRes, itemsRes, listsRes, groupsRes] =
@@ -368,9 +372,9 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
     data.append("imageUpload", form.imageFile);
     data.append("fileextension", extension);
 
-    const response = await api.post(`/image/file/${imageId}`, data);
+    const response = await api.post(`/picture/file/${imageId}`, data);
     if (response.status >= 400) {
-      throw toApiError(response, "Failed to upload image file");
+      throw toApiError(response, "Failed to upload picture file");
     }
   }
 
@@ -410,9 +414,9 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
           categoryId: toOptionalValue(form.categoryId),
         };
         response = isEdit
-          ? await api.put(`/image/${form.id}`, payload)
-          : await api.post("/image", payload);
-        if (response.status >= 400) throw toApiError(response, "Failed to save image");
+          ? await api.put(`/picture/${form.id}`, payload)
+          : await api.post("/picture", payload);
+        if (response.status >= 400) throw toApiError(response, "Failed to save picture");
         createdId = extractEntity(response, "image")?.id || form.id;
         await uploadImageFile(createdId);
       } else if (kind === "item") {
@@ -457,32 +461,32 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
           expiration: form.expiration || null,
         };
         response = isEdit
-          ? await api.put(`/election/${form.id}`, {
+          ? await api.put(`/poll/${form.id}`, {
               ...payload,
               imageId: toOptionalValue(form.imageId),
             })
-          : await api.post("/election", payload);
-        if (response.status >= 400) throw toApiError(response, "Failed to save election");
+          : await api.post("/poll", payload);
+        if (response.status >= 400) throw toApiError(response, "Failed to save poll");
         createdId = extractEntity(response, "election")?.id || form.id;
         if (!isEdit && form.imageId) {
-          const patchRes = await api.put(`/election/${createdId}`, {
+          const patchRes = await api.put(`/poll/${createdId}`, {
             imageId: form.imageId,
             workgroupId: toOptionalValue(form.workgroupId),
           });
-          if (patchRes.status >= 400) throw toApiError(patchRes, "Failed to attach election image");
+          if (patchRes.status >= 400) throw toApiError(patchRes, "Failed to attach poll picture");
         }
 
         if (startAfterSave) {
           if (!payload.listId || !payload.groupId) {
-            throw new Error("Select both a list and an audience group before starting the poll.");
+            throw new Error("Select both a list and a circle before starting the poll.");
           }
-          const startRes = await api.post(`/election/${createdId}/start`);
+          const startRes = await api.post(`/poll/${createdId}/start`);
           if (startRes.status >= 400) throw toApiError(startRes, "Failed to start poll");
         }
       }
 
       setSuccess(
-        startAfterSave && isElection ? "Poll saved and started." : `${config.singular} saved.`
+        startAfterSave && isElection ? "Poll saved and started." : `${config.displaySingular} saved.`
       );
       navigate(
         startAfterSave && isElection ? "/app/cast-vote" : `/app/${kind}/${createdId || "add"}`,
@@ -504,8 +508,8 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
 
     try {
       const response = await api.delete(`${config.path}/${form.id}`);
-      if (response.status >= 400) throw toApiError(response, `Failed to delete ${config.singular}`);
-      setSuccess(`${config.singular} deleted.`);
+      if (response.status >= 400) throw toApiError(response, `Failed to delete ${config.displaySingular}`);
+      setSuccess(`${config.displaySingular} deleted.`);
       navigate(`/app/${kind}/add`, { replace: true });
       setForm(emptyForm(kind, activeWorkgroupId));
       setOriginalItemIds([]);
@@ -537,7 +541,7 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
             <h2>{config.label}</h2>
           </div>
           <Link className="text-link" to={`/app/${kind}/add`}>
-            New {config.singular}
+            New {config.displaySingular}
           </Link>
         </div>
         <div className="resource-strip">
@@ -574,7 +578,7 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
         <div className="section-heading">
           <div>
             <p className="eyebrow">Editor</p>
-            <h3>{form.id ? `Edit ${config.singular}` : `New ${config.singular}`}</h3>
+            <h3>{form.id ? `Edit ${config.displaySingular}` : `New ${config.displaySingular}`}</h3>
           </div>
         </div>
         <ErrorBanner error={error} />
@@ -594,7 +598,7 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
                 <div className="chip-row">
                   <span className="chip">Tutorial list</span>
                   <span className="chip chip-soft">{tutorial.bindings.listId}</span>
-                  <span className="chip">Audience</span>
+                  <span className="chip">Circle</span>
                   <span className="chip chip-soft">{tutorial.bindings.groupId}</span>
                 </div>
               ) : null}
@@ -618,7 +622,7 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
             />
           </label>
           <label className="field">
-            <span>Workgroup</span>
+            <span>Space</span>
             <select
               value={form.workgroupId}
               onChange={(event) => updateField("workgroupId", event.target.value)}
@@ -648,7 +652,7 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
 
           {kind === "image" ? (
             <label className="field">
-              <span>Image File</span>
+              <span>Picture File</span>
               <input
                 accept="image/png,image/jpeg,image/jpg"
                 onChange={(event) => updateField("imageFile", event.target.files?.[0] || null)}
@@ -660,7 +664,7 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
           {kind === "item" ? (
             <>
               <label className="field">
-                <span>Image</span>
+                <span>Picture</span>
                 <select
                   value={form.imageId}
                   onChange={(event) => updateField("imageId", event.target.value)}
@@ -702,7 +706,7 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
                 <span>Items</span>
                 {itemChoices.length === 0 ? (
                   <div className="empty-state">
-                    <div>No items are available for this workgroup yet.</div>
+                    <div>No items are available for this space yet.</div>
                     <div className="split-actions wrap-actions">
                       <Link className="btn btn-secondary" to="/app/item/add">
                         Create Item
@@ -743,7 +747,7 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
                 </div>
                 <div>
                   <span className="detail-label">Who can vote</span>
-                  <span>{selectedGroup?.name || "Choose an audience group"}</span>
+                  <span>{selectedGroup?.name || "Choose a circle"}</span>
                 </div>
                 <div>
                   <span className="detail-label">Type</span>
@@ -753,7 +757,7 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
                   </span>
                 </div>
                 <div>
-                  <span className="detail-label">Cover image</span>
+                  <span className="detail-label">Cover picture</span>
                   <span>{selectedImage?.name || "Optional"}</span>
                 </div>
               </div>
@@ -772,13 +776,13 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
                 </select>
               </label>
               <label className="field">
-                <span>Audience Group</span>
+                <span>Circle</span>
                 {refs.groups.length === 0 ? (
                   <div className="empty-state">
-                    <div>No audience groups are available yet.</div>
+                    <div>No circles are available yet.</div>
                     <div className="split-actions wrap-actions">
-                      <Link className="btn btn-secondary" to="/app/group/add">
-                        Create Audience Group
+                      <Link className="btn btn-secondary" to="/app/circle/add">
+                        Create Circle
                       </Link>
                     </div>
                   </div>
@@ -797,7 +801,7 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
                 )}
               </label>
               <label className="field">
-                <span>Image</span>
+                <span>Picture</span>
                 <select
                   value={form.imageId}
                   onChange={(event) => updateField("imageId", event.target.value)}

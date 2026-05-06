@@ -30,18 +30,18 @@ npm run preview
 
 - Auth: `/login`, `/login/verify2fa`, `/login/2fa`, `/login/resetreq`, `/login/password/:userId`
 - Registration: `/register`, `/register/confirm/:tokenId`
-- User graph: `/user/:userId`, `/user/friend`, `/user/request`, `/user/accept/:token`, `/user/relationship/:id`, `/user/block/:userId`
+- User graph: `/person/:userId`, `/person/friend`, `/person/request`, `/person/accept/:token`, `/person/relationship/:id`, `/person/block/:userId`
 - Notifications: `/notification`, `/notification/unreadcount`, `/notification/status/:notificationId/:statusId`
 - Preferences: `/preference`, `/preference/:preferenceId`
-- Voting and elections: `/vote/next/all`, `/vote/:electionId/next`, `/cast/:voteId/decision`, `/election`, `/election/:id`, `/election/:id/stats`
-- Content management: `/workgroup`, `/category`, `/group`, `/image`, `/image/file/:imageId`, `/item`, `/list`, `/list/:listId/bulkitemadd`, `/list/:listId/bulkitemdel`
+- Voting and elections: `/vote/next/all`, `/vote/:electionId/next`, `/cast/:voteId/decision`, `/poll`, `/poll/:id`, `/poll/:id/stats`
+- Content management: `/space`, `/category`, `/circle`, `/picture`, `/picture/file/:imageId`, `/item`, `/list`, `/list/:listId/bulkitemadd`, `/list/:listId/bulkitemdel`
 
 ## Where To Make Changes
 
 - Route composition and auth redirects: `src/App.jsx`
 - Shared application chrome: `src/components/`
 - Route-level screens: `src/pages/`
-- API/session/workgroup helpers: `src/lib/`
+- API/session/space helpers: `src/lib/`
 - Global styling: `src/styles.css`
 - Build and container config: `package.json`, `vite.config.js`, `Dockerfile`
 - Raw Kubernetes manifests: `k8s/`

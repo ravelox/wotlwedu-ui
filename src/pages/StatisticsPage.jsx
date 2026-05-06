@@ -32,13 +32,13 @@ export default function StatisticsPage({ api }) {
 
       try {
         const [electionRes, statsRes, participationRes] = await Promise.all([
-          api.get(`/election/${electionId}`),
-          api.get(`/election/${electionId}/stats`),
-          api.get(`/election/${electionId}/participation`),
+          api.get(`/poll/${electionId}`),
+          api.get(`/poll/${electionId}/stats`),
+          api.get(`/poll/${electionId}/participation`),
         ]);
         const tutorialValue = await getPollTutorial(api);
         if (electionRes.status >= 400) {
-          throw toApiError(electionRes, "Failed to load election");
+          throw toApiError(electionRes, "Failed to load poll");
         }
         if (statsRes.status >= 400) {
           throw toApiError(statsRes, "Failed to load statistics");
@@ -88,13 +88,13 @@ export default function StatisticsPage({ api }) {
               <div className="surface-card">
                 <div className="section-heading compact">
                   <div>
-                    <p className="eyebrow">Audience</p>
+                    <p className="eyebrow">Circle</p>
                     <h3>Participation</h3>
                   </div>
                 </div>
                 <div className="detail-grid">
                   <div>
-                    <span className="detail-label">Group</span>
+                    <span className="detail-label">Circle</span>
                     <span>{audience?.group?.name || election?.group?.name || election?.groupId || "Not set"}</span>
                   </div>
                   <div>

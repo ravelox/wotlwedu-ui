@@ -19,7 +19,7 @@ function notificationRoute(notification) {
   }
   if (objectId.startsWith("list_")) return `/app/list/${objectId}`;
   if (objectId.startsWith("item_")) return `/app/item/${objectId}`;
-  if (objectId.startsWith("image_")) return `/app/image/${objectId}`;
+  if (objectId.startsWith("image_")) return `/app/picture/${objectId}`;
   return null;
 }
 
@@ -32,7 +32,7 @@ function notificationActionLabel(notification) {
   }
   if (objectId.startsWith("list_")) return "Open List";
   if (objectId.startsWith("item_")) return "Open Item";
-  if (objectId.startsWith("image_")) return "Open Image";
+  if (objectId.startsWith("image_")) return "Open Picture";
   return null;
 }
 
@@ -111,7 +111,7 @@ export default function NotificationsPage({ api }) {
     setSuccess("");
 
     try {
-      const response = await api.post(`/user/accept/${token}`);
+      const response = await api.post(`/person/accept/${token}`);
       if (response.status >= 400) throw toApiError(response, "Failed to accept friend request");
       await api.delete(`/notification/${notificationId}`);
       setSuccess("Friend request accepted.");
@@ -129,7 +129,7 @@ export default function NotificationsPage({ api }) {
     setSuccess("");
 
     try {
-      const response = await api.put(`/user/block/${senderId}`);
+      const response = await api.put(`/person/block/${senderId}`);
       if (response.status >= 400) throw toApiError(response, "Failed to block sender");
       await api.delete(`/notification/${notificationId}`);
       setSuccess("Sender blocked.");

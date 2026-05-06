@@ -52,14 +52,14 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
         const [unreadRes, electionRes, myPollsRes, voteRes, tutorialValue] =
           await Promise.all([
             api.get("/notification/unreadcount"),
-            api.get("/election", {
+            api.get("/poll", {
               params: {
                 page: 1,
                 items: 6,
                 workgroupId: activeWorkgroupId || undefined,
               },
             }),
-            api.get("/election", {
+            api.get("/poll", {
               params: {
                 page: 1,
                 items: 6,
@@ -87,7 +87,7 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
         const participationEntries = await Promise.all(
           nextMyPolls.map(async (poll) => {
             try {
-              const response = await api.get(`/election/${poll.id}/participation`);
+              const response = await api.get(`/poll/${poll.id}/participation`);
               if (response.status >= 400) return [poll.id, null];
               return [poll.id, response.data?.data || null];
             } catch {
@@ -202,11 +202,11 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
           </div>
         </div>
         <div className="split-actions">
-          <Link className="btn" to="/app/election/add">
+          <Link className="btn" to="/app/poll/add">
             Create Poll
           </Link>
-          <Link className="btn btn-secondary" to="/app/workgroup/add">
-            Create Workgroup
+          <Link className="btn btn-secondary" to="/app/space/add">
+            Create Space
           </Link>
           <Link className="btn btn-tonal" to="/app/notifications">
             View Notifications
@@ -315,7 +315,7 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
                           </div>
                         ) : null}
                         <div className="split-actions">
-                          <Link className="btn btn-secondary" to={`/app/election/${poll.id}`}>
+                          <Link className="btn btn-secondary" to={`/app/poll/${poll.id}`}>
                             Edit Poll
                           </Link>
                           <Link className="text-link" to={`/app/statistics/${poll.id}`}>
@@ -338,7 +338,7 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
             <p className="eyebrow">Upcoming</p>
             <h3>Polls</h3>
           </div>
-          <Link className="text-link" to="/app/elections">
+          <Link className="text-link" to="/app/polls">
             View all
           </Link>
         </div>

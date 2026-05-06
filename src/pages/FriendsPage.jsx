@@ -4,7 +4,7 @@ import { ErrorBanner, SuccessBanner } from "../components/Feedback";
 import { extractCollection, toApiError } from "../lib/api";
 
 function friendName(row) {
-  return row?.user?.fullName || row?.user?.alias || row?.user?.email || "Unknown user";
+  return row?.user?.fullName || row?.user?.alias || row?.user?.email || "Unknown person";
 }
 
 export default function FriendsPage({ api }) {
@@ -21,7 +21,7 @@ export default function FriendsPage({ api }) {
     setError("");
 
     try {
-      const response = await api.get("/user/friend", {
+      const response = await api.get("/person/friend", {
         params: showBlocked ? { blocked: true } : undefined,
       });
       if (response.status >= 400) {
@@ -46,7 +46,7 @@ export default function FriendsPage({ api }) {
     setSuccess("");
 
     try {
-      const response = await api.post("/user/request", { email });
+      const response = await api.post("/person/request", { email });
       if (response.status >= 400) {
         throw toApiError(response, "Failed to send friend request");
       }
@@ -66,7 +66,7 @@ export default function FriendsPage({ api }) {
     setSuccess("");
 
     try {
-      const response = await api.delete(`/user/relationship/${id}`);
+      const response = await api.delete(`/person/relationship/${id}`);
       if (response.status >= 400) {
         throw toApiError(response, "Failed to update relationship");
       }
@@ -85,14 +85,14 @@ export default function FriendsPage({ api }) {
     setSuccess("");
 
     try {
-      const response = await api.put(`/user/block/${userId}`);
+      const response = await api.put(`/person/block/${userId}`);
       if (response.status >= 400) {
-        throw toApiError(response, "Failed to block user");
+        throw toApiError(response, "Failed to block person");
       }
-      setSuccess("User blocked.");
+      setSuccess("Person blocked.");
       await load();
     } catch (err) {
-      setError(err.message || "Failed to block user");
+      setError(err.message || "Failed to block person");
     } finally {
       setSaving(false);
     }
@@ -164,7 +164,7 @@ export default function FriendsPage({ api }) {
                       <button
                         className="btn btn-secondary"
                         disabled={saving}
-                        onClick={() => deleteRelationship(row.id, "User unblocked.")}
+                        onClick={() => deleteRelationship(row.id, "Person unblocked.")}
                         type="button"
                       >
                         Unblock

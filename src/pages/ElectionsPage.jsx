@@ -36,7 +36,7 @@ export default function ElectionsPage({ api, activeWorkgroupId }) {
     else setLoading(true);
 
     try {
-      const response = await api.get("/election", {
+      const response = await api.get("/poll", {
         params: {
           page: 1,
           items: 50,
@@ -50,7 +50,7 @@ export default function ElectionsPage({ api, activeWorkgroupId }) {
       const summaries = await Promise.all(
         nextElections.map(async (election) => {
           try {
-            const summaryRes = await api.get(`/election/${election.id}/participation`);
+            const summaryRes = await api.get(`/poll/${election.id}/participation`);
             if (summaryRes.status >= 400) return [election.id, null];
             return [election.id, summaryRes.data?.data || null];
           } catch {
@@ -83,7 +83,7 @@ export default function ElectionsPage({ api, activeWorkgroupId }) {
             <h2>Poll feed</h2>
           </div>
           <div className="split-actions">
-            <Link className="text-link" to="/app/election">
+            <Link className="text-link" to="/app/poll">
               Create
             </Link>
             <button className="btn btn-tonal" onClick={() => load({ silent: true })}>
@@ -121,11 +121,11 @@ export default function ElectionsPage({ api, activeWorkgroupId }) {
                     <span>{formatDate(election.expiration)}</span>
                   </div>
                   <div>
-                    <span className="detail-label">Workgroup</span>
+                    <span className="detail-label">Space</span>
                     <span>{election.workgroupId || "Unscoped"}</span>
                   </div>
                   <div>
-                    <span className="detail-label">Audience</span>
+                    <span className="detail-label">Circle</span>
                     <span>{audience?.group?.name || election.groupId || "Not set"}</span>
                   </div>
                   <div>
@@ -170,7 +170,7 @@ export default function ElectionsPage({ api, activeWorkgroupId }) {
                   <Link className="btn btn-secondary" to={`/app/cast-vote/${election.id}`}>
                     Vote
                   </Link>
-                  <Link className="text-link" to={`/app/election/${election.id}`}>
+                  <Link className="text-link" to={`/app/poll/${election.id}`}>
                     Edit
                   </Link>
                   <Link className="text-link" to={`/app/statistics/${election.id}`}>

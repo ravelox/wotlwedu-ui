@@ -83,7 +83,7 @@ export default function VotingPage({ api }) {
         <div className="section-heading">
           <div>
             <p className="eyebrow">Voting</p>
-            <h2>{electionId ? "Current election vote" : "Your next votes"}</h2>
+            <h2>{electionId ? "Current poll vote" : "Your next votes"}</h2>
           </div>
           <button className="btn btn-tonal" onClick={load} type="button">
             Refresh
@@ -139,7 +139,7 @@ export default function VotingPage({ api }) {
                   />
                 ) : null}
                 <div>
-                  <strong>{currentVote.item?.name || "Unnamed option"}</strong>
+                  <strong>{currentVote.item?.name || "Unnamed idea"}</strong>
                   {currentVote.item?.description ? <p>{currentVote.item.description}</p> : null}
                   {currentVote.item?.location ? (
                     <p className="tiny-meta">{currentVote.item.location}</p>

@@ -17,8 +17,8 @@ export default function AppShell({
   const navItems = [
     { label: "Home", to: "/app/home", icon: "◐" },
     { label: "Vote", to: "/app/cast-vote", icon: "◎" },
-    { label: "Polls", to: "/app/elections", icon: "◒" },
-    { label: "Groups", to: "/app/group", icon: "◌" },
+    { label: "Polls", to: "/app/polls", icon: "◒" },
+    { label: "Circles", to: "/app/circle", icon: "◌" },
     { label: "Profile", to: "/app/profile", icon: "◍" },
   ];
 
@@ -29,7 +29,7 @@ export default function AppShell({
       if (!session?.authToken) return;
 
       const [workgroupsRes, unreadRes] = await Promise.all([
-        api.get("/workgroup", { params: { page: 1, items: 100 } }),
+        api.get("/space", { params: { page: 1, items: 100 } }),
         api.get("/notification/unreadcount"),
       ]);
 
@@ -79,7 +79,7 @@ export default function AppShell({
                 <div>{session?.organizationId || "Personal"}</div>
               </div>
               <div>
-                <div className="scope-label">Workgroup Scope</div>
+                <div className="scope-label">Space Scope</div>
                 <select
                   value={activeWorkgroupId || ""}
                   onChange={(event) =>
@@ -88,7 +88,7 @@ export default function AppShell({
                     )
                   }
                 >
-                  <option value="">All visible workgroups</option>
+                  <option value="">All visible spaces</option>
                   {workgroups.map((workgroup) => (
                     <option key={workgroup.id} value={workgroup.id}>
                       {workgroup.name || workgroup.id}

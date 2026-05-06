@@ -7,14 +7,14 @@ function stepPath(step) {
       return "/app/list/add";
     case "create_audience":
     case "add_yourself_to_audience":
-      return "/app/group/add";
+      return "/app/circle/add";
     case "create_poll":
     case "start_poll":
-      return "/app/election/add";
+      return "/app/poll/add";
     case "cast_vote":
       return "/app/cast-vote";
     case "view_stats":
-      return step.resourceId ? `/app/statistics/${step.resourceId}` : "/app/election";
+      return step.resourceId ? `/app/statistics/${step.resourceId}` : "/app/poll";
     default:
       return "/app/home";
   }
@@ -43,7 +43,7 @@ export default function TutorialPanel({
           </div>
         </div>
         <p className="tutorial-copy">
-          Walk through creating a real options list, audience group, poll, and live stats using the
+          Walk through creating a real ideas list, audience group, poll, and live stats using the
           existing UI.
         </p>
         <div className="split-actions">
