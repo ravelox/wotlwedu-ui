@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.23 - 2026-05-06
+
+- Improve label/value separation with clearer typography and whitespace in forms and detail sections.
+
 ## 0.1.22 - 2026-05-05
 
 - Update visible UI terminology to Circle, Picture, Person, Space, and Poll.
