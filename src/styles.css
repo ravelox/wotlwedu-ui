@@ -131,6 +131,37 @@ a {
   gap: 16px;
 }
 
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.topbar-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  color: var(--muted);
+  background: rgba(29, 92, 82, 0.06);
+  border: 1px solid rgba(29, 92, 82, 0.1);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.topbar-link-active {
+  color: var(--text);
+  background: rgba(29, 92, 82, 0.14);
+}
+
+.shell-logout {
+  min-height: 38px;
+  padding: 8px 12px;
+}
+
 .eyebrow {
   margin: 0 0 6px;
   color: var(--brand);
@@ -841,12 +872,22 @@ pre {
 }
 
 :root[data-theme="dark"] .btn-tonal,
+:root[data-theme="dark"] .topbar-link,
 :root[data-theme="dark"] .topbar-pill,
 :root[data-theme="dark"] .chip,
 :root[data-theme="dark"] .version-badge,
 :root[data-theme="dark"] .status-pill,
 :root[data-theme="dark"] .bottom-nav-link-active {
   background: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="dark"] .topbar-link {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="dark"] .topbar-link-active {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.14);
 }
 
 :root[data-theme="dark"] pre {
@@ -912,6 +953,16 @@ pre {
   .device-screen {
     padding-left: 14px;
     padding-right: 14px;
+  }
+
+  .shell-topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .topbar-actions {
+    justify-content: flex-start;
+    width: 100%;
   }
 }
 

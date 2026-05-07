@@ -11,6 +11,7 @@ export default function AppShell({
   onChangeActiveWorkgroupId,
   themeMode,
   onChangeThemeMode,
+  onLogout,
 }) {
   const [workgroups, setWorkgroups] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -66,9 +67,30 @@ export default function AppShell({
                 <h1>{session?.alias || session?.email || "Workspace"}</h1>
               </div>
             </div>
-            <div className="topbar-pill">
-              <span className="status-dot" />
-              {unreadCount} notifications
+            <div className="topbar-actions">
+              <NavLink
+                to="/app/home"
+                className={({ isActive }) =>
+                  `topbar-link${isActive ? " topbar-link-active" : ""}`
+                }
+              >
+                Home
+              </NavLink>
+              <NavLink
+                to="/app/profile"
+                className={({ isActive }) =>
+                  `topbar-link${isActive ? " topbar-link-active" : ""}`
+                }
+              >
+                Profile
+              </NavLink>
+              <div className="topbar-pill">
+                <span className="status-dot" />
+                {unreadCount} notifications
+              </div>
+              <button className="btn btn-secondary shell-logout" onClick={onLogout} type="button">
+                Logout
+              </button>
             </div>
           </header>
 

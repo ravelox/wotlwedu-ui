@@ -218,6 +218,7 @@ export default function App() {
               onChangeActiveWorkgroupId={handleChangeActiveWorkgroupId}
               themeMode={themeMode}
               onChangeThemeMode={handleThemeModeChange}
+              onLogout={handleLogout}
             >
               <Routes>
                 <Route path="/" element={<Navigate to="/app/home" replace />} />
