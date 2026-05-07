@@ -65,6 +65,12 @@ select {
   font: inherit;
 }
 
+select,
+select option {
+  color: var(--text);
+  background: var(--bg-strong);
+}
+
 button {
   cursor: pointer;
 }
@@ -821,6 +827,12 @@ pre {
 :root[data-theme="dark"] .loading {
   background: rgba(255, 255, 255, 0.05);
   border-color: rgba(255, 255, 255, 0.1);
+}
+
+:root[data-theme="dark"] select,
+:root[data-theme="dark"] select option {
+  color: var(--text);
+  background: #142324;
 }
 
 :root[data-theme="dark"] .btn-secondary {
