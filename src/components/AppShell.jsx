@@ -137,7 +137,7 @@ export default function AppShell({
 
           <nav
             className="bottom-nav"
-            style={{ gridTemplateColumns: `repeat(${navItems.length}, minmax(0, 1fr))` }}
+            style={{ gridTemplateColumns: `repeat(${navItems.length + 1}, minmax(0, 1fr))` }}
           >
             {navItems.map((item) => (
               <NavLink
@@ -151,6 +151,10 @@ export default function AppShell({
                 <span>{item.label}</span>
               </NavLink>
             ))}
+            <button className="bottom-nav-link bottom-nav-button" onClick={onLogout} type="button">
+              <span>⇥</span>
+              <span>Logout</span>
+            </button>
           </nav>
         </div>
       </div>

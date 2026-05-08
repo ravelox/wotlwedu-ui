@@ -612,6 +612,33 @@ a {
   text-transform: uppercase;
 }
 
+.readonly-field {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 11px 12px;
+  border: 1px solid rgba(32, 48, 56, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.52);
+  color: var(--text);
+  font-size: 0.94rem;
+  font-weight: 650;
+  text-transform: none;
+  overflow-wrap: anywhere;
+}
+
+.field-error .readonly-field {
+  border-color: rgba(180, 73, 73, 0.5);
+  background: rgba(180, 73, 73, 0.08);
+}
+
+.field-help {
+  color: var(--danger);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: none;
+}
+
 .field-full {
   grid-column: 1 / -1;
 }
@@ -767,10 +794,17 @@ pre {
   display: grid;
   gap: 4px;
   justify-items: center;
+  align-content: center;
   color: var(--muted);
   font-size: 0.72rem;
   padding: 10px 8px;
   border-radius: 18px;
+}
+
+.bottom-nav-button {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .bottom-nav-link-active {
@@ -845,6 +879,7 @@ pre {
 :root[data-theme="dark"] .field input,
 :root[data-theme="dark"] .field textarea,
 :root[data-theme="dark"] .field select,
+:root[data-theme="dark"] .readonly-field,
 :root[data-theme="dark"] .resource-chip,
 :root[data-theme="dark"] .list-card,
 :root[data-theme="dark"] .record-card,

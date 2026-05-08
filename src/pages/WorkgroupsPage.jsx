@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import Loading from "../components/Loading";
 import { ErrorBanner, SuccessBanner } from "../components/Feedback";
 import { extractCollection, extractEntity, toApiError } from "../lib/api";
@@ -25,6 +25,8 @@ function displayUserName(user) {
 
 export default function WorkgroupsPage({ api, session, activeWorkgroupId, onChangeActiveWorkgroupId }) {
   const { recordId } = useParams();
+  const location = useLocation();
+  const isAddRoute = location.pathname.endsWith("/space/add");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [workgroups, setWorkgroups] = useState([]);
@@ -38,13 +40,27 @@ export default function WorkgroupsPage({ api, session, activeWorkgroupId, onChan
   const [success, setSuccess] = useState("");
 
   const canCreateWorkgroup = session?.systemAdmin === true || session?.organizationAdmin === true;
+  const organizationOptions = useMemo(() => {
+    const nextOptions = [...organizations];
+    if (
+      session?.organizationId &&
+      !nextOptions.some((organization) => organization.id === session.organizationId)
+    ) {
+      nextOptions.push({ id: session.organizationId, name: session.organizationId });
+    }
+    return nextOptions;
+  }, [organizations, session?.organizationId]);
+  const fallbackOrganizationId = session?.organizationId || organizationOptions[0]?.id || "";
+  const effectiveOrganizationId = form.organizationId || fallbackOrganizationId;
+  const canChooseOrganization = session?.systemAdmin === true && organizationOptions.length > 1;
+  const hasOrganizationContext = Boolean(effectiveOrganizationId);
   const selectedCategory = useMemo(
     () => categories.find((category) => category.id === form.categoryId) || null,
     [categories, form.categoryId]
   );
   const selectedOrganization = useMemo(
-    () => organizations.find((organization) => organization.id === form.organizationId) || null,
-    [form.organizationId, organizations]
+    () => organizationOptions.find((organization) => organization.id === effectiveOrganizationId) || null,
+    [effectiveOrganizationId, organizationOptions]
   );
 
   async function loadLookups() {
@@ -93,9 +109,12 @@ export default function WorkgroupsPage({ api, session, activeWorkgroupId, onChan
     const nextWorkgroups = extractCollection(response, "workgroups");
     setWorkgroups(nextWorkgroups);
 
-    if (!nextWorkgroups.length) {
+    if (isAddRoute || !nextWorkgroups.length) {
       setSelectedWorkgroupId("");
-      setForm(emptyForm(session?.organizationId || ""));
+      setForm((current) => ({
+        ...emptyForm(current.organizationId || fallbackOrganizationId),
+        memberIds: [],
+      }));
       setOriginalMemberIds([]);
       return;
     }
@@ -167,7 +186,12 @@ export default function WorkgroupsPage({ api, session, activeWorkgroupId, onChan
     return () => {
       cancelled = true;
     };
-  }, [api, form.organizationId, recordId, session?.organizationId, session?.systemAdmin]);
+  }, [api, isAddRoute, recordId, session?.organizationId, session?.systemAdmin]);
+
+  useEffect(() => {
+    if (form.organizationId || !fallbackOrganizationId) return;
+    setForm((current) => ({ ...current, organizationId: fallbackOrganizationId }));
+  }, [fallbackOrganizationId, form.organizationId]);
 
   function updateField(key, value) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -205,12 +229,17 @@ export default function WorkgroupsPage({ api, session, activeWorkgroupId, onChan
     setSuccess("");
 
     try {
+      const organizationId = form.organizationId || fallbackOrganizationId;
+      if (!organizationId) {
+        throw new Error("Create or assign an organization before creating a space.");
+      }
+
       const payload = {
-        organizationId: form.organizationId || session?.organizationId || null,
         name: form.name,
         description: form.description,
         categoryId: form.categoryId || null,
       };
+      if (organizationId) payload.organizationId = organizationId;
 
       const response = form.id
         ? await api.put(`/space/${form.id}`, payload)
@@ -274,7 +303,7 @@ export default function WorkgroupsPage({ api, session, activeWorkgroupId, onChan
             disabled={!canCreateWorkgroup}
             onClick={() => {
               setSelectedWorkgroupId("");
-              setForm(emptyForm(session?.organizationId || ""));
+              setForm(emptyForm(fallbackOrganizationId));
               setOriginalMemberIds([]);
               setSuccess("");
               setError("");
@@ -318,22 +347,31 @@ export default function WorkgroupsPage({ api, session, activeWorkgroupId, onChan
           </div>
         </div>
         <form className="stack-form" onSubmit={save}>
-          {session?.systemAdmin === true ? (
-            <label className="field">
-              <span>Organization</span>
+          <label className={`field${!hasOrganizationContext ? " field-error" : ""}`}>
+            <span>Organization</span>
+            {canChooseOrganization ? (
               <select
-                value={form.organizationId}
+                value={effectiveOrganizationId}
                 onChange={(event) => updateField("organizationId", event.target.value)}
               >
                 <option value="">Select organization</option>
-                {organizations.map((organization) => (
+                {organizationOptions.map((organization) => (
                   <option key={organization.id} value={organization.id}>
                     {organization.name || organization.id}
                   </option>
                 ))}
               </select>
-            </label>
-          ) : null}
+            ) : (
+              <div className="readonly-field">
+                {selectedOrganization?.name || effectiveOrganizationId || "No organization available"}
+              </div>
+            )}
+            {!hasOrganizationContext ? (
+              <span className="field-help">
+                Create an organization or sign in with an organization-scoped account before creating a space.
+              </span>
+            ) : null}
+          </label>
           <label className="field">
             <span>Name</span>
             <input
@@ -368,7 +406,7 @@ export default function WorkgroupsPage({ api, session, activeWorkgroupId, onChan
           <div className="detail-grid">
             <div>
               <span className="detail-label">Organization</span>
-              <span>{selectedOrganization?.name || session?.organizationId || "Not set"}</span>
+              <span>{selectedOrganization?.name || effectiveOrganizationId || "Authenticated organization"}</span>
             </div>
             <div>
               <span className="detail-label">Category</span>
@@ -414,7 +452,7 @@ export default function WorkgroupsPage({ api, session, activeWorkgroupId, onChan
           <div className="split-actions wrap-actions">
             <button
               className="btn"
-              disabled={saving || (!canCreateWorkgroup && !form.id)}
+              disabled={saving || !hasOrganizationContext || (!canCreateWorkgroup && !form.id)}
               type="submit"
             >
               {saving ? "Saving..." : form.id ? "Save Space" : "Create Space"}

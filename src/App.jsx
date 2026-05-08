@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
+import packageJson from "../package.json";
 import AppShell from "./components/AppShell";
 import LegacyAppRedirect from "./components/LegacyAppRedirect";
 import { clearSession, getSession, setSession } from "./lib/session";
@@ -31,7 +32,7 @@ import {
 
 const DEFAULT_API_BASE_URL =
   import.meta.env.VITE_WOTLWEDU_API_BASE_URL || "https://api.wotlwedu.com:9876";
-const APP_VERSION = import.meta.env.VITE_APP_VERSION || "0.1.23";
+const APP_VERSION = import.meta.env.VITE_APP_VERSION || packageJson.version;
 const API_STORAGE_KEY = "wotlwedu_ui_api_base_url";
 
 function RequireAuth({ session, children }) {
