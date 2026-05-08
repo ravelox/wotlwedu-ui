@@ -5,6 +5,7 @@ import { ErrorBanner } from "../components/Feedback";
 import { extractCollection } from "../lib/api";
 import TutorialPanel from "../components/TutorialPanel";
 import {
+  dismissPollTutorial,
   enablePollTutorial,
   getPollTutorial,
   skipPollTutorial,
@@ -149,6 +150,19 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
     }
   }
 
+  async function handleDismissTutorial() {
+    setUpdatingTutorial(true);
+    setError("");
+    try {
+      await dismissPollTutorial(api);
+      setTutorial({ status: "dismissed" });
+    } catch (err) {
+      setError(err.message || "Failed to dismiss tutorial");
+    } finally {
+      setUpdatingTutorial(false);
+    }
+  }
+
   async function handleEnableTutorial() {
     setUpdatingTutorial(true);
     setError("");
@@ -221,6 +235,7 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
         tutorial={tutorial}
         onStart={tutorial ? null : handleStartTutorial}
         onSkip={tutorial?.status === "active" ? handleSkipTutorial : null}
+        onDismiss={handleDismissTutorial}
         onEnable={tutorial?.status === "skipped" ? handleEnableTutorial : null}
         onRestart={tutorial ? handleRestartTutorial : null}
         starting={startingTutorial}

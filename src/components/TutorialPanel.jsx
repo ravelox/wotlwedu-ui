@@ -24,6 +24,7 @@ export default function TutorialPanel({
   tutorial,
   onStart,
   onSkip,
+  onDismiss,
   onEnable,
   onRestart,
   starting = false,
@@ -32,6 +33,7 @@ export default function TutorialPanel({
   title = "Poll tutorial",
 }) {
   if (!tutorial && !onStart) return null;
+  if (tutorial?.status === "dismissed") return null;
 
   if (!tutorial) {
     return (
@@ -41,6 +43,11 @@ export default function TutorialPanel({
             <p className="eyebrow">Tutorial</p>
             <h3>{title}</h3>
           </div>
+          {onDismiss ? (
+            <button className="btn btn-tonal tutorial-dismiss" onClick={onDismiss} type="button" disabled={busy}>
+              Dismiss
+            </button>
+          ) : null}
         </div>
         <p className="tutorial-copy">
           Walk through creating a real ideas list, audience group, poll, and live stats using the
@@ -69,9 +76,16 @@ export default function TutorialPanel({
           <p className="eyebrow">Tutorial</p>
           <h3>{title}</h3>
         </div>
-        <span className="chip chip-soft">
-          {tutorial.progress?.completedSteps || 0}/{tutorial.progress?.totalSteps || 0} complete
-        </span>
+        <div className="chip-row">
+          <span className="chip chip-soft">
+            {tutorial.progress?.completedSteps || 0}/{tutorial.progress?.totalSteps || 0} complete
+          </span>
+          {onDismiss ? (
+            <button className="btn btn-tonal tutorial-dismiss" onClick={onDismiss} type="button" disabled={busy}>
+              Dismiss
+            </button>
+          ) : null}
+        </div>
       </div>
 
       {isSkipped ? (

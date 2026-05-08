@@ -19,6 +19,12 @@ export async function skipPollTutorial(api) {
   return response.data?.data?.tutorial || response.data?.tutorial || null;
 }
 
+export async function dismissPollTutorial(api) {
+  const response = await api.post("/tutorial/poll/dismiss", {});
+  if (response.status >= 400) throw toApiError(response, "Failed to dismiss tutorial");
+  return response.data?.data || response.data || null;
+}
+
 export async function enablePollTutorial(api, options = {}) {
   const response = await api.post("/tutorial/poll/enable", options);
   if (response.status >= 400) throw toApiError(response, "Failed to re-enable tutorial");
@@ -32,10 +38,12 @@ export async function adminEnablePollTutorial(api, userId, options = {}) {
 }
 
 export function getRelevantTutorialStep(tutorial, keys = []) {
+  if (tutorial?.status === "dismissed") return null;
   if (!tutorial?.steps?.length) return null;
   return tutorial.steps.find((step) => keys.includes(step.key) && step.complete !== true) || null;
 }
 
 export function getTutorialStepStatus(tutorial, key) {
+  if (tutorial?.status === "dismissed") return null;
   return tutorial?.steps?.find((step) => step.key === key) || null;
 }
