@@ -5,6 +5,7 @@ import { ErrorBanner, SuccessBanner } from "../components/Feedback";
 import { extractCollection, extractEntity, toApiError } from "../lib/api";
 import TutorialPanel from "../components/TutorialPanel";
 import { getPollTutorial, getRelevantTutorialStep, getTutorialStepStatus } from "../lib/tutorial";
+import { getImageUploadExtension, validateImageUploadFile } from "../lib/uploadValidation";
 
 const CONFIG = {
   image: {
@@ -367,7 +368,12 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
   async function uploadImageFile(imageId) {
     if (!form.imageFile || !imageId) return;
 
-    const extension = form.imageFile.name.split(".").pop() || "jpg";
+    const validationError = validateImageUploadFile(form.imageFile);
+    if (validationError) {
+      throw new Error(validationError);
+    }
+
+    const extension = getImageUploadExtension(form.imageFile);
     const data = new FormData();
     data.append("imageUpload", form.imageFile);
     data.append("fileextension", extension);

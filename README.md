@@ -44,7 +44,7 @@ npm run validate:support-console
 The app reads these Vite variables at build time:
 
 - `VITE_WOTLWEDU_API_BASE_URL`: backend API origin. Defaults to `https://api.wotlwedu.com:9876`.
-- `VITE_APP_VERSION`: optional version label shown in the app chrome. Defaults to the package version (`0.1.28`).
+- `VITE_APP_VERSION`: optional version label shown in the app chrome. Defaults to the package version (`0.1.29`).
 - `VITE_GOOGLE_CLIENT_ID`: Google web client ID used to render the Google sign-in button.
 
 An example file is included at `.env.example`.
@@ -176,7 +176,9 @@ Workgroup-scoped content management:
 
 Most collection requests use `page` and `items` query parameters. Workgroup-scoped resources also pass `workgroupId` when the user selects a specific scope.
 
-`src/lib/api.js` centralizes axios setup, bearer token injection, JSON defaults, and unauthorized-session handling.
+`src/lib/api.js` centralizes axios setup, bearer token injection, JSON defaults, unauthorized-session handling, and user-safe API errors for rate limits, body limits, upload validation, and CORS/network failures.
+
+Picture uploads are prevalidated in the browser before calling `POST /picture/file/:imageId`. The UI accepts PNG/JPEG files only and defaults to a 5 MB client-side limit, matching the backend default. Override the client limit at build time with `VITE_WOTLWEDU_IMAGE_UPLOAD_MAX_BYTES` when the backend uses a different `WOTLWEDU_UPLOAD_MAX_BYTES`.
 
 ## Docker
 
@@ -203,6 +205,7 @@ docker build \
 - The `Dockerfile` copies `nginx.conf`, which includes an SPA fallback rule. Keep the image config, raw manifests, and Helm chart aligned if route rewrite behavior changes.
 - `VITE_WOTLWEDU_API_BASE_URL` is compiled into the bundle at build time. Changing the backend origin requires a rebuild unless the user overrides it in browser storage.
 - The frontend sends bearer tokens from local storage. Deploy only over HTTPS and ensure the API allows the frontend origin via CORS.
+- Backend Priority 1 hardening means `403` responses are shown as authorization errors instead of clearing the session; only `401` is treated as an expired/invalid session.
 - Because the API base URL defaults to `https://api.wotlwedu.com:9876`, production builds should set this explicitly for each environment instead of relying on the default.
 
 ## Kubernetes

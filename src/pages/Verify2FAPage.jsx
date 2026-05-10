@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import PublicAuthCard from "../components/PublicAuthCard";
 import { ErrorBanner } from "../components/Feedback";
+import { toApiError } from "../lib/api";
 import { setSession } from "../lib/session";
 
 export default function Verify2FAPage({ api, appVersion }) {
@@ -24,7 +25,7 @@ export default function Verify2FAPage({ api, appVersion }) {
       });
 
       if (response.status >= 400) {
-        setError(response.data?.message || "2FA verification failed");
+        setError(toApiError(response, "2FA verification failed").message);
         return;
       }
 
