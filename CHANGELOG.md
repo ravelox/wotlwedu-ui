@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.1.28 - 2026-05-10
+
+- Refresh Codex agent guidance for the UI repository.
+- Update README release metadata and deployment notes.
+
+## 0.1.27 - 2026-05-07
+
+- Add a tutorial dismiss control wired to the backend tutorial dismissal endpoint.
+- Allow users to hide the current tutorial prompt without permanently skipping the tutorial.
+
+## 0.1.26 - 2026-05-07
+
+- Fix app navigation state handling around the global menu.
+- Correct space/workgroup organization handling in the workgroups flow.
+
+## 0.1.25 - 2026-05-07
+
+- Add a global app menu to improve navigation across authenticated app areas.
+- Update Docker/Nginx serving configuration alongside the navigation changes.
+
+## 0.1.24 - 2026-05-07
+
+- Fix themed dropdown option colors so select controls remain readable across themes.
+
 ## 0.1.23 - 2026-05-06
 
 - Improve label/value separation with clearer typography and whitespace in forms and detail sections.

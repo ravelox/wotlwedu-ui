@@ -44,10 +44,10 @@ npm run validate:support-console
 The app reads these Vite variables at build time:
 
 - `VITE_WOTLWEDU_API_BASE_URL`: backend API origin. Defaults to `https://api.wotlwedu.com:9876`.
-- `VITE_APP_VERSION`: version label shown in the app chrome. Defaults to `0.1.23`.
+- `VITE_APP_VERSION`: optional version label shown in the app chrome. Defaults to the package version (`0.1.28`).
 - `VITE_GOOGLE_CLIENT_ID`: Google web client ID used to render the Google sign-in button.
 
-An example file is included at [`.env.example`](/Users/dkelly/Projects/wotlwedu/wotlwedu-ui/.env.example).
+An example file is included at `.env.example`.
 
 The selected API base URL is also persisted in browser storage under `wotlwedu_ui_api_base_url`.
 
@@ -194,14 +194,13 @@ Build with a custom backend origin:
 ```bash
 docker build \
   --build-arg VITE_WOTLWEDU_API_BASE_URL=https://api.example.com \
-  --build-arg VITE_APP_VERSION=0.1.23 \
   -t wotlwedu-ui .
 ```
 
 ## Deployment Notes
 
 - This is a static single-page application. Deep links such as `/app/profile` or `/app/poll/123` must be rewritten to `index.html` by the serving layer.
-- The current `Dockerfile` uses the default Nginx configuration and does not add an SPA fallback rule. In production, either add a custom Nginx config to the image or ensure an upstream reverse proxy or CDN handles the rewrite.
+- The `Dockerfile` copies `nginx.conf`, which includes an SPA fallback rule. Keep the image config, raw manifests, and Helm chart aligned if route rewrite behavior changes.
 - `VITE_WOTLWEDU_API_BASE_URL` is compiled into the bundle at build time. Changing the backend origin requires a rebuild unless the user overrides it in browser storage.
 - The frontend sends bearer tokens from local storage. Deploy only over HTTPS and ensure the API allows the frontend origin via CORS.
 - Because the API base URL defaults to `https://api.wotlwedu.com:9876`, production builds should set this explicitly for each environment instead of relying on the default.
