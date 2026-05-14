@@ -24,6 +24,7 @@ import ContentManagerPage from "./pages/ContentManagerPage";
 import ErrorPage from "./pages/ErrorPage";
 import StatisticsPage from "./pages/StatisticsPage";
 import VotingPage from "./pages/VotingPage";
+import PublicPollPage from "./pages/PublicPollPage";
 import {
   applyThemeMode,
   getStoredThemeMode,
@@ -171,6 +172,10 @@ export default function App() {
       <Route
         path="/auth/verify/:userId/:verificationToken"
         element={<Verify2FAPage api={api} appVersion={APP_VERSION} />}
+      />
+      <Route
+        path="/public/poll/:token"
+        element={<PublicPollPage api={api} appVersion={APP_VERSION} />}
       />
       <Route path="/auth" element={<Navigate to="/login" replace />} />
       <Route path="/home" element={<Navigate to="/app/home" replace />} />

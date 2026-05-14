@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add the unauthenticated `/public/poll/:token` consumer experience with public poll details, guest-session voting, invite-token acceptance, and abuse reporting.
+- Add owner public-poll controls in the poll editor for share links, guest voting, platform invites, invite history, and public participation/report counts.
 - Automatically refresh expired access tokens with refresh-token rotation.
 - Add Profile controls to view active sessions, revoke another device, log out the current device, and log out all devices.
 - Simplify consumer registration by removing the alias requirement, optionally naming the first space, and matching the backend personal-space onboarding flow.

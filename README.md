@@ -61,6 +61,7 @@ The selected API base URL is also persisted in browser storage under `wotlwedu_u
 Public routes:
 
 - `/login`
+- `/public/poll/:token`
 - `/register`
 - `/confirm/:tokenId`
 - `/pwdrequest`
@@ -70,6 +71,10 @@ Public routes:
 Registration asks for consumer-facing account details and an optional first-space
 name. The backend provisions the personal organization, first space, membership,
 and poll tutorial automatically after signup.
+
+Public poll links show poll status, expiration, ideas, guest-voting controls,
+and reporting controls without requiring an authenticated session. Guest progress
+is stored locally with the backend-provided expiry.
 
 Authenticated app routes:
 
@@ -87,6 +92,9 @@ Authenticated app routes:
 - `/app/list`
 - `/app/poll`
 - `/app/space`
+
+Poll editors include public-sharing controls for link visibility, guest voting,
+platform email invites, invite history, and public activity/report counts.
 
 Legacy top-level paths redirect into `/app/*` routes to preserve compatibility with older links.
 

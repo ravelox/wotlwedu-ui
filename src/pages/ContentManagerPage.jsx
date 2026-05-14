@@ -4,6 +4,7 @@ import Loading from "../components/Loading";
 import { ErrorBanner, SuccessBanner } from "../components/Feedback";
 import { extractCollection, extractEntity, toApiError } from "../lib/api";
 import TutorialPanel from "../components/TutorialPanel";
+import PublicPollControls from "../components/PublicPollControls";
 import { getPollTutorial, getRelevantTutorialStep, getTutorialStepStatus } from "../lib/tutorial";
 import { getImageUploadExtension, validateImageUploadFile } from "../lib/uploadValidation";
 
@@ -866,6 +867,7 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
           </div>
         </form>
       </section>
+      {isElection && form.id ? <PublicPollControls api={api} electionId={form.id} /> : null}
     </div>
   );
 }
