@@ -60,7 +60,7 @@ export default function App() {
       setActiveWorkgroupId(null);
       setActiveWorkgroupIdState(null);
       navigate("/login", { replace: true });
-    });
+    }, setSessionState);
   }, [baseUrl, navigate]);
 
   useEffect(() => {
@@ -82,6 +82,7 @@ export default function App() {
     const nextSession = {
       authToken: data?.authToken,
       refreshToken: data?.refreshToken,
+      sessionId: data?.sessionId,
       userId: data?.userId,
       email: data?.email,
       alias: data?.alias,
@@ -108,6 +109,7 @@ export default function App() {
     const nextSession = {
       authToken: data?.authToken || session?.authToken,
       refreshToken: data?.refreshToken || session?.refreshToken,
+      sessionId: data?.sessionId || session?.sessionId,
       userId: data?.userId || session?.userId,
       email: data?.email || session?.email,
       alias: data?.alias || session?.alias,
@@ -122,7 +124,10 @@ export default function App() {
     setSessionState(nextSession);
   }
 
-  function handleLogout() {
+  async function handleLogout() {
+    if (session?.authToken) {
+      await api.post("/login/logout").catch(() => null);
+    }
     clearSession();
     setSessionState(null);
     setActiveWorkgroupId(null);

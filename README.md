@@ -67,6 +67,10 @@ Public routes:
 - `/pwdreset/:userId/:resetToken`
 - `/auth/verify/:userId/:verificationToken`
 
+Registration asks for consumer-facing account details and an optional first-space
+name. The backend provisions the personal organization, first space, membership,
+and poll tutorial automatically after signup.
+
 Authenticated app routes:
 
 - `/app/home`
@@ -178,6 +182,8 @@ Most collection requests use `page` and `items` query parameters. Workgroup-scop
 
 `src/lib/api.js` centralizes axios setup, bearer token injection, JSON defaults, unauthorized-session handling, and user-safe API errors for rate limits, body limits, upload validation, and CORS/network failures.
 
+The API client automatically refreshes expired access tokens with `/login/refresh` when a refresh token is present. The Profile screen lists active sessions and supports revoking individual sessions, logging out the current device, and logging out all devices.
+
 Picture uploads are prevalidated in the browser before calling `POST /picture/file/:imageId`. The UI accepts PNG/JPEG files only and defaults to a 5 MB client-side limit, matching the backend default. Override the client limit at build time with `VITE_WOTLWEDU_IMAGE_UPLOAD_MAX_BYTES` when the backend uses a different `WOTLWEDU_UPLOAD_MAX_BYTES`.
 
 ## Docker
@@ -205,6 +211,7 @@ docker build \
 - The `Dockerfile` copies `nginx.conf`, which includes an SPA fallback rule. Keep the image config, raw manifests, and Helm chart aligned if route rewrite behavior changes.
 - `VITE_WOTLWEDU_API_BASE_URL` is compiled into the bundle at build time. Changing the backend origin requires a rebuild unless the user overrides it in browser storage.
 - The frontend sends bearer tokens from local storage. Deploy only over HTTPS and ensure the API allows the frontend origin via CORS.
+- Set `VITE_WOTLWEDU_REFRESH_COOKIE_ENABLED=true` when the backend uses HTTP-only refresh-token cookies so Axios sends credentials on refresh/logout requests.
 - Backend Priority 1 hardening means `403` responses are shown as authorization errors instead of clearing the session; only `401` is treated as an expired/invalid session.
 - Because the API base URL defaults to `https://api.wotlwedu.com:9876`, production builds should set this explicitly for each environment instead of relying on the default.
 

@@ -8,7 +8,7 @@ export default function RegisterPage({ api, appVersion }) {
     email: "",
     firstName: "",
     lastName: "",
-    alias: "",
+    spaceName: "",
     password: "",
     confirmPassword: "",
   });
@@ -36,7 +36,7 @@ export default function RegisterPage({ api, appVersion }) {
         email: form.email,
         firstName: form.firstName,
         lastName: form.lastName,
-        alias: form.alias,
+        spaceName: form.spaceName,
         password: form.password,
       });
 
@@ -44,12 +44,12 @@ export default function RegisterPage({ api, appVersion }) {
         throw toApiError(response, "Registration failed");
       }
 
-      setSuccess("Registration submitted. Check your email for the confirmation link.");
+      setSuccess("Registration submitted. Check your email to confirm your account and open your first space.");
       setForm({
         email: "",
         firstName: "",
         lastName: "",
-        alias: "",
+        spaceName: "",
         password: "",
         confirmPassword: "",
       });
@@ -63,7 +63,7 @@ export default function RegisterPage({ api, appVersion }) {
   return (
     <PublicAuthCard
       title="Register"
-      copy="Create a new Wotlwedu account and we will email you a confirmation link."
+      copy="Create a Wotlwedu account and your first personal space."
       appVersion={appVersion}
     >
       <SuccessBanner message={success} />
@@ -98,12 +98,11 @@ export default function RegisterPage({ api, appVersion }) {
           />
         </label>
         <label className="field">
-          <span>Alias</span>
+          <span>First Space Name</span>
           <input
-            value={form.alias}
-            onChange={(event) => updateField("alias", event.target.value)}
-            autoComplete="nickname"
-            required
+            value={form.spaceName}
+            onChange={(event) => updateField("spaceName", event.target.value)}
+            placeholder="My Space"
           />
         </label>
         <label className="field">

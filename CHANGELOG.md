@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Automatically refresh expired access tokens with refresh-token rotation.
+- Add Profile controls to view active sessions, revoke another device, log out the current device, and log out all devices.
+- Simplify consumer registration by removing the alias requirement, optionally naming the first space, and matching the backend personal-space onboarding flow.
+- Replace raw backend IDs in common consumer onboarding and poll surfaces with friendly space/list/circle labels.
+
 ## 0.1.29 - 2026-05-10
 
 - Align client auth/error handling with backend Priority 1 hardening: only `401` clears the session, while `403` stays visible as an authorization error.

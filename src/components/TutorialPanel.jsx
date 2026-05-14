@@ -50,8 +50,7 @@ export default function TutorialPanel({
           ) : null}
         </div>
         <p className="tutorial-copy">
-          Walk through creating a real ideas list, audience group, poll, and live stats using the
-          existing UI.
+          Walk through creating a real ideas list, circle, poll, and live stats using the existing UI.
         </p>
         <div className="split-actions">
           <button className="btn" onClick={onStart} type="button" disabled={starting}>
@@ -134,7 +133,7 @@ export default function TutorialPanel({
       ) : (
         <div className="tutorial-callout">
           <strong>Tutorial completed</strong>
-          <p>The real poll, audience, and stats flow is complete.</p>
+          <p>The real poll, circle, and stats flow is complete.</p>
           <div className="split-actions">
             {tutorial.bindings?.electionId ? (
               <Link className="btn btn-secondary" to={`/app/statistics/${tutorial.bindings.electionId}`}>

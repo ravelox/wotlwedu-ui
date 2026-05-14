@@ -15,6 +15,7 @@ export default function AppShell({
 }) {
   const [workgroups, setWorkgroups] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const activeWorkgroup = workgroups.find((workgroup) => workgroup.id === activeWorkgroupId);
   const navItems = [
     { label: "Home", to: "/app/home", icon: "◐" },
     { label: "Vote", to: "/app/cast-vote", icon: "◎" },
@@ -97,8 +98,8 @@ export default function AppShell({
           <section className="shell-meta">
             <div className="scope-card">
               <div>
-                <div className="scope-label">Organization</div>
-                <div>{session?.organizationId || "Personal"}</div>
+                <div className="scope-label">Current Space</div>
+                <div>{activeWorkgroup?.name || "All visible spaces"}</div>
               </div>
               <div>
                 <div className="scope-label">Space Scope</div>

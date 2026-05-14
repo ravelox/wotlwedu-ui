@@ -122,15 +122,15 @@ export default function ElectionsPage({ api, activeWorkgroupId }) {
                   </div>
                   <div>
                     <span className="detail-label">Space</span>
-                    <span>{election.workgroupId || "Unscoped"}</span>
+                    <span>{election.workgroupId ? "Scoped space" : "All visible spaces"}</span>
                   </div>
                   <div>
                     <span className="detail-label">Circle</span>
-                    <span>{audience?.group?.name || election.groupId || "Not set"}</span>
+                    <span>{audience?.group?.name || (election.groupId ? "Selected circle" : "Not set")}</span>
                   </div>
                   <div>
                     <span className="detail-label">List</span>
-                    <span>{audience?.list?.name || election.listId || "Not set"}</span>
+                    <span>{audience?.list?.name || (election.listId ? "Selected list" : "Not set")}</span>
                   </div>
                 </div>
 

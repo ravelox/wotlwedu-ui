@@ -37,15 +37,20 @@ export default function ProfilePage({
     linkedProviders: [],
   });
   const [userAudits, setUserAudits] = useState([]);
+  const [sessions, setSessions] = useState([]);
   const [inviteFilter, setInviteFilter] = useState("all");
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+  const activeWorkgroupName =
+    organizationMembership.workgroups.find((workgroup) => workgroup.id === activeWorkgroupId)?.name ||
+    null;
 
   async function loadProfile() {
     const requests = [
       api.get(`/person/${session?.userId}`),
       api.get(`/person/${session?.userId}/signin-method`),
       api.get(`/person/${session?.userId}/authaudit`, { params: { items: 10 } }),
+      api.get("/login/session"),
     ];
     const canManageOrganization =
       session?.organizationId && (session?.organizationAdmin || session?.systemAdmin);
@@ -67,6 +72,7 @@ export default function ProfilePage({
       userResponse,
       signInResponse,
       userAuditResponse,
+      sessionResponse,
       organizationResponse,
       membershipResponse,
       inviteResponse,
@@ -80,6 +86,9 @@ export default function ProfilePage({
     if (userAuditResponse.status >= 400) {
       throw toApiError(userAuditResponse, "Failed to load audit history");
     }
+    if (sessionResponse.status >= 400) {
+      throw toApiError(sessionResponse, "Failed to load sessions");
+    }
 
     const user = extractEntity(userResponse, "user");
     setCurrentUser(user);
@@ -88,6 +97,7 @@ export default function ProfilePage({
       linkedProviders: [],
     });
     setUserAudits(extractCollection(userAuditResponse, "audits"));
+    setSessions(extractCollection(sessionResponse, "sessions"));
     setForm({
       email: user?.email || "",
       firstName: user?.firstName || "",
@@ -445,6 +455,45 @@ export default function ProfilePage({
     }
   }
 
+  async function revokeSession(sessionId) {
+    if (!sessionId) return;
+    setSaving(true);
+    setError("");
+    setSuccess("");
+    try {
+      const response = await api.delete(`/login/session/${sessionId}`);
+      if (response.status >= 400) {
+        throw toApiError(response, "Failed to revoke session");
+      }
+      if (sessionId === session?.sessionId) {
+        onLogout();
+        return;
+      }
+      setSuccess("Session revoked.");
+      await loadProfile();
+    } catch (err) {
+      setError(err.message || "Failed to revoke session");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function revokeAllSessions() {
+    setSaving(true);
+    setError("");
+    setSuccess("");
+    try {
+      const response = await api.post("/login/logout/all");
+      if (response.status >= 400) {
+        throw toApiError(response, "Failed to revoke sessions");
+      }
+      onLogout();
+    } catch (err) {
+      setError(err.message || "Failed to revoke sessions");
+      setSaving(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="screen-stack">
@@ -465,7 +514,7 @@ export default function ProfilePage({
           </div>
           <div>
             <span className="detail-label">Organization</span>
-            <span>{organization?.name || session?.organizationId || "Not assigned"}</span>
+            <span>{organization?.name || "Personal"}</span>
           </div>
           <div>
             <span className="detail-label">Verification</span>
@@ -473,8 +522,48 @@ export default function ProfilePage({
           </div>
           <div>
             <span className="detail-label">Scope</span>
-            <span>{activeWorkgroupId || "All visible spaces"}</span>
+            <span>{activeWorkgroupName || "All visible spaces"}</span>
           </div>
+        </div>
+      </section>
+
+      <section className="surface-card">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Security</p>
+            <h3>Active Sessions</h3>
+          </div>
+          <button className="btn btn-secondary" disabled={saving} onClick={revokeAllSessions} type="button">
+            Logout All Devices
+          </button>
+        </div>
+        <div className="record-stack">
+          {sessions.map((row) => (
+            <div className="record-card" key={row.id}>
+              <div className="split-heading">
+                <strong>{row.current ? "Current session" : "Session"}</strong>
+                <span className="chip">{row.revokedAt ? "Revoked" : "Active"}</span>
+              </div>
+              <p className="tiny-meta">{row.userAgent || "Unknown device"}</p>
+              <p className="tiny-meta">
+                Last used {row.lastUsedAt ? new Date(row.lastUsedAt).toLocaleString() : "unknown"}
+              </p>
+              <p className="tiny-meta">
+                Expires {row.expiresAt ? new Date(row.expiresAt).toLocaleString() : "unknown"}
+              </p>
+              {!row.revokedAt ? (
+                <button
+                  className="btn btn-secondary"
+                  disabled={saving}
+                  onClick={() => revokeSession(row.id)}
+                  type="button"
+                >
+                  {row.current ? "Logout This Device" : "Revoke"}
+                </button>
+              ) : null}
+            </div>
+          ))}
+          {sessions.length === 0 ? <p className="tiny-meta">No active sessions found.</p> : null}
         </div>
       </section>
 

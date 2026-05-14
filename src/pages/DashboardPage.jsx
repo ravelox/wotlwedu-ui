@@ -306,7 +306,6 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
                         </div>
                         <div className="chip-row">
                           {poll.expiration ? <span className="chip">{formatDate(poll.expiration)}</span> : null}
-                          {poll.workgroupId ? <span className="chip chip-soft">{poll.workgroupId}</span> : null}
                           {audience?.group?.name ? <span className="chip chip-soft">{audience.group.name}</span> : null}
                         </div>
                         {participation ? (
@@ -369,9 +368,6 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
                 </div>
                 <div className="chip-row">
                   <span className="chip">{formatDate(election.expiration)}</span>
-                  {election.workgroupId ? (
-                    <span className="chip chip-soft">{election.workgroupId}</span>
-                  ) : null}
                 </div>
                 <div className="split-actions">
                   <Link className="text-link" to={`/app/cast-vote/${election.id}`}>

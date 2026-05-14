@@ -33,6 +33,7 @@ export default function Verify2FAPage({ api, appVersion }) {
       setSession({
         authToken: data?.authToken,
         refreshToken: data?.refreshToken,
+        sessionId: data?.sessionId,
         userId: data?.userId,
         email: data?.email,
         alias: data?.alias,

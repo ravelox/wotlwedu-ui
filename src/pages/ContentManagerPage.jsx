@@ -603,9 +603,9 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
               {kind === "election" && tutorial?.bindings?.listId && tutorial?.bindings?.groupId ? (
                 <div className="chip-row">
                   <span className="chip">Tutorial list</span>
-                  <span className="chip chip-soft">{tutorial.bindings.listId}</span>
+                  <span className="chip chip-soft">{selectedList?.name || tutorial.names?.listName || "Selected"}</span>
                   <span className="chip">Circle</span>
-                  <span className="chip chip-soft">{tutorial.bindings.groupId}</span>
+                  <span className="chip chip-soft">{selectedGroup?.name || tutorial.names?.groupName || "Selected"}</span>
                 </div>
               ) : null}
             </div>

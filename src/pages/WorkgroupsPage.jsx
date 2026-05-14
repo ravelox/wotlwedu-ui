@@ -58,6 +58,8 @@ export default function WorkgroupsPage({ api, session, activeWorkgroupId, onChan
     () => categories.find((category) => category.id === form.categoryId) || null,
     [categories, form.categoryId]
   );
+  const activeWorkgroupName =
+    workgroups.find((workgroup) => workgroup.id === activeWorkgroupId)?.name || null;
   const selectedOrganization = useMemo(
     () => organizationOptions.find((organization) => organization.id === effectiveOrganizationId) || null,
     [effectiveOrganizationId, organizationOptions]
@@ -418,7 +420,7 @@ export default function WorkgroupsPage({ api, session, activeWorkgroupId, onChan
             </div>
             <div>
               <span className="detail-label">Active Scope</span>
-              <span>{activeWorkgroupId || "All visible spaces"}</span>
+              <span>{activeWorkgroupName || "All visible spaces"}</span>
             </div>
           </div>
 
