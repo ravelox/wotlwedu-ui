@@ -1,45 +1,44 @@
 :root {
   font-family: "IBM Plex Sans", "Avenir Next", "Segoe UI", sans-serif;
-  color: #203038;
-  background:
-    radial-gradient(circle at top left, rgba(217, 143, 61, 0.16), transparent 28%),
-    radial-gradient(circle at top right, rgba(29, 92, 82, 0.14), transparent 30%),
-    linear-gradient(180deg, #f7f2e8 0%, #efe7da 100%);
+  color: #000;
+  background: #fff;
   color-scheme: light;
-  --bg: rgba(255, 252, 247, 0.88);
-  --bg-strong: rgba(255, 248, 239, 0.98);
-  --panel: rgba(255, 252, 247, 0.9);
-  --panel-strong: rgba(255, 249, 241, 0.98);
-  --panel-soft: rgba(29, 92, 82, 0.05);
-  --text: #203038;
-  --muted: #64757d;
-  --line: rgba(32, 48, 56, 0.1);
-  --brand: #1d5c52;
-  --brand-2: #d98f3d;
-  --danger: #b44949;
-  --warning: #b27222;
-  --shadow: 0 24px 60px rgba(33, 41, 46, 0.12);
-  --shadow-soft: 0 14px 32px rgba(33, 41, 46, 0.08);
+  --bg: #fff;
+  --bg-strong: #fff;
+  --panel: #fff;
+  --panel-strong: #fff;
+  --panel-soft: #f8f8f8;
+  --text: #000;
+  --muted: #555;
+  --line: #000;
+  --border: #000;
+  --brand: #000;
+  --brand-2: #d71920;
+  --danger: #d71920;
+  --warning: #d71920;
+  --shadow: none;
+  --shadow-soft: none;
 }
 
 :root[data-theme="dark"] {
-  color: #f6f2e9;
-  background:
-    radial-gradient(circle at top left, rgba(217, 143, 61, 0.22), transparent 26%),
-    radial-gradient(circle at top right, rgba(29, 92, 82, 0.24), transparent 28%),
-    linear-gradient(180deg, #0f1718 0%, #142324 100%);
+  color: #fff;
+  background: #000;
   color-scheme: dark;
-  --bg: rgba(17, 25, 26, 0.84);
-  --bg-strong: rgba(10, 17, 18, 0.96);
-  --panel: rgba(22, 34, 35, 0.84);
-  --panel-strong: rgba(18, 28, 29, 0.94);
-  --panel-soft: rgba(255, 255, 255, 0.06);
-  --text: #f6f2e9;
-  --muted: #b8b0a2;
-  --line: rgba(255, 255, 255, 0.1);
-  --border: rgba(255, 255, 255, 0.1);
-  --shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
-  --shadow-soft: 0 14px 32px rgba(0, 0, 0, 0.24);
+  --bg: #000;
+  --bg-strong: #000;
+  --panel: #000;
+  --panel-strong: #000;
+  --panel-soft: #080808;
+  --text: #fff;
+  --muted: #bbb;
+  --line: #fff;
+  --border: #fff;
+  --brand: #fff;
+  --brand-2: #ff2a2f;
+  --danger: #ff2a2f;
+  --warning: #ff2a2f;
+  --shadow: none;
+  --shadow-soft: none;
 }
 
 * {
@@ -91,19 +90,16 @@ a {
   min-height: calc(100dvh - 36px);
   margin: 0 auto;
   border-radius: 32px;
-  border: 1px solid rgba(32, 48, 56, 0.08);
+  border: 1px solid var(--border);
   box-shadow: var(--shadow);
   overflow: hidden;
-  background: rgba(255, 250, 243, 0.9);
+  background: var(--bg);
 }
 
 .device-background {
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(circle at 18% 0%, rgba(217, 143, 61, 0.15), transparent 28%),
-    radial-gradient(circle at 88% 6%, rgba(29, 92, 82, 0.14), transparent 24%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.18));
+  background: var(--bg);
   pointer-events: none;
 }
 
@@ -146,15 +142,15 @@ a {
   padding: 8px 12px;
   border-radius: 999px;
   color: var(--muted);
-  background: rgba(29, 92, 82, 0.06);
-  border: 1px solid rgba(29, 92, 82, 0.1);
+  background: var(--bg);
+  border: 1px solid var(--border);
   font-size: 0.86rem;
   font-weight: 700;
 }
 
 .topbar-link-active {
-  color: var(--text);
-  background: rgba(29, 92, 82, 0.14);
+  color: var(--bg);
+  background: var(--danger);
 }
 
 .shell-logout {
@@ -556,16 +552,17 @@ a {
 }
 
 .resource-chip {
-  border: 1px solid rgba(32, 48, 56, 0.08);
-  background: rgba(255, 255, 255, 0.68);
+  border: 1px solid var(--border);
+  background: var(--bg);
   color: var(--text);
   border-radius: 999px;
   padding: 10px 14px;
 }
 
 .resource-chip-active {
-  background: linear-gradient(135deg, rgba(29, 92, 82, 0.12), rgba(217, 143, 61, 0.16));
-  border-color: rgba(29, 92, 82, 0.26);
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
 }
 
 .selection-grid {
@@ -587,8 +584,8 @@ a {
 .wizard-step,
 .template-tile,
 .segmented-control button {
-  border: 1px solid rgba(32, 48, 56, 0.08);
-  background: rgba(255, 255, 255, 0.68);
+  border: 1px solid var(--border);
+  background: var(--bg);
   color: var(--text);
 }
 
@@ -616,8 +613,9 @@ a {
 .wizard-step-done,
 .template-tile-active,
 .segmented-control .selected {
-  border-color: rgba(29, 92, 82, 0.32);
-  background: linear-gradient(135deg, rgba(29, 92, 82, 0.12), rgba(217, 143, 61, 0.16));
+  border-color: var(--danger);
+  background: var(--danger);
+  color: #fff;
 }
 
 .wizard-panel {
@@ -934,29 +932,96 @@ a {
 }
 
 .btn {
-  border: none;
+  border: 1px solid var(--border);
   border-radius: 16px;
   padding: 13px 16px;
-  background: linear-gradient(135deg, var(--brand), var(--brand-2));
-  color: #fffdf9;
+  background: var(--bg);
+  color: var(--text);
   font-weight: 800;
-  box-shadow: 0 14px 28px rgba(29, 92, 82, 0.16);
+  box-shadow: none;
 }
 
 .btn-secondary {
-  background: #e9e2d6;
+  background: var(--bg);
   color: var(--text);
   box-shadow: none;
 }
 
 .btn-tonal {
-  background: rgba(29, 92, 82, 0.08);
+  background: var(--panel-soft);
   color: var(--text);
   box-shadow: none;
 }
 
 .btn-danger {
-  background: linear-gradient(135deg, #f09a9a, var(--danger));
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+}
+
+.split-actions .btn,
+.wrap-actions .btn,
+.wizard-actions .btn,
+.auth-actions .btn,
+.topbar-actions .btn,
+.password-row .btn,
+.actions .btn,
+.public-controls .btn {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  padding: 0;
+  display: inline-grid;
+  place-items: center;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 0;
+}
+
+.split-actions .btn::before,
+.wrap-actions .btn::before,
+.wizard-actions .btn::before,
+.auth-actions .btn::before,
+.topbar-actions .btn::before,
+.password-row .btn::before,
+.actions .btn::before,
+.public-controls .btn::before {
+  content: "+";
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.split-actions .btn-secondary::before,
+.wrap-actions .btn-secondary::before,
+.wizard-actions .btn-secondary::before,
+.auth-actions .btn-secondary::before,
+.topbar-actions .btn-secondary::before,
+.password-row .btn-secondary::before,
+.actions .btn-secondary::before,
+.public-controls .btn-secondary::before {
+  content: "↗";
+}
+
+.split-actions .btn-tonal::before,
+.wrap-actions .btn-tonal::before,
+.wizard-actions .btn-tonal::before,
+.auth-actions .btn-tonal::before,
+.topbar-actions .btn-tonal::before,
+.password-row .btn-tonal::before,
+.actions .btn-tonal::before,
+.public-controls .btn-tonal::before {
+  content: "↻";
+}
+
+.split-actions .btn-danger::before,
+.wrap-actions .btn-danger::before,
+.wizard-actions .btn-danger::before,
+.auth-actions .btn-danger::before,
+.topbar-actions .btn-danger::before,
+.password-row .btn-danger::before,
+.actions .btn-danger::before,
+.public-controls .btn-danger::before {
+  content: "×";
 }
 
 .banner {
@@ -1021,9 +1086,9 @@ pre {
   padding: 10px;
   border-radius: 24px;
   margin-top: 18px;
-  background: rgba(255, 249, 242, 0.9);
-  border: 1px solid rgba(32, 48, 56, 0.08);
-  backdrop-filter: blur(18px);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  backdrop-filter: none;
   box-shadow: var(--shadow-soft);
 }
 
@@ -1045,8 +1110,8 @@ pre {
 }
 
 .bottom-nav-link-active {
-  color: var(--text);
-  background: rgba(29, 92, 82, 0.08);
+  color: #fff;
+  background: var(--danger);
 }
 
 .login-shell {
@@ -1062,8 +1127,8 @@ pre {
   position: relative;
   overflow: hidden;
   border-radius: 32px;
-  border: 1px solid rgba(32, 48, 56, 0.08);
-  background: rgba(255, 249, 242, 0.88);
+  border: 1px solid var(--border);
+  background: var(--bg);
   box-shadow: var(--shadow);
   display: grid;
   align-items: center;
@@ -1072,10 +1137,7 @@ pre {
 .login-gradient {
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(circle at top left, rgba(217, 161, 93, 0.18), transparent 22%),
-    radial-gradient(circle at 90% 12%, rgba(29, 92, 82, 0.16), transparent 24%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.54), rgba(255, 255, 255, 0.2));
+  background: var(--bg);
 }
 
 .login-card {
@@ -1093,8 +1155,8 @@ pre {
   display: grid;
   place-items: center;
   border-radius: 18px;
-  background: linear-gradient(135deg, var(--brand-2), #f4c27b);
-  color: #10231f;
+  background: var(--danger);
+  color: #fff;
   font-size: 1.4rem;
   font-weight: 900;
   box-shadow: 0 16px 28px rgba(217, 143, 61, 0.18);
@@ -1102,14 +1164,11 @@ pre {
 
 :root[data-theme="dark"] .device-shell,
 :root[data-theme="dark"] .login-phone {
-  background: rgba(8, 13, 14, 0.88);
+  background: var(--bg);
 }
 
 :root[data-theme="dark"] .device-background {
-  background:
-    radial-gradient(circle at 18% 0%, rgba(217, 143, 61, 0.18), transparent 28%),
-    radial-gradient(circle at 88% 6%, rgba(29, 92, 82, 0.22), transparent 24%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 30%);
+  background: var(--bg);
 }
 
 :root[data-theme="dark"] .scope-card select,
@@ -1145,11 +1204,11 @@ pre {
 :root[data-theme="dark"] select,
 :root[data-theme="dark"] select option {
   color: var(--text);
-  background: #142324;
+  background: #000;
 }
 
 :root[data-theme="dark"] .btn-secondary {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--bg);
   color: var(--text);
 }
 
@@ -1160,7 +1219,7 @@ pre {
 :root[data-theme="dark"] .version-badge,
 :root[data-theme="dark"] .status-pill,
 :root[data-theme="dark"] .bottom-nav-link-active {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--panel-soft);
 }
 
 :root[data-theme="dark"] .topbar-link {
@@ -1168,8 +1227,8 @@ pre {
 }
 
 :root[data-theme="dark"] .topbar-link-active {
-  color: var(--text);
-  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  background: var(--danger);
 }
 
 :root[data-theme="dark"] pre {
@@ -1282,8 +1341,57 @@ pre {
 
 :root[data-theme="dark"] .public-poll-main,
 :root[data-theme="dark"] .public-idea-card {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.1);
+  background: var(--panel);
+  border-color: var(--border);
+}
+
+:where(
+  .device-shell,
+  .login-phone,
+  .panel,
+  .card,
+  .scope-card,
+  .topbar-link,
+  .resource-chip,
+  .wizard-step,
+  .template-tile,
+  .segmented-control,
+  .list-card,
+  .record-card,
+  .election-card,
+  .vote-card,
+  .metric-card,
+  .preference-toggle,
+  .toggle-field,
+  .field input,
+  .field textarea,
+  .field select,
+  .btn,
+  .bottom-nav,
+  .empty-state,
+  .loading,
+  .public-poll-main,
+  .public-idea-card
+) {
+  border-color: var(--border) !important;
+  box-shadow: none !important;
+}
+
+:where(
+  .panel,
+  .card,
+  .scope-card,
+  .list-card,
+  .record-card,
+  .election-card,
+  .vote-card,
+  .metric-card,
+  .preference-toggle,
+  .toggle-field,
+  .public-poll-main,
+  .public-idea-card
+) {
+  background: var(--panel) !important;
 }
 
 @media (min-width: 740px) {

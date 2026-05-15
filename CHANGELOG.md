@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.1.34 - 2026-05-15
+
+- Simplify the consumer UI styling to flat black, white, and red themes with no gradients.
+- Convert common action-row buttons to icon-first controls.
+
 ## 0.1.33 - 2026-05-15
 
 - Render profile account audit activity as a table with time, event, outcome, message, and context columns.
