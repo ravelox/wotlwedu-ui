@@ -5,7 +5,7 @@ Local instructions for Codex-style agents working in this repository.
 ## Repo Summary
 
 - App: main browser frontend for the wotlwedu ecosystem.
-- Package: `wotlwedu-ui` version `0.1.33`.
+- Package: `wotlwedu-ui` version `0.1.34`.
 - Stack: React 18, Vite 5, React Router 6, Axios.
 - Deploy target: static bundle served by Nginx.
 - Default backend: `https://api.wotlwedu.com:9876`.
