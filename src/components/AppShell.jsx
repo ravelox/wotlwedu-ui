@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { extractCollection } from "../lib/api";
+import { connectLiveNotifications } from "../lib/liveNotifications";
 
 export default function AppShell({
   children,
@@ -18,6 +19,7 @@ export default function AppShell({
   const activeWorkgroup = workgroups.find((workgroup) => workgroup.id === activeWorkgroupId);
   const navItems = [
     { label: "Home", to: "/app/home", icon: "◐" },
+    { label: "Create", to: "/app/create-poll", icon: "+" },
     { label: "Vote", to: "/app/cast-vote", icon: "◎" },
     { label: "Polls", to: "/app/polls", icon: "◒" },
     { label: "Circles", to: "/app/circle", icon: "◌" },
@@ -54,6 +56,36 @@ export default function AppShell({
       cancelled = true;
     };
   }, [api, session?.authToken]);
+
+  useEffect(() => {
+    if (!session?.userId) return undefined;
+    const socket = connectLiveNotifications({
+      api,
+      userId: session.userId,
+      onNotification: () => {
+        setUnreadCount((current) => current + 1);
+      },
+      onPollUpdate: () => {
+        api.get("/notification/unreadcount")
+          .then((response) => {
+            const unread =
+              response.data?.count ??
+              response.data?.data?.count ??
+              response.data?.data ??
+              0;
+            setUnreadCount(Number(unread) || 0);
+          })
+          .catch(() => {});
+      },
+    });
+
+    return () => {
+      if (socket) {
+        socket.emit("unregister");
+        socket.disconnect();
+      }
+    };
+  }, [api, session?.userId]);
 
   return (
     <div className="app-frame">

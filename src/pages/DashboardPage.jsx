@@ -216,7 +216,7 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
           </div>
         </div>
         <div className="split-actions">
-          <Link className="btn" to="/app/poll/add">
+          <Link className="btn" to="/app/create-poll">
             Create Poll
           </Link>
           <Link className="btn btn-secondary" to="/app/space/add">

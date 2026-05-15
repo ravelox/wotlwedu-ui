@@ -4,6 +4,24 @@ import Loading from "../components/Loading";
 import { ErrorBanner, SuccessBanner } from "../components/Feedback";
 import { extractCollection, extractEntity, toApiError } from "../lib/api";
 
+const NOTIFICATION_PREFS = [
+  {
+    name: "notification.pollUpdates",
+    label: "Poll updates",
+    detail: "Live poll starts, closes, reminders, and result changes.",
+  },
+  {
+    name: "notification.emailInvites",
+    label: "Email invites",
+    detail: "Messages related to public poll and organization invites.",
+  },
+  {
+    name: "notification.reminders",
+    label: "Voting reminders",
+    detail: "Follow-up nudges when a poll still needs your response.",
+  },
+];
+
 export default function PreferencesPage({ api }) {
   const navigate = useNavigate();
   const { preferenceId } = useParams();
@@ -11,6 +29,7 @@ export default function PreferencesPage({ api }) {
   const [saving, setSaving] = useState(false);
   const [preferences, setPreferences] = useState([]);
   const [form, setForm] = useState({ id: "", name: "", value: "" });
+  const [notificationPrefs, setNotificationPrefs] = useState({});
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -26,6 +45,14 @@ export default function PreferencesPage({ api }) {
 
       const rows = extractCollection(listRes, "preferences");
       setPreferences(rows);
+      setNotificationPrefs(
+        Object.fromEntries(
+          NOTIFICATION_PREFS.map((pref) => {
+            const row = rows.find((entry) => entry.name === pref.name);
+            return [pref.name, row?.value === undefined ? true : row.value !== "false"];
+          })
+        )
+      );
 
       if (selectedId && selectedId !== "add") {
         const detailRes = await api.get(`/preference/${selectedId}`);
@@ -103,6 +130,26 @@ export default function PreferencesPage({ api }) {
     }
   }
 
+  async function saveNotificationPreference(name, enabled) {
+    setSaving(true);
+    setError("");
+    setSuccess("");
+    try {
+      const response = await api.put(`/preference/${name}`, {
+        name,
+        value: enabled ? "true" : "false",
+      });
+      if (response.status >= 400) throw toApiError(response, "Failed to save notification preference");
+      setNotificationPrefs((current) => ({ ...current, [name]: enabled }));
+      setSuccess("Notification preference saved.");
+      await load(form.id || "add");
+    } catch (err) {
+      setError(err.message || "Failed to save notification preference");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   if (loading) return <Loading text="Loading preferences..." />;
 
   return (
@@ -119,6 +166,22 @@ export default function PreferencesPage({ api }) {
         </div>
         <ErrorBanner error={error} />
         <SuccessBanner message={success} />
+        <div className="preference-control-list">
+          {NOTIFICATION_PREFS.map((pref) => (
+            <label className="preference-toggle" key={pref.name}>
+              <span>
+                <strong>{pref.label}</strong>
+                <small>{pref.detail}</small>
+              </span>
+              <input
+                checked={notificationPrefs[pref.name] !== false}
+                disabled={saving}
+                onChange={(event) => saveNotificationPreference(pref.name, event.target.checked)}
+                type="checkbox"
+              />
+            </label>
+          ))}
+        </div>
         <div className="card-list">
           {preferences.length === 0 ? (
             <div className="empty-state">No preferences saved yet.</div>

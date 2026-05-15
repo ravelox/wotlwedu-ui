@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.1.32 - 2026-05-14
+
+- Add a task-based Create Poll wizard with templates, ideas, audience selection, public/private sharing, email invites, and SMS/share-link handoff.
+- Improve poll results with winner/tie summaries, participation completion, ranked outcomes, copyable summaries, and a Decide Now close-poll action.
+- Add consumer notification preference toggles and connect the app shell to Socket.IO for live notification and poll-update refreshes.
 - Add the unauthenticated `/public/poll/:token` consumer experience with public poll details, guest-session voting, invite-token acceptance, and abuse reporting.
 - Add owner public-poll controls in the poll editor for share links, guest voting, platform invites, invite history, and public participation/report counts.
 - Automatically refresh expired access tokens with refresh-token rotation.

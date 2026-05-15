@@ -44,7 +44,7 @@ npm run validate:support-console
 The app reads these Vite variables at build time:
 
 - `VITE_WOTLWEDU_API_BASE_URL`: backend API origin. Defaults to `https://api.wotlwedu.com:9876`.
-- `VITE_APP_VERSION`: optional version label shown in the app chrome. Defaults to the package version (`0.1.29`).
+- `VITE_APP_VERSION`: optional version label shown in the app chrome. Defaults to the package version (`0.1.32`).
 - `VITE_GOOGLE_CLIENT_ID`: Google web client ID used to render the Google sign-in button.
 
 An example file is included at `.env.example`.
@@ -82,6 +82,7 @@ Authenticated app routes:
 - `/app/cast-vote`
 - `/app/cast-vote/:electionId`
 - `/app/polls`
+- `/app/create-poll`
 - `/app/friend`
 - `/app/notification`
 - `/app/profile`
@@ -93,8 +94,11 @@ Authenticated app routes:
 - `/app/poll`
 - `/app/space`
 
-Poll editors include public-sharing controls for link visibility, guest voting,
-platform email invites, invite history, and public activity/report counts.
+The primary poll creation route is `/app/create-poll`, a guided flow for choosing
+a template, adding ideas, selecting a circle or share-link audience, configuring
+public/private sharing, sending email invites, and handing off share text for SMS.
+Poll editors still include public-sharing controls for link visibility, guest
+voting, platform email invites, invite history, and public activity/report counts.
 
 Legacy top-level paths redirect into `/app/*` routes to preserve compatibility with older links.
 
@@ -169,6 +173,7 @@ Voting and election insights:
 - `GET /poll`: list elections for dashboard and elections pages
 - `GET /poll/:electionId`: load election details
 - `GET /poll/:electionId/stats`: load election statistics
+- `POST /poll/:electionId/stop`: close a poll from the results page
 - `GET /vote/next/all`: fetch the next available vote across visible workgroups
 - `GET /vote/:electionId/next`: fetch the next vote inside a specific election
 - `POST /cast/:voteId/decision`: submit a vote decision

@@ -83,7 +83,7 @@ export default function ElectionsPage({ api, activeWorkgroupId }) {
             <h2>Poll feed</h2>
           </div>
           <div className="split-actions">
-            <Link className="text-link" to="/app/poll">
+            <Link className="text-link" to="/app/create-poll">
               Create
             </Link>
             <button className="btn btn-tonal" onClick={() => load({ silent: true })}>

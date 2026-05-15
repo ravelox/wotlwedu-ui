@@ -520,6 +520,190 @@ a {
   gap: 10px;
 }
 
+.poll-wizard {
+  display: grid;
+  gap: 16px;
+}
+
+.wizard-steps {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.wizard-step,
+.template-tile,
+.segmented-control button {
+  border: 1px solid rgba(32, 48, 56, 0.08);
+  background: rgba(255, 255, 255, 0.68);
+  color: var(--text);
+}
+
+.wizard-step {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  min-height: 72px;
+  padding: 10px;
+  border-radius: 16px;
+}
+
+.wizard-step span {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(29, 92, 82, 0.1);
+  color: var(--brand);
+  font-weight: 800;
+}
+
+.wizard-step-active,
+.wizard-step-done,
+.template-tile-active,
+.segmented-control .selected {
+  border-color: rgba(29, 92, 82, 0.32);
+  background: linear-gradient(135deg, rgba(29, 92, 82, 0.12), rgba(217, 143, 61, 0.16));
+}
+
+.wizard-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.template-tile {
+  display: grid;
+  gap: 8px;
+  min-height: 112px;
+  padding: 14px;
+  border-radius: 18px;
+  text-align: left;
+}
+
+.template-tile span {
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.idea-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1.2fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid var(--line);
+}
+
+.idea-row input {
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(32, 48, 56, 0.12);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--text);
+}
+
+.idea-number {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: rgba(29, 92, 82, 0.1);
+  color: var(--brand);
+  font-weight: 800;
+}
+
+.segmented-control {
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.segmented-control button {
+  min-height: 44px;
+  border-radius: 14px;
+  font-weight: 800;
+}
+
+.wizard-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.result-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.result-summary > div,
+.result-panel {
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.result-summary strong {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.result-rank-list,
+.preference-control-list {
+  display: grid;
+  gap: 10px;
+}
+
+.result-rank-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) repeat(3, minmax(68px, auto));
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--line);
+}
+
+.preference-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.preference-toggle span {
+  display: grid;
+  gap: 4px;
+}
+
+.preference-toggle small {
+  color: var(--muted);
+  line-height: 1.35;
+}
+
 .preference-row {
   text-align: left;
 }
@@ -877,16 +1061,26 @@ pre {
 
 :root[data-theme="dark"] .scope-card select,
 :root[data-theme="dark"] .field input,
+:root[data-theme="dark"] .idea-row input,
 :root[data-theme="dark"] .field textarea,
 :root[data-theme="dark"] .field select,
 :root[data-theme="dark"] .readonly-field,
 :root[data-theme="dark"] .resource-chip,
+:root[data-theme="dark"] .wizard-step,
+:root[data-theme="dark"] .template-tile,
+:root[data-theme="dark"] .idea-row,
+:root[data-theme="dark"] .segmented-control,
+:root[data-theme="dark"] .segmented-control button,
 :root[data-theme="dark"] .list-card,
 :root[data-theme="dark"] .record-card,
 :root[data-theme="dark"] .election-card,
 :root[data-theme="dark"] .vote-card,
 :root[data-theme="dark"] .detail-grid > div,
 :root[data-theme="dark"] .stats-grid,
+:root[data-theme="dark"] .result-summary > div,
+:root[data-theme="dark"] .result-panel,
+:root[data-theme="dark"] .result-rank-row,
+:root[data-theme="dark"] .preference-toggle,
 :root[data-theme="dark"] .toggle-field,
 :root[data-theme="dark"] .metric-card,
 :root[data-theme="dark"] .empty-state,
@@ -1077,6 +1271,23 @@ pre {
   .topbar-actions {
     justify-content: flex-start;
     width: 100%;
+  }
+
+  .wizard-steps,
+  .result-summary,
+  .metric-grid,
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .idea-row,
+  .result-rank-row {
+    grid-template-columns: 1fr;
+  }
+
+  .bottom-nav-link {
+    font-size: 0.66rem;
+    padding: 8px 4px;
   }
 }
 

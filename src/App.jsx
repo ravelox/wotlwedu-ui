@@ -25,6 +25,7 @@ import ErrorPage from "./pages/ErrorPage";
 import StatisticsPage from "./pages/StatisticsPage";
 import VotingPage from "./pages/VotingPage";
 import PublicPollPage from "./pages/PublicPollPage";
+import CreatePollWizardPage from "./pages/CreatePollWizardPage";
 import {
   applyThemeMode,
   getStoredThemeMode,
@@ -203,7 +204,7 @@ export default function App() {
       <Route path="/list/add" element={<Navigate to="/app/list/add" replace />} />
       <Route path="/list/:recordId" element={<LegacyAppRedirect to="/app/list/:recordId" />} />
       <Route path="/poll" element={<Navigate to="/app/poll" replace />} />
-      <Route path="/poll/add" element={<Navigate to="/app/poll/add" replace />} />
+      <Route path="/poll/add" element={<Navigate to="/app/create-poll" replace />} />
       <Route path="/poll/:recordId" element={<LegacyAppRedirect to="/app/poll/:recordId" />} />
       <Route path="/preference" element={<Navigate to="/app/preference" replace />} />
       <Route path="/preference/add" element={<Navigate to="/app/preference/add" replace />} />
@@ -304,6 +305,10 @@ export default function App() {
                   path="/polls"
                   element={<ElectionsPage api={api} activeWorkgroupId={activeWorkgroupId} />}
                 />
+                <Route
+                  path="/create-poll"
+                  element={<CreatePollWizardPage api={api} activeWorkgroupId={activeWorkgroupId} />}
+                />
                 <Route path="/friend" element={<FriendsPage api={api} />} />
                 <Route path="/notification" element={<NotificationsPage api={api} />} />
                 <Route path="/notifications" element={<NotificationsPage api={api} />} />
@@ -370,7 +375,7 @@ export default function App() {
                 <Route
                   path="/poll/add"
                   element={
-                    <ContentManagerPage api={api} activeWorkgroupId={activeWorkgroupId} kindOverride="election" />
+                    <CreatePollWizardPage api={api} activeWorkgroupId={activeWorkgroupId} />
                   }
                 />
                 <Route
