@@ -215,6 +215,10 @@ export default function ProfilePage({
     return `${who}: ${detail}`;
   }
 
+  function formatDate(value) {
+    return value ? new Date(value).toLocaleString() : "Unknown";
+  }
+
   function clearInviteQuery() {
     const url = new URL(window.location.href);
     url.searchParams.delete("invite");
@@ -727,20 +731,37 @@ export default function ProfilePage({
             <h3>Recent account activity</h3>
           </div>
         </div>
-        <div className="record-stack">
+        <div className="audit-table-scroll">
           {userAudits.length ? (
-            userAudits.map((audit) => (
-              <div className="record-card" key={audit.id}>
-                <div className="split-heading">
-                  <strong>{audit.eventType}</strong>
-                  <span className="chip">{audit.outcome}</span>
-                </div>
-                <p>{formatAudit(audit)}</p>
-                <p className="tiny-meta">
-                  {audit.createdAt ? new Date(audit.createdAt).toLocaleString() : "Unknown"}
-                </p>
-              </div>
-            ))
+            <table className="audit-table">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Event</th>
+                  <th>Outcome</th>
+                  <th>Message</th>
+                  <th>Context</th>
+                </tr>
+              </thead>
+              <tbody>
+                {userAudits.map((audit) => (
+                  <tr key={audit.id}>
+                    <td>{formatDate(audit.createdAt)}</td>
+                    <td>{audit.eventType || "Activity"}</td>
+                    <td>
+                      <span className={`chip audit-chip-${audit.outcome || "unknown"}`}>
+                        {audit.outcome || "unknown"}
+                      </span>
+                    </td>
+                    <td>{formatAudit(audit)}</td>
+                    <td>
+                      {[audit.email, audit.provider, audit.organizationId].filter(Boolean).join(" / ") ||
+                        "Account"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           ) : (
             <div className="empty-state">No account activity recorded yet.</div>
           )}

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.1.33 - 2026-05-15
+
+- Render profile account audit activity as a table with time, event, outcome, message, and context columns.
+
 ## 0.1.32 - 2026-05-14
 
 - Add a task-based Create Poll wizard with templates, ideas, audience selection, public/private sharing, email invites, and SMS/share-link handoff.
