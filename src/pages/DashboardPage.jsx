@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Loading from "../components/Loading";
 import { ErrorBanner } from "../components/Feedback";
-import { extractCollection } from "../lib/api";
+import { extractCollection, extractUnreadNotificationCount } from "../lib/api";
 import TutorialPanel from "../components/TutorialPanel";
 import {
   dismissPollTutorial,
@@ -72,14 +72,7 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
 
         if (cancelled) return;
 
-        setUnreadCount(
-          Number(
-            unreadRes.data?.count ??
-              unreadRes.data?.data?.count ??
-              unreadRes.data?.data ??
-              0
-          ) || 0
-        );
+        setUnreadCount(extractUnreadNotificationCount(unreadRes));
         setElections(extractCollection(electionRes, "elections").slice(0, 4));
         const nextMyPolls = extractCollection(myPollsRes, "elections").slice(0, 4);
         setMyPolls(nextMyPolls);

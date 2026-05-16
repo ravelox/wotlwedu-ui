@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.1.35 - 2026-05-16
+
+- Add CI for production dependency audit, frontend build, and container build.
+- Fix app header and dashboard unread notification counts for the backend
+  `data.unread` response shape and structured Socket.IO notification payloads.
+- Update production dependency locks to clear high-severity audit findings.
+
 ## 0.1.34 - 2026-05-15
 
 - Simplify the consumer UI styling to flat black, white, and red themes with no gradients.

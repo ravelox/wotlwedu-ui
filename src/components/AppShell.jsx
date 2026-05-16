@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { extractCollection } from "../lib/api";
+import { extractCollection, extractUnreadNotificationCount } from "../lib/api";
 import { connectLiveNotifications } from "../lib/liveNotifications";
 
 export default function AppShell({
@@ -41,12 +41,7 @@ export default function AppShell({
         const workgroupsList = extractCollection(workgroupsRes, "workgroups");
         setWorkgroups(Array.isArray(workgroupsList) ? workgroupsList : []);
 
-        const unread =
-          unreadRes.data?.count ??
-          unreadRes.data?.data?.count ??
-          unreadRes.data?.data ??
-          0;
-        setUnreadCount(Number(unread) || 0);
+        setUnreadCount(extractUnreadNotificationCount(unreadRes));
       }
     }
 
@@ -62,18 +57,17 @@ export default function AppShell({
     const socket = connectLiveNotifications({
       api,
       userId: session.userId,
-      onNotification: () => {
+      onNotification: (payload) => {
+        if (payload?.unreadCount !== undefined) {
+          setUnreadCount(extractUnreadNotificationCount(payload));
+          return;
+        }
         setUnreadCount((current) => current + 1);
       },
       onPollUpdate: () => {
         api.get("/notification/unreadcount")
           .then((response) => {
-            const unread =
-              response.data?.count ??
-              response.data?.data?.count ??
-              response.data?.data ??
-              0;
-            setUnreadCount(Number(unread) || 0);
+            setUnreadCount(extractUnreadNotificationCount(response));
           })
           .catch(() => {});
       },

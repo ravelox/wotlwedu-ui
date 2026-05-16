@@ -135,3 +135,19 @@ export function extractCollection(response, key) {
 export function extractEntity(response, key) {
   return response?.data?.data?.[key] || response?.data?.[key] || null;
 }
+
+export function extractUnreadNotificationCount(responseOrPayload) {
+  const value =
+    responseOrPayload?.unreadCount ??
+    responseOrPayload?.unread ??
+    responseOrPayload?.count ??
+    responseOrPayload?.data?.unreadCount ??
+    responseOrPayload?.data?.unread ??
+    responseOrPayload?.data?.count ??
+    responseOrPayload?.data?.data?.unreadCount ??
+    responseOrPayload?.data?.data?.unread ??
+    responseOrPayload?.data?.data?.count ??
+    responseOrPayload?.data?.data;
+
+  return Number(value) || 0;
+}

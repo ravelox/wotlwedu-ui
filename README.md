@@ -44,7 +44,7 @@ npm run validate:support-console
 The app reads these Vite variables at build time:
 
 - `VITE_WOTLWEDU_API_BASE_URL`: backend API origin. Defaults to `https://api.wotlwedu.com:9876`.
-- `VITE_APP_VERSION`: optional version label shown in the app chrome. Docker builds default this to the package version (`0.1.34`) when no build argument is supplied.
+- `VITE_APP_VERSION`: optional version label shown in the app chrome. Docker builds default this to the package version (`0.1.35`) when no build argument is supplied.
 - `VITE_GOOGLE_CLIENT_ID`: Google web client ID used to render the Google sign-in button.
 
 An example file is included at `.env.example`.
