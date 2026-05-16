@@ -289,6 +289,13 @@ export default function PublicPollPage({ api, appVersion }) {
                   <button className="btn" disabled={starting} type="submit">
                     {starting ? "Starting..." : "Start Guest Session"}
                   </button>
+                  <p className="tiny-meta">
+                    By starting a guest session, you agree to the{" "}
+                    <Link className="text-link" to="/terms">Terms</Link> and{" "}
+                    <Link className="text-link" to="/privacy">Privacy Policy</Link>. Wotlwedu
+                    stores your display name if provided, invite status, votes, and abuse signals
+                    so this poll can count responses and stay healthy.
+                  </p>
                 </form>
               </section>
             )
@@ -303,6 +310,9 @@ export default function PublicPollPage({ api, appVersion }) {
           <section className="surface-card">
             <p className="eyebrow">Report</p>
             <h2>Something wrong?</h2>
+            <p className="tiny-meta">
+              Reports are reviewed under the <Link className="text-link" to="/abuse">Abuse Policy</Link>.
+            </p>
             <form className="stack-form" onSubmit={reportPoll}>
               <label className="field">
                 <span>Reason</span>

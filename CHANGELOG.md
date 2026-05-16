@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.1.36 - 2026-05-16
+- Add public Terms, Privacy, Abuse Policy, Support, and public invite
+  unsubscribe pages.
+- Add Profile privacy controls for account data export and account deletion
+  requests.
+- Add guest voting and registration consent copy with links to legal pages.
+
 ## 0.1.35 - 2026-05-16
 
 - Add CI for production dependency audit, frontend build, and container build.

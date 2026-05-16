@@ -23,6 +23,15 @@ export default function PublicAuthCard({
             <Link className="text-link" to={backTo}>
               {backLabel}
             </Link>
+            <Link className="text-link" to="/privacy">
+              Privacy
+            </Link>
+            <Link className="text-link" to="/terms">
+              Terms
+            </Link>
+            <Link className="text-link" to="/support">
+              Support
+            </Link>
           </div>
         </div>
       </div>

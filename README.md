@@ -44,8 +44,9 @@ npm run validate:support-console
 The app reads these Vite variables at build time:
 
 - `VITE_WOTLWEDU_API_BASE_URL`: backend API origin. Defaults to `https://api.wotlwedu.com:9876`.
-- `VITE_APP_VERSION`: optional version label shown in the app chrome. Docker builds default this to the package version (`0.1.35`) when no build argument is supplied.
+- `VITE_APP_VERSION`: optional version label shown in the app chrome. Docker builds default this to the package version (`0.1.36`) when no build argument is supplied.
 - `VITE_GOOGLE_CLIENT_ID`: Google web client ID used to render the Google sign-in button.
+- `VITE_WOTLWEDU_SUPPORT_EMAIL`: optional support contact email shown on the public support page. Defaults to `admin@wotlwedu.net`.
 
 An example file is included at `.env.example`.
 
@@ -62,6 +63,11 @@ Public routes:
 
 - `/login`
 - `/public/poll/:token`
+- `/public/unsubscribe/:inviteToken`
+- `/terms`
+- `/privacy`
+- `/abuse`
+- `/support`
 - `/register`
 - `/confirm/:tokenId`
 - `/pwdrequest`
@@ -74,7 +80,8 @@ and poll tutorial automatically after signup.
 
 Public poll links show poll status, expiration, ideas, guest-voting controls,
 and reporting controls without requiring an authenticated session. Guest progress
-is stored locally with the backend-provided expiry.
+is stored locally with the backend-provided expiry. The public poll and invite
+unsubscribe routes include consent and opt-out copy for non-registered guests.
 
 Authenticated app routes:
 
@@ -106,6 +113,7 @@ The profile route now includes:
 
 - linked sign-in method visibility with unlink controls for removable social identities
 - recent account activity sourced from the backend auth audit feed
+- account data export and account deletion request controls
 - organization invite history and organization audit activity for organization admins
 - a direct link into workgroup management for reviewing and administering membership scope
 

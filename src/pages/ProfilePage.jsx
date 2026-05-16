@@ -39,6 +39,8 @@ export default function ProfilePage({
   const [userAudits, setUserAudits] = useState([]);
   const [sessions, setSessions] = useState([]);
   const [inviteFilter, setInviteFilter] = useState("all");
+  const [privacyLoading, setPrivacyLoading] = useState(false);
+  const [deletionReason, setDeletionReason] = useState("");
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const activeWorkgroupName =
@@ -267,6 +269,63 @@ export default function ProfilePage({
       setError(err.message || "Failed to update profile");
     } finally {
       setSaving(false);
+    }
+  }
+
+  function downloadJson(filename, payload) {
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  async function exportAccountData() {
+    if (!session?.userId) return;
+    setPrivacyLoading(true);
+    setError("");
+    setSuccess("");
+    try {
+      const response = await api.get(`/person/${session.userId}/privacy/export`);
+      if (response.status >= 400) {
+        throw toApiError(response, "Failed to export account data");
+      }
+      const payload = response.data?.data?.export || response.data?.export || response.data;
+      downloadJson(`wotlwedu-account-export-${session.userId}.json`, payload);
+      setSuccess("Account data export generated.");
+    } catch (err) {
+      setError(err.message || "Failed to export account data");
+    } finally {
+      setPrivacyLoading(false);
+    }
+  }
+
+  async function requestAccountDeletion(event) {
+    event.preventDefault();
+    if (!session?.userId) return;
+    setPrivacyLoading(true);
+    setError("");
+    setSuccess("");
+    try {
+      const response = await api.post(`/person/${session.userId}/privacy/delete-request`, {
+        reason: deletionReason,
+      });
+      if (response.status >= 400) {
+        throw toApiError(response, "Failed to request account deletion");
+      }
+      setDeletionReason("");
+      setSuccess("Account deletion request submitted for support review.");
+      await loadProfile();
+    } catch (err) {
+      setError(err.message || "Failed to request account deletion");
+    } finally {
+      setPrivacyLoading(false);
     }
   }
 
@@ -568,6 +627,62 @@ export default function ProfilePage({
             </div>
           ))}
           {sessions.length === 0 ? <p className="tiny-meta">No active sessions found.</p> : null}
+        </div>
+      </section>
+
+      <section className="surface-card">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Privacy</p>
+            <h3>Account data</h3>
+          </div>
+          <Link className="text-link" to="/privacy">Privacy Policy</Link>
+        </div>
+        <ErrorBanner error={error} />
+        <SuccessBanner message={success} />
+        <div className="record-stack">
+          <div className="record-card">
+            <div className="split-heading">
+              <strong>Export your data</strong>
+              <span className="chip">JSON</span>
+            </div>
+            <p className="tiny-meta">
+              Includes profile, organization membership, sessions, notifications, sign-in methods,
+              and recent account audit history. Secret authentication material is excluded.
+            </p>
+            <button
+              className="btn btn-secondary"
+              disabled={privacyLoading}
+              onClick={exportAccountData}
+              type="button"
+            >
+              {privacyLoading ? "Working..." : "Export My Data"}
+            </button>
+          </div>
+          <div className="record-card">
+            <div className="split-heading">
+              <strong>Request account deletion</strong>
+              <span className="chip">Support review</span>
+            </div>
+            <p className="tiny-meta">
+              Submits a deletion request for review. Organization-owned resources may be transferred
+              or retained when required for security, abuse handling, or shared poll history.
+            </p>
+            <form className="stack-form" onSubmit={requestAccountDeletion}>
+              <label className="field">
+                <span>Reason</span>
+                <textarea
+                  rows="3"
+                  value={deletionReason}
+                  onChange={(event) => setDeletionReason(event.target.value)}
+                  placeholder="Optional context for support"
+                />
+              </label>
+              <button className="btn btn-secondary" disabled={privacyLoading} type="submit">
+                {privacyLoading ? "Submitting..." : "Request Account Deletion"}
+              </button>
+            </form>
+          </div>
         </div>
       </section>
 

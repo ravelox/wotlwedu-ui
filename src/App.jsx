@@ -25,7 +25,9 @@ import ErrorPage from "./pages/ErrorPage";
 import StatisticsPage from "./pages/StatisticsPage";
 import VotingPage from "./pages/VotingPage";
 import PublicPollPage from "./pages/PublicPollPage";
+import PublicUnsubscribePage from "./pages/PublicUnsubscribePage";
 import CreatePollWizardPage from "./pages/CreatePollWizardPage";
+import LegalPage from "./pages/LegalPage";
 import {
   applyThemeMode,
   getStoredThemeMode,
@@ -178,6 +180,14 @@ export default function App() {
         path="/public/poll/:token"
         element={<PublicPollPage api={api} appVersion={APP_VERSION} />}
       />
+      <Route
+        path="/public/unsubscribe/:inviteToken"
+        element={<PublicUnsubscribePage api={api} appVersion={APP_VERSION} />}
+      />
+      <Route path="/terms" element={<LegalPage kind="terms" appVersion={APP_VERSION} />} />
+      <Route path="/privacy" element={<LegalPage kind="privacy" appVersion={APP_VERSION} />} />
+      <Route path="/abuse" element={<LegalPage kind="abuse" appVersion={APP_VERSION} />} />
+      <Route path="/support" element={<LegalPage kind="support" appVersion={APP_VERSION} />} />
       <Route path="/auth" element={<Navigate to="/login" replace />} />
       <Route path="/home" element={<Navigate to="/app/home" replace />} />
       <Route path="/cast-vote" element={<Navigate to="/app/cast-vote" replace />} />

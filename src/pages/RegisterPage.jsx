@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import PublicAuthCard from "../components/PublicAuthCard";
 import { ErrorBanner, SuccessBanner } from "../components/Feedback";
 import { toApiError } from "../lib/api";
@@ -128,6 +129,11 @@ export default function RegisterPage({ api, appVersion }) {
         <button className="btn" disabled={loading} type="submit">
           {loading ? "Registering..." : "Create Account"}
         </button>
+        <p className="tiny-meta">
+          By creating an account, you agree to the{" "}
+          <Link className="text-link" to="/terms">Terms</Link> and{" "}
+          <Link className="text-link" to="/privacy">Privacy Policy</Link>.
+        </p>
       </form>
     </PublicAuthCard>
   );
