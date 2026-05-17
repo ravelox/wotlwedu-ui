@@ -135,7 +135,7 @@ export default function AppShell({
                 <div>{activeWorkgroup?.name || "All visible spaces"}</div>
               </div>
               <div>
-                <div className="scope-label">Space Scope</div>
+                <div className="scope-label">Space View</div>
                 <select
                   value={activeWorkgroupId || ""}
                   onChange={(event) =>

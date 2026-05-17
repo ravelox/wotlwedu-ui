@@ -188,7 +188,7 @@ export default function VotingPage({ api }) {
               <Link className="text-link" to="/app/home">
                 Back home
               </Link>
-              <span className="tiny-meta">Vote ID {currentVote.id}</span>
+              <span className="tiny-meta">Your choice is saved as soon as you vote.</span>
             </div>
           </div>
         )}

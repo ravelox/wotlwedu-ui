@@ -167,7 +167,7 @@ export default function StatisticsPage({ api }) {
         <ErrorBanner error={error} />
         <SuccessBanner message={success} />
         {!stats ? (
-          <div className="empty-state">No statistics available.</div>
+          <div className="empty-state">Results are not ready yet.</div>
         ) : (
           <div className="stack-form">
             <PollCard
@@ -185,11 +185,11 @@ export default function StatisticsPage({ api }) {
               meta={(
                 <div className="poll-card-meta-grid">
                   <span>
-                    <strong>{audience?.group?.name || election?.group?.name || "Circle not set"}</strong>
+                    <strong>{audience?.group?.name || election?.group?.name || "No circle selected"}</strong>
                     <small>circle</small>
                   </span>
                   <span>
-                    <strong>{audience?.list?.name || election?.list?.name || "List not set"}</strong>
+                    <strong>{audience?.list?.name || election?.list?.name || "No idea list selected"}</strong>
                     <small>idea list</small>
                   </span>
                   <span>
@@ -278,11 +278,11 @@ export default function StatisticsPage({ api }) {
                 <div className="detail-grid">
                   <div>
                     <span className="detail-label">Circle</span>
-                    <span>{audience?.group?.name || election?.group?.name || election?.groupId || "Not set"}</span>
+                    <span>{audience?.group?.name || election?.group?.name || "No circle selected"}</span>
                   </div>
                   <div>
                     <span className="detail-label">List</span>
-                    <span>{audience?.list?.name || election?.list?.name || election?.listId || "Not set"}</span>
+                    <span>{audience?.list?.name || election?.list?.name || "No idea list selected"}</span>
                   </div>
                   <div>
                     <span className="detail-label">Participants</span>

@@ -279,7 +279,7 @@ export default function NotificationsPage({ api }) {
         <SuccessBanner message={success} />
         <div className="notification-group-list">
           {groupedNotifications.length === 0 ? (
-            <div className="empty-state">No notifications were returned by the API.</div>
+            <div className="empty-state">You are all caught up. New poll updates and friend requests will show up here.</div>
           ) : (
             groupedNotifications.map((group) =>
               group.type === "poll" ? (
@@ -324,7 +324,7 @@ export default function NotificationsPage({ api }) {
                             <strong>{senderName(notification)}</strong>
                             <span className="tiny-meta">{formatDate(notification.createdAt)}</span>
                           </div>
-                          <p>{notification.text || "No content available."}</p>
+                          <p>{notification.text || "This update does not include a message."}</p>
                           <div className="chip-row">
                             {notification.status?.name ? <span className="chip">{notification.status.name}</span> : null}
                             <button
@@ -371,10 +371,7 @@ export default function NotificationsPage({ api }) {
                             <p className="tiny-meta">{formatDate(notification.createdAt)}</p>
                           </div>
                         </div>
-                        <p>{notification.text || "No content available."}</p>
-                        <div className="chip-row">
-                          {notification.objectId ? <span className="chip chip-soft">{notification.objectId}</span> : null}
-                        </div>
+                        <p>{notification.text || "This update does not include a message."}</p>
                         <div className="split-actions wrap-actions">
                           {notification.type === 103 ? (
                             <>

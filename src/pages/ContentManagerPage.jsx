@@ -634,7 +634,7 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
               value={form.workgroupId}
               onChange={(event) => updateField("workgroupId", event.target.value)}
             >
-              <option value="">Unscoped</option>
+              <option value="">No specific space</option>
               {refs.workgroups.map((row) => (
                 <option key={row.id} value={row.id}>
                   {row.name || row.id}

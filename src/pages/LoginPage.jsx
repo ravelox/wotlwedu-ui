@@ -158,7 +158,7 @@ export default function LoginPage({ api, appVersion, onLogin }) {
       if (response.status === 302) {
         const redirect = parse2faRedirect(response.data?.data?.toURL);
         if (!redirect) {
-          setError("2FA was requested but the API did not return a verification token.");
+          setError("We could not start two-step verification. Please try signing in again.");
           return;
         }
         setPending2fa(redirect);

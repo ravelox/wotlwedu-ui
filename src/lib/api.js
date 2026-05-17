@@ -100,7 +100,7 @@ export function createApi(baseURL, onUnauthorized, onSessionRefresh) {
 export function toApiError(response, fallback = "Request failed") {
   if (!response) {
     return new Error(
-      `${fallback}. The API could not be reached. Check the API URL, HTTPS, and CORS configuration.`
+      `${fallback}. Wotlwedu could not be reached. Check your connection and try again.`
     );
   }
 

@@ -15,6 +15,8 @@
   friendlier poll-card media fallbacks, social proof copy, and subtle motion.
 - Add habit-loop prompts for waiting votes, closing polls, rematches, reusable
   lists/circles, and last-draft continuation.
+- Replace backend-oriented empty states and fallback labels with consumer-facing
+  copy across alerts, friends, voting, poll feed, results, and connection errors.
 
 ## 0.1.36 - 2026-05-16
 - Add public Terms, Privacy, Abuse Policy, Support, and public invite

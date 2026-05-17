@@ -146,7 +146,9 @@ export default function FriendsPage({ api }) {
         </div>
         <div className="card-list">
           {friends.length === 0 ? (
-            <div className="empty-state">No relationships returned for this view.</div>
+            <div className="empty-state">
+              {showBlocked ? "You have not blocked anyone." : "No friends or pending requests yet."}
+            </div>
           ) : (
             friends.map((row) => {
               const statusName = row?.status?.name || "Unknown";

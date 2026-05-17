@@ -119,11 +119,11 @@ export default function ElectionsPage({ api, activeWorkgroupId }) {
                         <small>deadline</small>
                       </span>
                       <span>
-                        <strong>{audience?.group?.name || election.group?.name || "Circle not set"}</strong>
+                        <strong>{audience?.group?.name || election.group?.name || "No circle selected"}</strong>
                         <small>circle</small>
                       </span>
                       <span>
-                        <strong>{audience?.list?.name || election.list?.name || "List not set"}</strong>
+                        <strong>{audience?.list?.name || election.list?.name || "No idea list selected"}</strong>
                         <small>ideas</small>
                       </span>
                       <span>
