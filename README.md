@@ -105,6 +105,10 @@ The home route is a social activity surface. It highlights polls that need the
 user's vote, polls closing soon, recent activity, recent winners, quick-start
 templates, and unread notification count.
 
+Core social surfaces use reusable initial avatars, friendlier empty states,
+animated loading placeholders, richer poll-card media fallbacks, and lightweight
+hover motion so the app feels more personal without adding visual clutter.
+
 The notification route groups poll-related updates into actionable cards. Poll
 groups include inline actions for voting, viewing results, sending reminders,
 opening poll settings, reaching public-link controls, and marking the group

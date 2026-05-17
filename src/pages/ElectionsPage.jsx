@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Loading from "../components/Loading";
 import { ErrorBanner } from "../components/Feedback";
+import EmptyState from "../components/EmptyState";
 import { extractCollection, toApiError } from "../lib/api";
 import { PollCard, formatPollDate, normalizePollCard } from "../components/PollCard";
 
@@ -77,7 +78,15 @@ export default function ElectionsPage({ api, activeWorkgroupId }) {
 
         <div className="card-list">
           {elections.length === 0 ? (
-            <div className="empty-state">No polls available for this scope.</div>
+            <EmptyState
+              title="No polls here yet."
+              copy="Create one for this space and it will show up here with progress, people, and a quick way back in."
+              action={(
+                <Link className="btn btn-secondary" to="/app/create-poll">
+                  Create Poll
+                </Link>
+              )}
+            />
           ) : (
             elections.map((election) => {
               const summary = participationByElectionId[election.id];

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import Loading from "../components/Loading";
 import { ErrorBanner, SuccessBanner } from "../components/Feedback";
+import EmptyState from "../components/EmptyState";
 import { toApiError } from "../lib/api";
 
 function extractVoteRows(response) {
@@ -108,7 +109,15 @@ export default function VotingPage({ api }) {
         ) : null}
 
         {!currentVote ? (
-          <div className="empty-state">No pending votes are available.</div>
+          <EmptyState
+            title="You are all caught up."
+            copy="When friends need your take, their next idea will land here."
+            action={(
+              <Link className="btn btn-secondary" to="/app/create-poll">
+                Start a Poll
+              </Link>
+            )}
+          />
         ) : (
           <div className="stack-form">
             <div className="vote-panel">

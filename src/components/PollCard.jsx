@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import Avatar, { initials } from "./Avatar";
 
 export function formatPollDate(value) {
   if (!value) return "No expiration";
@@ -22,15 +23,6 @@ export function timeUntil(value) {
   if (diffHours < 24) return `${Math.max(diffHours, 1)}h left`;
   const diffDays = Math.round(diffHours / 24);
   return `${diffDays}d left`;
-}
-
-export function initials(value) {
-  const words = String(value || "")
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean);
-  if (!words.length) return "W";
-  return words.slice(0, 2).map((word) => word[0]).join("").toUpperCase();
 }
 
 export function displayPerson(user) {
@@ -61,7 +53,9 @@ export function firstImageUrl(poll) {
     poll?.imageUrl ||
     poll?.image?.url ||
     poll?.list?.items?.find((item) => item?.image?.url)?.image?.url ||
+    poll?.list?.items?.find((item) => item?.imageUrl)?.imageUrl ||
     poll?.items?.find((item) => item?.image?.url)?.image?.url ||
+    poll?.items?.find((item) => item?.imageUrl)?.imageUrl ||
     null
   );
 }
@@ -118,7 +112,12 @@ export function PollVisual({ card, className = "social-poll-image" }) {
   }
   return (
     <div className={`${className} social-poll-image-fallback`} aria-hidden="true">
-      {label.slice(0, 1).toUpperCase()}
+      <span>{label.slice(0, 1).toUpperCase()}</span>
+      <div className="fallback-idea-row">
+        {(card?.ideas || []).slice(0, 3).map((idea) => (
+          <small key={idea.id || idea.name}>{initials(idea.name).slice(0, 1)}</small>
+        ))}
+      </div>
     </div>
   );
 }
@@ -131,9 +130,12 @@ export function AvatarStack({ creator, count = 0 }) {
   return (
     <div className="avatar-stack" aria-label={`${count || 1} participant${count === 1 ? "" : "s"}`}>
       {people.map((person, index) => (
-        <span className="avatar-dot" title={person.name} key={`${person.name || "person"}-${index}`}>
-          {person.initials || "W"}
-        </span>
+        <Avatar
+          className={person.initials === "+" ? "avatar-more" : ""}
+          label={person.initials === "+" ? person.name : person.name || person.initials}
+          title={person.name}
+          key={`${person.name || "person"}-${index}`}
+        />
       ))}
     </div>
   );

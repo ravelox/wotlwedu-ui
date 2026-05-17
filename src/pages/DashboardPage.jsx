@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import Loading from "../components/Loading";
+import Avatar from "../components/Avatar";
 import { ErrorBanner } from "../components/Feedback";
+import EmptyState from "../components/EmptyState";
 import TutorialPanel from "../components/TutorialPanel";
 import { PollCard, formatPollDate } from "../components/PollCard";
 import {
@@ -14,10 +16,10 @@ import {
 
 function ActivityItem({ activity }) {
   if (!activity) return null;
-  const initials = activity.actor?.initials || "W";
+  const actorName = activity.actor?.name || activity.actor?.fullName || activity.actor?.email || activity.title || "Someone";
   return (
     <Link className="activity-item" to={activity.href || "/app/home"}>
-      <span className="avatar-dot">{initials}</span>
+      <Avatar label={actorName} title={actorName} />
       <span>
         <strong>{activity.title}</strong>
         <small>{activity.text}</small>
@@ -29,15 +31,16 @@ function ActivityItem({ activity }) {
 
 function EmptySocialState({ title, copy, actionTo, actionLabel }) {
   return (
-    <div className="empty-state social-empty-state">
-      <strong>{title}</strong>
-      <p>{copy}</p>
-      {actionTo ? (
+    <EmptyState
+      className="social-empty-state"
+      title={title}
+      copy={copy}
+      action={actionTo ? (
         <Link className="btn btn-secondary" to={actionTo}>
           {actionLabel}
         </Link>
       ) : null}
-    </div>
+    />
   );
 }
 
@@ -193,6 +196,28 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
             <strong>{metrics.winners}</strong>
             <span>recent decisions</span>
           </Link>
+        </div>
+        <div className="social-proof-strip">
+          <div className="avatar-stack">
+            {(home?.friendActivity || []).slice(0, 3).map((activity, index) => (
+              <Avatar
+                key={activity.id || index}
+                label={activity.actor?.name || activity.actor?.email || activity.title}
+              />
+            ))}
+            {!home?.friendActivity?.length ? (
+              <>
+                <Avatar label="You" />
+                <Avatar label="Friends" />
+                <Avatar label="Poll crew" />
+              </>
+            ) : null}
+          </div>
+          <span>
+            {home?.friendActivity?.length
+              ? "Your circle has been moving decisions along."
+              : "Invite a few friends and this becomes your shared decision feed."}
+          </span>
         </div>
         <div className="split-actions wrap-actions">
           <Link className="btn" to="/app/create-poll">

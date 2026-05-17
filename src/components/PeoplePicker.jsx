@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import Avatar from "./Avatar";
 
 function ensureArray(value) {
   return Array.isArray(value) ? value : [];
@@ -13,12 +14,6 @@ function displayPerson(person) {
     person?.id ||
     "Unknown person"
   );
-}
-
-function initials(value) {
-  const words = String(value || "").trim().split(/\s+/).filter(Boolean);
-  if (!words.length) return "W";
-  return words.slice(0, 2).map((word) => word[0]).join("").toUpperCase();
 }
 
 export function parseEmails(value) {
@@ -110,7 +105,7 @@ export default function PeoplePicker({
                   onClick={() => togglePerson(person.id)}
                   type="button"
                 >
-                  <span className="avatar-dot">{initials(name)}</span>
+                  <Avatar label={name} />
                   <span>
                     <strong>{name}</strong>
                     {person.email ? <small>{person.email}</small> : null}
