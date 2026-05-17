@@ -141,7 +141,14 @@ export function AvatarStack({ creator, count = 0 }) {
   );
 }
 
-export function PollCard({ poll, card: providedCard, tone = "default", compact = false, meta = null }) {
+export function PollCard({
+  poll,
+  card: providedCard,
+  tone = "default",
+  compact = false,
+  meta = null,
+  extraActions = null,
+}) {
   const card = providedCard || normalizePollCard(poll);
   if (!card) return null;
   const action = card.action || { label: "View Results", href: `/app/statistics/${card.id}` };
@@ -178,9 +185,12 @@ export function PollCard({ poll, card: providedCard, tone = "default", compact =
               {card.completionRate || 0}% complete
             </span>
           </div>
-          <Link className="btn btn-secondary" to={action.href}>
-            {action.label}
-          </Link>
+          <div className="poll-card-actions">
+            <Link className="btn btn-secondary" to={action.href}>
+              {action.label}
+            </Link>
+            {extraActions}
+          </div>
         </div>
       </div>
     </article>

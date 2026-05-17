@@ -614,6 +614,13 @@ a {
   align-items: center;
 }
 
+.poll-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .participant-summary {
   display: flex;
   align-items: center;
@@ -2465,6 +2472,10 @@ pre {
   .winner-row {
     grid-template-columns: 1fr;
     justify-items: start;
+  }
+
+  .poll-card-actions {
+    justify-content: flex-start;
   }
 
   .idea-row,

@@ -862,13 +862,13 @@ export default function ContentManagerPage({ api, activeWorkgroupId, kindOverrid
             {form.id ? (
               <button
                 aria-label={`Delete ${config.displaySingular}`}
-                className="btn btn-danger btn-icon-delete"
+                className={`btn btn-danger${isElection ? "" : " btn-icon-delete"}`}
                 disabled={saving}
                 onClick={remove}
                 title={`Delete ${config.displaySingular}`}
                 type="button"
               >
-                Delete
+                {isElection ? "Delete Poll" : "Delete"}
               </button>
             ) : null}
           </div>

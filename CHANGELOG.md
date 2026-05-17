@@ -17,6 +17,8 @@
   lists/circles, and last-draft continuation.
 - Replace backend-oriented empty states and fallback labels with consumer-facing
   copy across alerts, friends, voting, poll feed, results, and connection errors.
+- Add explicit poll deletion actions to poll management cards and the poll
+  editor.
 
 ## 0.1.36 - 2026-05-16
 - Add public Terms, Privacy, Abuse Policy, Support, and public invite

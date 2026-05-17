@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Loading from "../components/Loading";
-import { ErrorBanner } from "../components/Feedback";
+import { ErrorBanner, SuccessBanner } from "../components/Feedback";
 import EmptyState from "../components/EmptyState";
 import { extractCollection, toApiError } from "../lib/api";
 import { PollCard, formatPollDate, normalizePollCard } from "../components/PollCard";
@@ -9,7 +9,9 @@ import { PollCard, formatPollDate, normalizePollCard } from "../components/PollC
 export default function ElectionsPage({ api, activeWorkgroupId }) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [deletingId, setDeletingId] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [elections, setElections] = useState([]);
   const [participationByElectionId, setParticipationByElectionId] = useState({});
 
@@ -57,6 +59,27 @@ export default function ElectionsPage({ api, activeWorkgroupId }) {
 
   if (loading) return <Loading text="Loading polls..." />;
 
+  async function deletePoll(poll) {
+    if (!poll?.id || deletingId) return;
+    const confirmed = window.confirm(`Delete "${poll.name || "this poll"}"? This removes the poll and its votes.`);
+    if (!confirmed) return;
+
+    setDeletingId(poll.id);
+    setError("");
+    setSuccess("");
+
+    try {
+      const response = await api.delete(`/poll/${poll.id}`);
+      if (response.status >= 400) throw toApiError(response, "Failed to delete poll");
+      setSuccess("Poll deleted.");
+      await load({ silent: true });
+    } catch (err) {
+      setError(err.message || "Failed to delete poll");
+    } finally {
+      setDeletingId("");
+    }
+  }
+
   return (
     <div className="screen-stack">
       <section className="surface-card">
@@ -75,6 +98,7 @@ export default function ElectionsPage({ api, activeWorkgroupId }) {
           </div>
         </div>
         <ErrorBanner error={error} />
+        <SuccessBanner message={success} />
 
         <div className="card-list">
           {elections.length === 0 ? (
@@ -131,6 +155,16 @@ export default function ElectionsPage({ api, activeWorkgroupId }) {
                         <small>waiting on</small>
                       </span>
                     </div>
+                  )}
+                  extraActions={(
+                    <button
+                      className="btn btn-danger"
+                      disabled={Boolean(deletingId)}
+                      onClick={() => deletePoll(election)}
+                      type="button"
+                    >
+                      {deletingId === election.id ? "Deleting..." : "Delete Poll"}
+                    </button>
                   )}
                 />
               );
