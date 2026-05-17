@@ -111,12 +111,20 @@ opening poll settings, reaching public-link controls, and marking the group
 read, while non-poll notifications keep focused actions such as accepting friend
 requests.
 
+Circle membership and poll invite flows use a shared people/contact picker. It
+supports searchable people, selected-person chips, typed email recipients, and
+recent-email shortcuts where available.
+
 The primary poll creation route is `/app/create-poll`, a guided flow that starts
 with a visual template gallery for dinner, movies, trips, date night, family
 activity, team lunch, meeting times, and custom polls. The builder keeps a live
 preview visible while the user edits ideas, audience, deadline, and sharing.
 Poll editors still include public-sharing controls for link visibility, guest
 voting, platform email invites, invite history, and public activity/report counts.
+
+The mobile app shell keeps the primary actions in a thumb-friendly bottom bar:
+Home, Vote, Create, Polls, and Alerts. Create is visually emphasized and Alerts
+shows the unread notification count.
 
 Legacy top-level paths redirect into `/app/*` routes to preserve compatibility with older links.
 

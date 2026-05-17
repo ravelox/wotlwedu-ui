@@ -6,6 +6,7 @@ import { ErrorBanner, SuccessBanner } from "../components/Feedback";
 import { extractCollection, extractEntity, toApiError } from "../lib/api";
 import TutorialPanel from "../components/TutorialPanel";
 import { getPollTutorial, getRelevantTutorialStep } from "../lib/tutorial";
+import PeoplePicker from "../components/PeoplePicker";
 
 function emptyForm() {
   return {
@@ -19,10 +20,6 @@ function emptyForm() {
 
 function ensureArray(value) {
   return Array.isArray(value) ? value : [];
-}
-
-function displayUserName(user) {
-  return user?.fullName || user?.alias || user?.email || user?.id || "Unknown person";
 }
 
 export default function AudienceGroupsPage({ api, session }) {
@@ -365,29 +362,14 @@ export default function AudienceGroupsPage({ api, session }) {
 
           <label className="field">
             <span>Members</span>
-            {users.length === 0 ? (
-              <div className="empty-state">No eligible people are available for this circle.</div>
-            ) : (
-              <div className="selection-grid">
-                {users.map((user) => (
-                  <label className="toggle-field" key={user.id}>
-                    <span>{displayUserName(user)}</span>
-                    <input
-                      checked={ensureArray(form.memberIds).includes(user.id)}
-                      onChange={(event) =>
-                        updateField(
-                          "memberIds",
-                          event.target.checked
-                            ? [...ensureArray(form.memberIds), user.id]
-                            : ensureArray(form.memberIds).filter((id) => id !== user.id)
-                        )
-                      }
-                      type="checkbox"
-                    />
-                  </label>
-                ))}
-              </div>
-            )}
+            <PeoplePicker
+              disabled={saving}
+              emptyText="No eligible people are available for this circle."
+              onSelectedIdsChange={(memberIds) => updateField("memberIds", memberIds)}
+              people={users}
+              selectedIds={form.memberIds}
+              title="Circle members"
+            />
           </label>
 
           <div className="split-actions wrap-actions">

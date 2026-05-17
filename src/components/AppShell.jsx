@@ -18,12 +18,11 @@ export default function AppShell({
   const [unreadCount, setUnreadCount] = useState(0);
   const activeWorkgroup = workgroups.find((workgroup) => workgroup.id === activeWorkgroupId);
   const navItems = [
-    { label: "Home", to: "/app/home", icon: "◐" },
-    { label: "Create", to: "/app/create-poll", icon: "+" },
-    { label: "Vote", to: "/app/cast-vote", icon: "◎" },
-    { label: "Polls", to: "/app/polls", icon: "◒" },
-    { label: "Circles", to: "/app/circle", icon: "◌" },
-    { label: "Profile", to: "/app/profile", icon: "◍" },
+    { label: "Home", short: "Home", to: "/app/home" },
+    { label: "Vote", short: "Vote", to: "/app/cast-vote" },
+    { label: "Create", short: "Create", to: "/app/create-poll", primary: true },
+    { label: "Polls", short: "Polls", to: "/app/polls" },
+    { label: "Alerts", short: "Alerts", to: "/app/notifications", badge: unreadCount },
   ];
 
   useEffect(() => {
@@ -104,6 +103,14 @@ export default function AppShell({
                 Home
               </NavLink>
               <NavLink
+                to="/app/notifications"
+                className={({ isActive }) =>
+                  `topbar-link${isActive ? " topbar-link-active" : ""}`
+                }
+              >
+                Alerts
+              </NavLink>
+              <NavLink
                 to="/app/profile"
                 className={({ isActive }) =>
                   `topbar-link${isActive ? " topbar-link-active" : ""}`
@@ -164,24 +171,20 @@ export default function AppShell({
 
           <nav
             className="bottom-nav"
-            style={{ gridTemplateColumns: `repeat(${navItems.length + 1}, minmax(0, 1fr))` }}
+            style={{ gridTemplateColumns: `repeat(${navItems.length}, minmax(0, 1fr))` }}
           >
             {navItems.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 className={({ isActive }) =>
-                  `bottom-nav-link${isActive ? " bottom-nav-link-active" : ""}`
+                  `bottom-nav-link${item.primary ? " bottom-nav-primary" : ""}${isActive ? " bottom-nav-link-active" : ""}`
                 }
               >
-                <span>{item.icon}</span>
-                <span>{item.label}</span>
+                <span className="bottom-nav-mark">{item.short}</span>
+                {item.badge ? <strong className="bottom-nav-badge">{item.badge}</strong> : null}
               </NavLink>
             ))}
-            <button className="bottom-nav-link bottom-nav-button" onClick={onLogout} type="button">
-              <span>⇥</span>
-              <span>Logout</span>
-            </button>
           </nav>
         </div>
       </div>

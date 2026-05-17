@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ErrorBanner, SuccessBanner } from "./Feedback";
 import { toApiError } from "../lib/api";
+import PeoplePicker from "./PeoplePicker";
 
 function formatDate(value) {
   if (!value) return "Never";
@@ -282,16 +283,17 @@ export default function PublicPollControls({ api, electionId }) {
           <form className="stack-form" onSubmit={sendInvites}>
             <label className="field">
               <span>Invite emails</span>
-              <textarea
+              <PeoplePicker
+                allowEmails
                 disabled={!invitesAllowed}
-                rows="3"
-                value={inviteEmails}
-                onChange={(event) => setInviteEmails(event.target.value)}
-                placeholder={
+                emailPlaceholder={
                   invitesAllowed
                     ? "one@example.com, two@example.com"
                     : "Enable invites with a trusted account to send email invites"
                 }
+                emailValue={inviteEmails}
+                onEmailValueChange={setInviteEmails}
+                title="Public invite recipients"
               />
             </label>
             <button className="btn btn-secondary" disabled={saving || !invitesAllowed} type="submit">

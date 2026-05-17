@@ -4,6 +4,7 @@ import Loading from "../components/Loading";
 import { ErrorBanner, SuccessBanner } from "../components/Feedback";
 import { extractCollection, extractEntity, toApiError } from "../lib/api";
 import { getPollTemplate, POLL_TEMPLATES } from "../lib/pollTemplates";
+import PeoplePicker, { parseEmails } from "../components/PeoplePicker";
 
 const STEPS = ["Template", "Ideas", "Audience", "Sharing", "Publish"];
 
@@ -34,15 +35,6 @@ function initialIdeaRows(templateId) {
     name,
     note: "",
   }));
-}
-
-function normalizeEmails(value) {
-  return [...new Set(
-    String(value || "")
-      .split(/[\s,;]+/)
-      .map((email) => email.trim().toLowerCase())
-      .filter(Boolean)
-  )];
 }
 
 function formatPreviewDate(value) {
@@ -116,7 +108,7 @@ export default function CreatePollWizardPage({ api, activeWorkgroupId }) {
   const [step, setStep] = useState(0);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [refs, setRefs] = useState({ categories: [], groups: [], workgroups: [] });
+  const [refs, setRefs] = useState({ categories: [], groups: [], workgroups: [], people: [] });
   const [published, setPublished] = useState(null);
   const [form, setForm] = useState({
     templateId: initialTemplateId,
@@ -131,6 +123,7 @@ export default function CreatePollWizardPage({ api, activeWorkgroupId }) {
     publicAccess: false,
     allowGuestVotes: true,
     inviteEmails: "",
+    invitePersonIds: [],
     smsNumbers: "",
     startNow: true,
   });
@@ -139,7 +132,18 @@ export default function CreatePollWizardPage({ api, activeWorkgroupId }) {
   const cleanIdeas = form.ideas
     .map((idea) => ({ ...idea, name: idea.name.trim(), note: idea.note.trim() }))
     .filter((idea) => idea.name);
-  const inviteEmails = useMemo(() => normalizeEmails(form.inviteEmails), [form.inviteEmails]);
+  const inviteEmails = useMemo(() => {
+    const typedEmails = parseEmails(form.inviteEmails);
+    const personEmails = form.invitePersonIds
+      .map((personId) => refs.people.find((person) => person.id === personId)?.email)
+      .filter(Boolean)
+      .map((email) => email.toLowerCase());
+    return [...new Set([...personEmails, ...typedEmails])];
+  }, [form.inviteEmails, form.invitePersonIds, refs.people]);
+  const recentInviteEmails = useMemo(
+    () => [...new Set(refs.people.map((person) => person.email).filter(Boolean).map((email) => email.toLowerCase()))],
+    [refs.people]
+  );
   const selectedGroup = refs.groups.find((group) => group.id === form.groupId);
   const selectedWorkgroup = refs.workgroups.find((workgroup) => workgroup.id === form.workgroupId);
   const audienceLabel =
@@ -160,19 +164,27 @@ export default function CreatePollWizardPage({ api, activeWorkgroupId }) {
       setLoading(true);
       setError("");
       try {
-        const [categoryRes, groupRes, workgroupRes] = await Promise.all([
+        const peopleRequest = api.get("/person", { params: { page: 1, items: 200 } }).catch(() => null);
+        const [categoryRes, groupRes, workgroupRes, peopleRes] = await Promise.all([
           api.get("/category", { params: { page: 1, items: 100 } }),
           api.get("/circle", { params: { page: 1, items: 100, detail: "user" } }),
           api.get("/space", { params: { page: 1, items: 100 } }),
+          peopleRequest,
         ]);
         if (categoryRes.status >= 400) throw toApiError(categoryRes, "Failed to load categories");
         if (groupRes.status >= 400) throw toApiError(groupRes, "Failed to load circles");
         if (workgroupRes.status >= 400) throw toApiError(workgroupRes, "Failed to load spaces");
+        const groupPeople = extractCollection(groupRes, "groups")
+          .flatMap((group) => group.users || [])
+          .filter(Boolean);
+        const directPeople = peopleRes?.status < 400 ? extractCollection(peopleRes, "users") : [];
+        const peopleById = new Map([...groupPeople, ...directPeople].map((person) => [person.id, person]));
         if (!cancelled) {
           setRefs({
             categories: extractCollection(categoryRes, "categories"),
             groups: extractCollection(groupRes, "groups"),
             workgroups: extractCollection(workgroupRes, "workgroups"),
+            people: [...peopleById.values()],
           });
         }
       } catch (err) {
@@ -566,7 +578,19 @@ export default function CreatePollWizardPage({ api, activeWorkgroupId }) {
             </label>
             <label className="field">
               <span>Email invites</span>
-              <textarea rows="3" value={form.inviteEmails} onChange={(event) => updateField("inviteEmails", event.target.value)} placeholder="name@example.com, friend@example.com" />
+              <PeoplePicker
+                allowEmails
+                disabled={saving}
+                emailLabel="Additional email invites"
+                emailPlaceholder="name@example.com, friend@example.com"
+                emailValue={form.inviteEmails}
+                onEmailValueChange={(value) => updateField("inviteEmails", value)}
+                onSelectedIdsChange={(invitePersonIds) => updateField("invitePersonIds", invitePersonIds)}
+                people={refs.people}
+                recentEmails={recentInviteEmails}
+                selectedIds={form.invitePersonIds}
+                title="Invite people"
+              />
             </label>
             <label className="field">
               <span>SMS recipients</span>

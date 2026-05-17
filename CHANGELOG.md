@@ -7,6 +7,10 @@
   a live preview that updates while the poll is built.
 - Group poll notifications into actionable cards with inline vote, results,
   reminder, settings, public-link, read, and delete actions.
+- Add a reusable people/contact picker for circle members and poll invite
+  recipients.
+- Tune mobile navigation with a prominent Create action, alert re-entry, and
+  larger thumb-friendly targets.
 
 ## 0.1.36 - 2026-05-16
 - Add public Terms, Privacy, Abuse Policy, Support, and public invite
