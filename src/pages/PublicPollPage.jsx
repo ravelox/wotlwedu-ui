@@ -59,6 +59,10 @@ export default function PublicPollPage({ api, appVersion }) {
 
   const canVote = poll?.canGuestVote === true && !isExpired(poll?.expiration);
   const items = useMemo(() => poll?.list?.items || [], [poll]);
+  const publicUrl = poll?.publicShareUrl || (typeof window !== "undefined" ? window.location.href : "");
+  const publicContext = poll?.publicContext || {};
+  const voteCount = Object.keys(votes).length;
+  const votedAllIdeas = Boolean(session?.sessionToken && items.length && voteCount >= items.length);
   const pollCard = useMemo(
     () =>
       normalizePollCard(poll, {
@@ -69,6 +73,8 @@ export default function PublicPollPage({ api, appVersion }) {
       }),
     [canVote, poll]
   );
+
+  const shareText = `${poll?.name || "Vote in this poll"} - ${publicUrl}`;
 
   useEffect(() => {
     let cancelled = false;
@@ -138,6 +144,16 @@ export default function PublicPollPage({ api, appVersion }) {
       });
       if (response.status >= 400) throw toApiError(response, "Failed to save vote");
       setVotes((current) => ({ ...current, [itemId]: decision }));
+      setPoll((current) => {
+        if (!current?.publicContext || votes[itemId]) return current;
+        return {
+          ...current,
+          publicContext: {
+            ...current.publicContext,
+            voteCount: (Number(current.publicContext.voteCount) || 0) + 1,
+          },
+        };
+      });
       const expiresAt = response.data?.data?.vote?.expiresAt || session.expiresAt;
       const nextSession = { ...session, expiresAt };
       storeSession(token, nextSession);
@@ -152,6 +168,30 @@ export default function PublicPollPage({ api, appVersion }) {
     } finally {
       setVoting("");
     }
+  }
+
+  async function copyShareLink() {
+    if (!publicUrl) return;
+    await navigator.clipboard?.writeText(publicUrl);
+    setSuccess("Public link copied.");
+  }
+
+  async function sharePoll() {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: poll?.name || "wotlwedu poll",
+          text: poll?.description || "Help decide with this public poll.",
+          url: publicUrl,
+        });
+        setSuccess("Share sheet opened.");
+        return;
+      } catch (err) {
+        if (err?.name === "AbortError") return;
+      }
+    }
+    await navigator.clipboard?.writeText(shareText);
+    setSuccess("Share text copied.");
   }
 
   async function reportPoll(event) {
@@ -208,8 +248,22 @@ export default function PublicPollPage({ api, appVersion }) {
                 <div className="participant-summary">
                   <AvatarStack creator={pollCard?.creator} count={pollCard?.participantCount || 1} />
                   <span>
-                    Shared public decision · {items.length} idea{items.length === 1 ? "" : "s"} ·{" "}
+                    Shared by {poll?.creator?.name || "a wotlwedu user"} · {items.length} idea{items.length === 1 ? "" : "s"} ·{" "}
                     {canVote ? "guest voting open" : "voting closed"}
+                  </span>
+                </div>
+                <div className="public-social-proof">
+                  <span>
+                    <strong>{publicContext.participantCount || 0}</strong>
+                    guests joined
+                  </span>
+                  <span>
+                    <strong>{publicContext.voteCount || 0}</strong>
+                    guest votes
+                  </span>
+                  <span>
+                    <strong>{publicContext.acceptedInviteCount || 0}</strong>
+                    invites accepted
                   </span>
                 </div>
                 <div className="detail-grid">
@@ -230,6 +284,37 @@ export default function PublicPollPage({ api, appVersion }) {
                     <span>{session?.sessionToken ? "Vote on each idea" : "Start a guest session"}</span>
                   </div>
                 </div>
+                <div className="split-actions wrap-actions">
+                  <button className="btn" onClick={sharePoll} type="button">
+                    Share Poll
+                  </button>
+                  <button className="btn btn-secondary" onClick={copyShareLink} type="button">
+                    Copy Link
+                  </button>
+                  <a className="btn btn-tonal" href="#public-poll-ideas">
+                    View Ideas
+                  </a>
+                </div>
+              </div>
+            </section>
+          ) : null}
+
+          {votedAllIdeas ? (
+            <section className="public-conversion-card">
+              <div>
+                <p className="eyebrow">Votes saved</p>
+                <h2>You weighed in on every idea.</h2>
+                <p>
+                  Share this poll with one more person, or start your own decision with friends.
+                </p>
+              </div>
+              <div className="split-actions wrap-actions">
+                <button className="btn btn-secondary" onClick={sharePoll} type="button">
+                  Share This Poll
+                </button>
+                <Link className="btn" to="/register">
+                  Create Your Own
+                </Link>
               </div>
             </section>
           ) : null}
@@ -286,12 +371,34 @@ export default function PublicPollPage({ api, appVersion }) {
         </div>
 
         <aside className="public-poll-side">
+          {poll ? (
+            <section className="surface-card public-share-panel">
+              <p className="eyebrow">Share</p>
+              <h2>Bring more people in</h2>
+              <p className="tiny-meta">{publicUrl}</p>
+              <div className="split-actions wrap-actions">
+                <button className="btn" onClick={sharePoll} type="button">
+                  Share Poll
+                </button>
+                <button className="btn btn-secondary" onClick={copyShareLink} type="button">
+                  Copy Link
+                </button>
+              </div>
+            </section>
+          ) : null}
+
           {canVote ? (
             session?.sessionToken ? (
               <section className="surface-card">
                 <p className="eyebrow">Guest session</p>
                 <h2>Vote as guest</h2>
                 <p>Your progress is stored on this device until {formatPollDate(session.expiresAt)}.</p>
+                <div className="public-vote-progress">
+                  <span style={{ "--progress-size": `${items.length ? Math.round((voteCount / items.length) * 100) : 0}%` }} />
+                </div>
+                <p className="tiny-meta">
+                  {voteCount}/{items.length} idea{items.length === 1 ? "" : "s"} answered
+                </p>
                 <button
                   className="btn btn-secondary"
                   onClick={() => {
@@ -337,6 +444,16 @@ export default function PublicPollPage({ api, appVersion }) {
               <p>This link can be viewed, but guest voting is not currently available.</p>
             </section>
           )}
+
+          <section className="surface-card public-trust-card">
+            <p className="eyebrow">Trust</p>
+            <h2>What this link can do</h2>
+            <div className="trust-list">
+              <span>Public link: anyone with the URL can view it.</span>
+              <span>Guest votes are counted without creating an account.</span>
+              <span>Reports go to moderation under the abuse policy.</span>
+            </div>
+          </section>
 
           <section className="surface-card">
             <p className="eyebrow">Report</p>

@@ -151,6 +151,33 @@ export default function PublicPollControls({ api, electionId }) {
     setSuccess("Public link copied.");
   }
 
+  async function copyShareText() {
+    const url = publicSummary(stats).publicShareUrl;
+    if (!url) return;
+    await navigator.clipboard?.writeText(`Help decide with this wotlwedu poll: ${url}`);
+    setSuccess("Share text copied.");
+  }
+
+  async function sharePublicPoll() {
+    const url = publicSummary(stats).publicShareUrl;
+    if (!url) return;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "wotlwedu public poll",
+          text: "Help decide with this wotlwedu poll.",
+          url,
+        });
+        setSuccess("Share sheet opened.");
+        return;
+      } catch (err) {
+        if (err?.name === "AbortError") return;
+      }
+    }
+    await navigator.clipboard?.writeText(`Help decide with this wotlwedu poll: ${url}`);
+    setSuccess("Share text copied.");
+  }
+
   if (!electionId) return null;
 
   const summary = publicSummary(stats);
@@ -197,9 +224,18 @@ export default function PublicPollControls({ api, electionId }) {
             <div className="invite-banner">
               <span className="detail-label">Share link</span>
               <span className="invite-link">{summary.publicShareUrl}</span>
+              <p className="tiny-meta">
+                Anyone with this link can view the public page. Guest voting follows the settings below.
+              </p>
               <div className="split-actions wrap-actions">
+                <button className="btn" onClick={sharePublicPoll} type="button">
+                  Share Poll
+                </button>
                 <button className="btn btn-secondary" onClick={copyShareUrl} type="button">
                   Copy Link
+                </button>
+                <button className="btn btn-secondary" onClick={copyShareText} type="button">
+                  Copy Invite Text
                 </button>
                 <a className="btn btn-tonal" href={summary.publicShareUrl} rel="noreferrer" target="_blank">
                   Open Public Page
