@@ -3,11 +3,11 @@ import { Link, useSearchParams } from "react-router-dom";
 import Loading from "../components/Loading";
 import { ErrorBanner, SuccessBanner } from "../components/Feedback";
 import { extractCollection, extractEntity, toApiError } from "../lib/api";
+import { clearStoredCreatePollDraft, readStoredCreatePollDraft, saveCreatePollDraft } from "../lib/createPollDraft";
 import { getPollTemplate, POLL_TEMPLATES } from "../lib/pollTemplates";
 import PeoplePicker, { parseEmails } from "../components/PeoplePicker";
 
 const STEPS = ["Template", "Ideas", "Audience", "Sharing", "Publish"];
-const DRAFT_STORAGE_KEY = "wotlwedu_ui_create_poll_draft";
 
 function defaultExpirationValue() {
   const date = new Date(Date.now() + 24 * 60 * 60 * 1000);
@@ -46,28 +46,6 @@ function ideaRowsFromItems(items = []) {
       note: item.description || item.location || "",
     }))
     .filter((idea) => idea.name);
-}
-
-function safeStoredDraft() {
-  try {
-    const raw = localStorage.getItem(DRAFT_STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    return parsed && typeof parsed === "object" ? parsed : null;
-  } catch {
-    return null;
-  }
-}
-
-function persistDraft(form) {
-  try {
-    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify({
-      ...form,
-      savedAt: new Date().toISOString(),
-    }));
-  } catch {
-    // Draft persistence is a convenience only.
-  }
 }
 
 function formatPreviewDate(value) {
@@ -132,7 +110,7 @@ function PollLivePreview({ form, selectedTemplate, ideas, inviteCount, audienceL
 export default function CreatePollWizardPage({ api, activeWorkgroupId }) {
   const [searchParams] = useSearchParams();
   const startFromLast = searchParams.get("fromLast") === "1";
-  const storedDraft = startFromLast ? safeStoredDraft() : null;
+  const storedDraft = startFromLast ? readStoredCreatePollDraft() : null;
   const initialTemplateId = POLL_TEMPLATES.some(
     (template) => template.id === (storedDraft?.templateId || searchParams.get("template"))
   )
@@ -237,7 +215,7 @@ export default function CreatePollWizardPage({ api, activeWorkgroupId }) {
 
   useEffect(() => {
     if (loading || published) return;
-    persistDraft(form);
+    saveCreatePollDraft(form);
   }, [form, loading, published]);
 
   useEffect(() => {
@@ -487,11 +465,7 @@ export default function CreatePollWizardPage({ api, activeWorkgroupId }) {
       };
       setPublished(nextPublished);
       setSuccess("Poll published.");
-      try {
-        localStorage.removeItem(DRAFT_STORAGE_KEY);
-      } catch {
-        // Ignore storage cleanup failures.
-      }
+      clearStoredCreatePollDraft();
       setStep(4);
     } catch (err) {
       setError(err.message || "Failed to publish poll");

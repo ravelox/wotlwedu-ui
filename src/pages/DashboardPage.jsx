@@ -6,6 +6,7 @@ import { ErrorBanner } from "../components/Feedback";
 import EmptyState from "../components/EmptyState";
 import TutorialPanel from "../components/TutorialPanel";
 import { PollCard, formatPollDate } from "../components/PollCard";
+import { clearStoredCreatePollDraft, readStoredCreatePollDraft } from "../lib/createPollDraft";
 import {
   dismissPollTutorial,
   enablePollTutorial,
@@ -53,8 +54,8 @@ function buildCreateUrl(params = {}) {
 }
 
 function HabitPrompt({ prompt }) {
-  return (
-    <Link className={`habit-card habit-card-${prompt.tone || "default"}`} to={prompt.href}>
+  const body = (
+    <>
       <span className="habit-icon" aria-hidden="true">{prompt.mark}</span>
       <span>
         <small>{prompt.kicker}</small>
@@ -62,6 +63,31 @@ function HabitPrompt({ prompt }) {
         <span>{prompt.copy}</span>
       </span>
       <em>{prompt.action}</em>
+    </>
+  );
+
+  if (prompt.onDelete) {
+    return (
+      <div className={`habit-card habit-card-${prompt.tone || "default"} habit-card-with-delete`}>
+        <Link className="habit-card-link" to={prompt.href}>
+          {body}
+        </Link>
+        <button
+          aria-label="Delete draft"
+          className="btn btn-danger btn-icon-delete habit-delete-btn"
+          onClick={prompt.onDelete}
+          title="Delete draft"
+          type="button"
+        >
+          Delete
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <Link className={`habit-card habit-card-${prompt.tone || "default"}`} to={prompt.href}>
+      {body}
     </Link>
   );
 }
@@ -71,6 +97,7 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
   const [error, setError] = useState("");
   const [home, setHome] = useState(null);
   const [tutorial, setTutorial] = useState(null);
+  const [storedDraft, setStoredDraft] = useState(() => readStoredCreatePollDraft());
   const [startingTutorial, setStartingTutorial] = useState(false);
   const [updatingTutorial, setUpdatingTutorial] = useState(false);
 
@@ -187,18 +214,26 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
       });
     }
 
-    prompts.push({
-      mark: "6",
-      kicker: "Continue a draft",
-      title: "Start from last time",
-      copy: recentTemplate?.description || "Bring back your last poll setup and adjust it.",
-      action: "Resume",
-      href: buildCreateUrl({ fromLast: "1", template: recentTemplate?.id }),
-      tone: "draft",
-    });
+    if (storedDraft) {
+      prompts.push({
+        mark: "6",
+        kicker: "Continue a draft",
+        title: storedDraft.title || "Start from last time",
+        copy: recentTemplate?.description || storedDraft.description || "Bring back your last poll setup and adjust it.",
+        action: "Resume",
+        href: buildCreateUrl({ fromLast: "1", template: storedDraft.templateId || recentTemplate?.id }),
+        tone: "draft",
+        onDelete: () => {
+          const confirmed = window.confirm("Delete this draft poll? This only removes the saved draft from this browser.");
+          if (!confirmed) return;
+          clearStoredCreatePollDraft();
+          setStoredDraft(null);
+        },
+      });
+    }
 
     return prompts.slice(0, 6);
-  }, [home]);
+  }, [home, storedDraft]);
 
   if (loading) return <Loading text="Loading home..." />;
 
