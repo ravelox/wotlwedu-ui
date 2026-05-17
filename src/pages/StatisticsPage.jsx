@@ -5,6 +5,7 @@ import { ErrorBanner, SuccessBanner } from "../components/Feedback";
 import { extractEntity, toApiError } from "../lib/api";
 import TutorialPanel from "../components/TutorialPanel";
 import { getPollTutorial } from "../lib/tutorial";
+import { PollCard, PollVisual, formatPollDate, normalizePollCard } from "../components/PollCard";
 
 const STATUS_COLUMNS = ["Yes", "No", "Maybe", "Pending"];
 
@@ -12,7 +13,7 @@ function renderValue(data, key) {
   return data?.[key] ?? 0;
 }
 
-function buildResultSummary(stats, lookup) {
+function buildResultSummary(stats, lookup, itemLookup = {}) {
   const results = stats?.Results || {};
   const rows = Object.entries(results).map(([itemId, values]) => {
     const yes = Number(values?.Yes) || 0;
@@ -27,6 +28,8 @@ function buildResultSummary(stats, lookup) {
       no,
       pending,
       score: yes * 2 + maybe,
+      imageUrl: itemLookup[itemId]?.image?.url || null,
+      description: itemLookup[itemId]?.description || "",
     };
   });
   const sorted = rows.sort((a, b) => b.score - a.score || b.yes - a.yes || a.name.localeCompare(b.name));
@@ -98,7 +101,8 @@ export default function StatisticsPage({ api }) {
     };
   }, [api, electionId]);
 
-  const resultSummary = buildResultSummary(stats, lookup);
+  const itemLookup = Object.fromEntries((election?.list?.items || []).map((item) => [item.id, item]));
+  const enrichedResultSummary = buildResultSummary(stats, lookup, itemLookup);
   const completionLabel = participation
     ? `${participation.completedCount}/${participation.expectedParticipants} done (${participation.completionRate}%)`
     : "Participation unavailable";
@@ -120,10 +124,10 @@ export default function StatisticsPage({ api }) {
   }
 
   async function copySummary() {
-    const winnerText = resultSummary.winners.length
-      ? resultSummary.isTie
-        ? `Tie: ${resultSummary.winners.map((row) => row.name).join(", ")}`
-        : `Winner: ${resultSummary.winners[0].name}`
+    const winnerText = enrichedResultSummary.winners.length
+      ? enrichedResultSummary.isTie
+        ? `Tie: ${enrichedResultSummary.winners.map((row) => row.name).join(", ")}`
+        : `Winner: ${enrichedResultSummary.winners[0].name}`
       : "No winner yet";
     const lines = [
       `${election?.name || "Poll"} results`,
@@ -166,16 +170,53 @@ export default function StatisticsPage({ api }) {
           <div className="empty-state">No statistics available.</div>
         ) : (
           <div className="stack-form">
+            <PollCard
+              poll={election}
+              card={normalizePollCard(election, {
+                participantCount: participation?.expectedParticipants,
+                completionRate: participation?.completionRate,
+                winner: enrichedResultSummary.winners[0],
+                action: {
+                  label: pollStatus(election) === "Closed" ? "Review Votes" : "Vote",
+                  href: `/app/cast-vote/${electionId}`,
+                },
+              })}
+              tone={pollStatus(election) === "Closed" ? "default" : "urgent"}
+              meta={(
+                <div className="poll-card-meta-grid">
+                  <span>
+                    <strong>{audience?.group?.name || election?.group?.name || "Circle not set"}</strong>
+                    <small>circle</small>
+                  </span>
+                  <span>
+                    <strong>{audience?.list?.name || election?.list?.name || "List not set"}</strong>
+                    <small>idea list</small>
+                  </span>
+                  <span>
+                    <strong>{formatPollDate(election?.expiration)}</strong>
+                    <small>deadline</small>
+                  </span>
+                  <span>
+                    <strong>
+                      {enrichedResultSummary.winners.length
+                        ? enrichedResultSummary.winners.map((row) => row.name).join(", ")
+                        : "No winner yet"}
+                    </strong>
+                    <small>{enrichedResultSummary.isTie ? "tie" : "top result"}</small>
+                  </span>
+                </div>
+              )}
+            />
             <div className="result-summary">
               <div>
                 <span className="detail-label">Status</span>
                 <strong>{pollStatus(election)}</strong>
               </div>
               <div>
-                <span className="detail-label">{resultSummary.isTie ? "Tie" : "Winner"}</span>
+                <span className="detail-label">{enrichedResultSummary.isTie ? "Tie" : "Winner"}</span>
                 <strong>
-                  {resultSummary.winners.length
-                    ? resultSummary.winners.map((row) => row.name).join(", ")
+                  {enrichedResultSummary.winners.length
+                    ? enrichedResultSummary.winners.map((row) => row.name).join(", ")
                     : "No winner yet"}
                 </strong>
               </div>
@@ -188,18 +229,40 @@ export default function StatisticsPage({ api }) {
                 <strong>{publicShareUrl || "Private poll"}</strong>
               </div>
             </div>
-            {resultSummary.rows.length ? (
+            {enrichedResultSummary.rows.length ? (
               <div className="stats-sheet">
                 <strong>Ranked results</strong>
-                <div className="result-rank-list">
-                  {resultSummary.rows.map((row, index) => (
-                    <div className="result-rank-row" key={row.itemId}>
-                      <span>{index + 1}</span>
-                      <strong>{row.name}</strong>
-                      <span>{row.yes} yes</span>
-                      <span>{row.maybe} maybe</span>
-                      <span>{row.no} no</span>
-                    </div>
+                <div className="visual-result-list">
+                  {enrichedResultSummary.rows.map((row, index) => (
+                    <article className="visual-result-card" key={row.itemId}>
+                      <PollVisual
+                        card={{ name: row.name, imageUrl: row.imageUrl }}
+                        className="visual-result-image"
+                      />
+                      <div className="visual-result-body">
+                        <div className="split-heading compact">
+                          <div>
+                            <span className="detail-label">#{index + 1}</span>
+                            <strong>{row.name}</strong>
+                          </div>
+                          {enrichedResultSummary.winners.some((winner) => winner.itemId === row.itemId) ? (
+                            <span className="chip">Winner</span>
+                          ) : null}
+                        </div>
+                        {row.description ? <p>{row.description}</p> : null}
+                        <div className="result-vote-bars">
+                          <span style={{ "--bar-size": `${Math.min(row.yes * 20, 100)}%` }}>
+                            <strong>{row.yes}</strong> yes
+                          </span>
+                          <span style={{ "--bar-size": `${Math.min(row.maybe * 20, 100)}%` }}>
+                            <strong>{row.maybe}</strong> maybe
+                          </span>
+                          <span style={{ "--bar-size": `${Math.min(row.no * 20, 100)}%` }}>
+                            <strong>{row.no}</strong> no
+                          </span>
+                        </div>
+                      </div>
+                    </article>
                   ))}
                 </div>
               </div>

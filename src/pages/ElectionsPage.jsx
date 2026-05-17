@@ -3,26 +3,7 @@ import { Link } from "react-router-dom";
 import Loading from "../components/Loading";
 import { ErrorBanner } from "../components/Feedback";
 import { extractCollection, toApiError } from "../lib/api";
-
-function getElectionStatus(expiration) {
-  if (!expiration) return "Draft";
-  const date = new Date(expiration);
-  if (Number.isNaN(date.getTime())) return "Scheduled";
-  return date.getTime() < Date.now() ? "Closed" : "Open";
-}
-
-function formatDate(value) {
-  if (!value) return "No expiration";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(date);
-}
+import { PollCard, formatPollDate, normalizePollCard } from "../components/PollCard";
 
 export default function ElectionsPage({ api, activeWorkgroupId }) {
   const [loading, setLoading] = useState(true);
@@ -41,6 +22,7 @@ export default function ElectionsPage({ api, activeWorkgroupId }) {
           page: 1,
           items: 50,
           workgroupId: activeWorkgroupId || undefined,
+          detail: "list,group,image",
         },
       });
 
@@ -97,92 +79,53 @@ export default function ElectionsPage({ api, activeWorkgroupId }) {
           {elections.length === 0 ? (
             <div className="empty-state">No polls available for this scope.</div>
           ) : (
-            elections.map((election) => (
-              <article className="election-card" key={election.id}>
-                {(() => {
-                  const summary = participationByElectionId[election.id];
-                  const participation = summary?.participation;
-                  const audience = summary?.audience;
-                  return (
-                    <>
-                <div className="section-heading compact">
-                  <div>
-                    <strong>{election.name || "Untitled poll"}</strong>
-                    {election.description ? <p>{election.description}</p> : null}
-                  </div>
-                  <span className={`status-pill status-${getElectionStatus(election.expiration).toLowerCase()}`}>
-                    {getElectionStatus(election.expiration)}
-                  </span>
-                </div>
+            elections.map((election) => {
+              const summary = participationByElectionId[election.id];
+              const participation = summary?.participation;
+              const audience = summary?.audience;
+              const participantsWaiting = audience?.participants
+                ?.filter((participant) => participant.state !== "completed")
+                .slice(0, 3)
+                .map((participant) => participant.fullName || participant.email || participant.id)
+                .join(", ");
+              const card = normalizePollCard(election, {
+                participantCount: participation?.expectedParticipants,
+                completionRate: participation?.completionRate,
+                action: {
+                  label: participation?.completionRate >= 100 ? "View Results" : "Vote",
+                  href: participation?.completionRate >= 100
+                    ? `/app/statistics/${election.id}`
+                    : `/app/cast-vote/${election.id}`,
+                },
+              });
 
-                <div className="detail-grid">
-                  <div>
-                    <span className="detail-label">Expires</span>
-                    <span>{formatDate(election.expiration)}</span>
-                  </div>
-                  <div>
-                    <span className="detail-label">Space</span>
-                    <span>{election.workgroupId ? "Scoped space" : "All visible spaces"}</span>
-                  </div>
-                  <div>
-                    <span className="detail-label">Circle</span>
-                    <span>{audience?.group?.name || (election.groupId ? "Selected circle" : "Not set")}</span>
-                  </div>
-                  <div>
-                    <span className="detail-label">List</span>
-                    <span>{audience?.list?.name || (election.listId ? "Selected list" : "Not set")}</span>
-                  </div>
-                </div>
-
-                {participation ? (
-                  <div className="detail-grid">
-                    <div>
-                      <span className="detail-label">Participants</span>
-                      <span>{participation.expectedParticipants}</span>
+              return (
+                <PollCard
+                  card={card}
+                  key={election.id}
+                  meta={(
+                    <div className="poll-card-meta-grid">
+                      <span>
+                        <strong>{formatPollDate(election.expiration)}</strong>
+                        <small>deadline</small>
+                      </span>
+                      <span>
+                        <strong>{audience?.group?.name || election.group?.name || "Circle not set"}</strong>
+                        <small>circle</small>
+                      </span>
+                      <span>
+                        <strong>{audience?.list?.name || election.list?.name || "List not set"}</strong>
+                        <small>ideas</small>
+                      </span>
+                      <span>
+                        <strong>{participantsWaiting || "No follow-up needed"}</strong>
+                        <small>waiting on</small>
+                      </span>
                     </div>
-                    <div>
-                      <span className="detail-label">Completed</span>
-                      <span>{participation.completedCount}</span>
-                    </div>
-                    <div>
-                      <span className="detail-label">Needs Follow-up</span>
-                      <span>{participation.followUpCount}</span>
-                    </div>
-                    <div>
-                      <span className="detail-label">Completion</span>
-                      <span>{participation.completionRate}%</span>
-                    </div>
-                  </div>
-                ) : null}
-
-                {audience?.participants?.length ? (
-                  <p className="tiny-meta">
-                    Next follow-up:{" "}
-                    {audience.participants
-                      .filter((participant) => participant.state !== "completed")
-                      .slice(0, 3)
-                      .map((participant) => participant.fullName || participant.email || participant.id)
-                      .join(", ") || "No follow-up needed"}
-                  </p>
-                ) : null}
-
-                <div className="split-actions">
-                  <Link className="btn btn-secondary" to={`/app/cast-vote/${election.id}`}>
-                    Vote
-                  </Link>
-                  <Link className="text-link" to={`/app/poll/${election.id}`}>
-                    Edit
-                  </Link>
-                  <Link className="text-link" to={`/app/statistics/${election.id}`}>
-                    Statistics
-                  </Link>
-                  <span className="tiny-meta">ID {election.id}</span>
-                </div>
-                    </>
-                  );
-                })()}
-              </article>
-            ))
+                  )}
+                />
+              );
+            })
           )}
         </div>
       </section>

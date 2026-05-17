@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Loading from "../components/Loading";
 import { ErrorBanner } from "../components/Feedback";
 import TutorialPanel from "../components/TutorialPanel";
+import { PollCard, formatPollDate } from "../components/PollCard";
 import {
   dismissPollTutorial,
   enablePollTutorial,
@@ -10,107 +11,6 @@ import {
   skipPollTutorial,
   startPollTutorial,
 } from "../lib/tutorial";
-
-function formatDate(value) {
-  if (!value) return "No expiration";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat(undefined, {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(date);
-}
-
-function timeUntil(value) {
-  if (!value) return "No deadline";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "No deadline";
-  const diffMs = date.getTime() - Date.now();
-  if (diffMs <= 0) return "Closed";
-  const diffHours = Math.round(diffMs / (60 * 60 * 1000));
-  if (diffHours < 24) return `${Math.max(diffHours, 1)}h left`;
-  const diffDays = Math.round(diffHours / 24);
-  return `${diffDays}d left`;
-}
-
-function cardAction(card) {
-  return card?.action || {
-    label: card?.status?.name === "Ended" ? "View Results" : "View Results",
-    href: `/app/statistics/${card?.id || ""}`,
-  };
-}
-
-function PollVisual({ card }) {
-  const label = card?.name || "Poll";
-  if (card?.imageUrl) {
-    return <img className="social-poll-image" src={card.imageUrl} alt="" />;
-  }
-  return (
-    <div className="social-poll-image social-poll-image-fallback" aria-hidden="true">
-      {label.slice(0, 1).toUpperCase()}
-    </div>
-  );
-}
-
-function AvatarStack({ creator, count = 0 }) {
-  const people = [
-    creator || { initials: "W", name: "Wotlwedu" },
-    ...(count > 1 ? [{ initials: "+", name: `${count - 1} more` }] : []),
-  ].slice(0, 3);
-  return (
-    <div className="avatar-stack" aria-label={`${count || 1} participant${count === 1 ? "" : "s"}`}>
-      {people.map((person, index) => (
-        <span className="avatar-dot" title={person.name} key={`${person.name || "person"}-${index}`}>
-          {person.initials || "W"}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-function PollCard({ card, tone = "default" }) {
-  if (!card) return null;
-  const action = cardAction(card);
-  return (
-    <article className={`social-poll-card social-poll-card-${tone}`}>
-      <PollVisual card={card} />
-      <div className="social-poll-body">
-        <div className="split-heading">
-          <div>
-            <p className="eyebrow">{card.status?.name || "Open"}</p>
-            <h3>{card.name || "Untitled poll"}</h3>
-          </div>
-          <span className="chip">{timeUntil(card.expiration)}</span>
-        </div>
-        {card.description ? <p>{card.description}</p> : null}
-        <div className="idea-chip-row">
-          {(card.ideas || []).slice(0, 3).map((idea) => (
-            <span className="chip chip-soft" key={idea.id}>
-              {idea.name}
-            </span>
-          ))}
-          {!card.ideas?.length && card.audience?.name ? (
-            <span className="chip chip-soft">{card.audience.name}</span>
-          ) : null}
-        </div>
-        <div className="social-card-footer">
-          <div className="participant-summary">
-            <AvatarStack creator={card.creator} count={card.participantCount} />
-            <span>
-              {card.participantCount || 0} participant{card.participantCount === 1 ? "" : "s"} ·{" "}
-              {card.completionRate || 0}% complete
-            </span>
-          </div>
-          <Link className="btn btn-secondary" to={action.href}>
-            {action.label}
-          </Link>
-        </div>
-      </div>
-    </article>
-  );
-}
 
 function ActivityItem({ activity }) {
   if (!activity) return null;
@@ -122,7 +22,7 @@ function ActivityItem({ activity }) {
         <strong>{activity.title}</strong>
         <small>{activity.text}</small>
       </span>
-      <span className="tiny-meta">{formatDate(activity.createdAt)}</span>
+      <span className="tiny-meta">{formatPollDate(activity.createdAt)}</span>
     </Link>
   );
 }

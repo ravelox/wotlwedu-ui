@@ -3,6 +3,7 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 import Loading from "../components/Loading";
 import { ErrorBanner, SuccessBanner } from "../components/Feedback";
 import { toApiError } from "../lib/api";
+import { AvatarStack, PollVisual, formatPollDate, normalizePollCard, timeUntil } from "../components/PollCard";
 
 const SESSION_PREFIX = "wotlwedu_public_poll_session:";
 const DECISIONS = [
@@ -34,13 +35,6 @@ function clearStoredSession(token) {
   localStorage.removeItem(`${SESSION_PREFIX}${token}`);
 }
 
-function formatDate(value) {
-  if (!value) return "No expiration";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "No expiration";
-  return date.toLocaleString();
-}
-
 function isExpired(value) {
   if (!value) return false;
   const date = new Date(value);
@@ -65,6 +59,16 @@ export default function PublicPollPage({ api, appVersion }) {
 
   const canVote = poll?.canGuestVote === true && !isExpired(poll?.expiration);
   const items = useMemo(() => poll?.list?.items || [], [poll]);
+  const pollCard = useMemo(
+    () =>
+      normalizePollCard(poll, {
+        action: {
+          label: canVote ? "Start Voting" : "View Ideas",
+          href: "#public-poll-ideas",
+        },
+      }),
+    [canVote, poll]
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -192,46 +196,73 @@ export default function PublicPollPage({ api, appVersion }) {
           </div>
           <ErrorBanner error={error} />
           <SuccessBanner message={success} />
-          {poll?.description ? <p className="public-poll-copy">{poll.description}</p> : null}
-          <div className="detail-grid">
-            <div>
-              <span className="detail-label">Status</span>
-              <span>{poll?.publicContext?.statusLabel || "Open"}</span>
-            </div>
-            <div>
-              <span className="detail-label">Closes</span>
-              <span>{formatDate(poll?.expiration)}</span>
-            </div>
-            <div>
-              <span className="detail-label">Privacy</span>
-              <span>Anyone with this link can view this poll.</span>
-            </div>
-            <div>
-              <span className="detail-label">Guest voting</span>
-              <span>{canVote ? "Enabled" : "Not available"}</span>
-            </div>
-          </div>
+          {poll ? (
+            <section className="public-poll-hero-card">
+              <PollVisual card={pollCard} className="public-poll-hero-image" />
+              <div className="public-poll-hero-body">
+                <div className="chip-row">
+                  <span className="chip">{poll?.publicContext?.statusLabel || "Open"}</span>
+                  <span className="chip chip-soft">{timeUntil(poll?.expiration)}</span>
+                </div>
+                {poll?.description ? <p className="public-poll-copy">{poll.description}</p> : null}
+                <div className="participant-summary">
+                  <AvatarStack creator={pollCard?.creator} count={pollCard?.participantCount || 1} />
+                  <span>
+                    Shared public decision · {items.length} idea{items.length === 1 ? "" : "s"} ·{" "}
+                    {canVote ? "guest voting open" : "voting closed"}
+                  </span>
+                </div>
+                <div className="detail-grid">
+                  <div>
+                    <span className="detail-label">Closes</span>
+                    <span>{formatPollDate(poll?.expiration)}</span>
+                  </div>
+                  <div>
+                    <span className="detail-label">Privacy</span>
+                    <span>Anyone with this link can view this poll.</span>
+                  </div>
+                  <div>
+                    <span className="detail-label">Guest voting</span>
+                    <span>{canVote ? "Enabled" : "Not available"}</span>
+                  </div>
+                  <div>
+                    <span className="detail-label">Next step</span>
+                    <span>{session?.sessionToken ? "Vote on each idea" : "Start a guest session"}</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+          ) : null}
 
           {!poll ? (
             <div className="empty-state">This public poll could not be loaded.</div>
           ) : !items.length ? (
             <div className="empty-state">This poll does not have ideas available yet.</div>
           ) : (
-            <div className="public-idea-grid">
+            <div className="public-idea-grid" id="public-poll-ideas">
               {items.map((item) => (
                 <article className="public-idea-card" key={item.id}>
                   {item.image?.url ? (
                     <img className="public-idea-image" src={item.image.url} alt="" />
-                  ) : null}
+                  ) : (
+                    <div className="public-idea-image social-poll-image-fallback" aria-hidden="true">
+                      {(item.name || "Idea").slice(0, 1).toUpperCase()}
+                    </div>
+                  )}
                   <div>
-                    <strong>{item.name || "Untitled idea"}</strong>
+                    <div className="split-heading compact">
+                      <strong>{item.name || "Untitled idea"}</strong>
+                      {votes[item.id] ? <span className="chip">{votes[item.id]}</span> : null}
+                    </div>
                     {item.description ? <p>{item.description}</p> : null}
-                    {item.location ? <span className="chip">{item.location}</span> : null}
-                    {item.url ? (
-                      <a className="text-link" href={item.url} rel="noreferrer" target="_blank">
-                        Open link
-                      </a>
-                    ) : null}
+                    <div className="chip-row">
+                      {item.location ? <span className="chip">{item.location}</span> : null}
+                      {item.url ? (
+                        <a className="text-link" href={item.url} rel="noreferrer" target="_blank">
+                          Open link
+                        </a>
+                      ) : null}
+                    </div>
                   </div>
                   {canVote && session?.sessionToken ? (
                     <div className="decision-row">
@@ -260,7 +291,7 @@ export default function PublicPollPage({ api, appVersion }) {
               <section className="surface-card">
                 <p className="eyebrow">Guest session</p>
                 <h2>Vote as guest</h2>
-                <p>Your progress is stored on this device until {formatDate(session.expiresAt)}.</p>
+                <p>Your progress is stored on this device until {formatPollDate(session.expiresAt)}.</p>
                 <button
                   className="btn btn-secondary"
                   onClick={() => {
