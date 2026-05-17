@@ -105,9 +105,16 @@ The home route is a social activity surface. It highlights polls that need the
 user's vote, polls closing soon, recent activity, recent winners, quick-start
 templates, and unread notification count.
 
-The primary poll creation route is `/app/create-poll`, a guided flow for choosing
-a template, adding ideas, selecting a circle or share-link audience, configuring
-public/private sharing, sending email invites, and handing off share text for SMS.
+The notification route groups poll-related updates into actionable cards. Poll
+groups include inline actions for voting, viewing results, sending reminders,
+opening poll settings, reaching public-link controls, and marking the group
+read, while non-poll notifications keep focused actions such as accepting friend
+requests.
+
+The primary poll creation route is `/app/create-poll`, a guided flow that starts
+with a visual template gallery for dinner, movies, trips, date night, family
+activity, team lunch, meeting times, and custom polls. The builder keeps a live
+preview visible while the user edits ideas, audience, deadline, and sharing.
 Poll editors still include public-sharing controls for link visibility, guest
 voting, platform email invites, invite history, and public activity/report counts.
 

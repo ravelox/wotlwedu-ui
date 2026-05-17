@@ -1,11 +1,14 @@
 export const POLL_TEMPLATES = [
   {
     id: "food",
-    name: "Food",
+    name: "Dinner",
     category: "Food",
     title: "Where should we eat?",
     description: "Pick the best place or meal for the group.",
     ideas: ["Pizza", "Sushi", "Tacos", "Burgers"],
+    icon: "D",
+    bestFor: "Friends, family, last-minute plans",
+    accent: "food",
   },
   {
     id: "movies",
@@ -14,14 +17,20 @@ export const POLL_TEMPLATES = [
     title: "What should we watch?",
     description: "Choose a movie or show everyone can get behind.",
     ideas: ["Comedy", "Action", "Documentary", "Something new"],
+    icon: "M",
+    bestFor: "Movie nights and watch parties",
+    accent: "movies",
   },
   {
     id: "travel",
-    name: "Travel",
+    name: "Trip",
     category: "Travel",
     title: "Where should we go?",
     description: "Compare trip ideas and find the favorite.",
     ideas: ["Beach", "Mountains", "City weekend", "Road trip"],
+    icon: "T",
+    bestFor: "Weekends, vacations, day trips",
+    accent: "travel",
   },
   {
     id: "team-lunch",
@@ -30,6 +39,9 @@ export const POLL_TEMPLATES = [
     title: "Team lunch plan",
     description: "Decide on a lunch option that works for the team.",
     ideas: ["Catering", "Food trucks", "Restaurant", "Bring your own"],
+    icon: "L",
+    bestFor: "Work groups and recurring teams",
+    accent: "team",
   },
   {
     id: "date-night",
@@ -38,6 +50,9 @@ export const POLL_TEMPLATES = [
     title: "Date night idea",
     description: "Pick a plan for the next night out.",
     ideas: ["Dinner", "Movie", "Live music", "Walk and dessert"],
+    icon: "N",
+    bestFor: "Couples and close friends",
+    accent: "date",
   },
   {
     id: "family-activity",
@@ -46,6 +61,9 @@ export const POLL_TEMPLATES = [
     title: "Family activity",
     description: "Find something fun for everyone.",
     ideas: ["Park", "Game night", "Museum", "Movie night"],
+    icon: "F",
+    bestFor: "Kids, relatives, mixed ages",
+    accent: "family",
   },
   {
     id: "meeting-time",
@@ -54,6 +72,20 @@ export const POLL_TEMPLATES = [
     title: "When should we meet?",
     description: "Vote on the best time for everyone.",
     ideas: ["Monday morning", "Tuesday afternoon", "Wednesday lunch", "Friday wrap-up"],
+    icon: "S",
+    bestFor: "Scheduling and planning",
+    accent: "schedule",
+  },
+  {
+    id: "custom",
+    name: "Custom",
+    category: "General",
+    title: "What should we choose?",
+    description: "Start with a blank decision and add your own ideas.",
+    ideas: ["Option one", "Option two", "Option three"],
+    icon: "C",
+    bestFor: "Anything that needs a group decision",
+    accent: "custom",
   },
 ];
 

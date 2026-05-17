@@ -3,6 +3,10 @@
 ## Unreleased
 - Replace the dashboard-style home screen with a social activity home powered by
   the backend home summary endpoint.
+- Add a richer create-poll template gallery with decision-specific templates and
+  a live preview that updates while the poll is built.
+- Group poll notifications into actionable cards with inline vote, results,
+  reminder, settings, public-link, read, and delete actions.
 
 ## 0.1.36 - 2026-05-16
 - Add public Terms, Privacy, Abuse Policy, Support, and public invite

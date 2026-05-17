@@ -45,6 +45,65 @@ function normalizeEmails(value) {
   )];
 }
 
+function formatPreviewDate(value) {
+  if (!value) return "No deadline";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "No deadline";
+  return new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
+}
+
+function PollLivePreview({ form, selectedTemplate, ideas, inviteCount, audienceLabel, spaceLabel }) {
+  return (
+    <aside className="poll-live-preview" aria-label="Live poll preview">
+      <div className={`poll-preview-media poll-preview-${selectedTemplate.accent || "custom"}`}>
+        <span>{selectedTemplate.icon || selectedTemplate.name.slice(0, 1)}</span>
+      </div>
+      <div className="poll-preview-body">
+        <div className="chip-row">
+          <span className="chip">{selectedTemplate.name}</span>
+          <span className="chip chip-soft">{form.publicAccess ? "Share link" : "Private circle"}</span>
+        </div>
+        <div>
+          <p className="eyebrow">Live preview</p>
+          <h3>{form.title || selectedTemplate.title}</h3>
+          <p>{form.description || selectedTemplate.description}</p>
+        </div>
+        <div className="poll-preview-idea-list">
+          {(ideas.length ? ideas : initialIdeaRows(form.templateId)).slice(0, 4).map((idea, index) => (
+            <span key={idea.id || `${idea.name}-${index}`}>
+              <strong>{idea.name || `Idea ${index + 1}`}</strong>
+              {idea.note ? <small>{idea.note}</small> : null}
+            </span>
+          ))}
+        </div>
+        <div className="poll-preview-meta">
+          <span>
+            <strong>{audienceLabel}</strong>
+            <small>audience</small>
+          </span>
+          <span>
+            <strong>{formatPreviewDate(form.expiration)}</strong>
+            <small>deadline</small>
+          </span>
+          <span>
+            <strong>{spaceLabel}</strong>
+            <small>space</small>
+          </span>
+          <span>
+            <strong>{inviteCount}</strong>
+            <small>email invite{inviteCount === 1 ? "" : "s"}</small>
+          </span>
+        </div>
+      </div>
+    </aside>
+  );
+}
+
 export default function CreatePollWizardPage({ api, activeWorkgroupId }) {
   const [searchParams] = useSearchParams();
   const initialTemplateId = POLL_TEMPLATES.some(
@@ -81,6 +140,13 @@ export default function CreatePollWizardPage({ api, activeWorkgroupId }) {
     .map((idea) => ({ ...idea, name: idea.name.trim(), note: idea.note.trim() }))
     .filter((idea) => idea.name);
   const inviteEmails = useMemo(() => normalizeEmails(form.inviteEmails), [form.inviteEmails]);
+  const selectedGroup = refs.groups.find((group) => group.id === form.groupId);
+  const selectedWorkgroup = refs.workgroups.find((workgroup) => workgroup.id === form.workgroupId);
+  const audienceLabel =
+    form.audienceMode === "public"
+      ? "Anyone with link"
+      : selectedGroup?.name || "Choose a circle";
+  const spaceLabel = selectedWorkgroup?.name || (form.workgroupId ? "Selected space" : "All visible spaces");
   const canPublish =
     form.title.trim() &&
     cleanIdeas.length >= 2 &&
@@ -348,18 +414,29 @@ export default function CreatePollWizardPage({ api, activeWorkgroupId }) {
         <ErrorBanner error={error} />
         <SuccessBanner message={success} />
 
+        <div className="wizard-layout">
+          <div className="wizard-editor">
         {step === 0 ? (
           <div className="wizard-panel">
+            <div className="template-gallery-heading">
+              <div>
+                <p className="eyebrow">Template gallery</p>
+                <h3>Start with the decision you are making</h3>
+              </div>
+              <span className="chip">{POLL_TEMPLATES.length} templates</span>
+            </div>
             <div className="template-grid">
               {POLL_TEMPLATES.map((template) => (
                 <button
-                  className={`template-tile${form.templateId === template.id ? " template-tile-active" : ""}`}
+                  className={`template-tile template-tile-${template.accent || "custom"}${form.templateId === template.id ? " template-tile-active" : ""}`}
                   key={template.id}
                   onClick={() => selectTemplate(template.id)}
                   type="button"
                 >
+                  <span className="template-icon">{template.icon || template.name.slice(0, 1)}</span>
                   <strong>{template.name}</strong>
                   <span>{template.title}</span>
+                  <small>{template.bestFor}</small>
                 </button>
               ))}
             </div>
@@ -565,6 +642,16 @@ export default function CreatePollWizardPage({ api, activeWorkgroupId }) {
             )}
           </div>
         ) : null}
+          </div>
+          <PollLivePreview
+            form={form}
+            selectedTemplate={selectedTemplate}
+            ideas={cleanIdeas}
+            inviteCount={inviteEmails.length}
+            audienceLabel={audienceLabel}
+            spaceLabel={spaceLabel}
+          />
+        </div>
 
         <div className="wizard-actions">
           <button className="btn btn-secondary" disabled={step === 0 || saving} onClick={() => setStep((current) => Math.max(current - 1, 0))} type="button">
