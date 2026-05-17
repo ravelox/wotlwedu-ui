@@ -782,6 +782,104 @@ a {
   font-weight: 700;
 }
 
+.habit-loop-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.habit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.habit-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+  min-height: 104px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(32, 48, 56, 0.08);
+  background: rgba(255, 255, 255, 0.68);
+  color: var(--text);
+  text-decoration: none;
+  box-shadow: var(--shadow-soft);
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.habit-card:hover {
+  border-color: rgba(29, 92, 82, 0.22);
+  box-shadow: 0 18px 36px rgba(32, 48, 56, 0.12);
+  transform: translateY(-2px);
+}
+
+.habit-card small,
+.habit-card strong,
+.habit-card span {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.habit-card small {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.habit-card strong {
+  margin-top: 2px;
+}
+
+.habit-card span span {
+  margin-top: 4px;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.habit-card em {
+  align-self: end;
+  color: var(--brand);
+  font-size: 0.82rem;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.habit-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: rgba(29, 92, 82, 0.12);
+  color: var(--brand);
+  font-weight: 900;
+}
+
+.habit-card-urgent .habit-icon {
+  background: rgba(217, 107, 107, 0.16);
+  color: #ad4040;
+}
+
+.habit-card-deadline .habit-icon {
+  background: rgba(209, 138, 63, 0.18);
+  color: #996029;
+}
+
+.habit-card-winner .habit-icon {
+  background: rgba(94, 124, 218, 0.18);
+  color: #4b65b4;
+}
+
+.habit-card-draft .habit-icon {
+  background: rgba(160, 98, 184, 0.18);
+  color: #864ca0;
+}
+
 .section-heading,
 .split-actions,
 .chip-row,
@@ -2217,7 +2315,8 @@ pre {
 :root[data-theme="dark"] .public-idea-card,
 :root[data-theme="dark"] .visual-result-card,
 :root[data-theme="dark"] .poll-card-meta-grid span,
-:root[data-theme="dark"] .public-social-proof span {
+:root[data-theme="dark"] .public-social-proof span,
+:root[data-theme="dark"] .habit-card {
   background: var(--panel);
   border-color: var(--border);
 }
@@ -2243,6 +2342,7 @@ pre {
   .notification-group-card,
   .social-poll-card,
   .social-metric-card,
+  .habit-card,
   .activity-item,
   .winner-row,
   .quick-start-card,
@@ -2279,6 +2379,7 @@ pre {
   .notification-group-card,
   .social-poll-card,
   .social-metric-card,
+  .habit-card,
   .activity-item,
   .winner-row,
   .quick-start-card,
@@ -2359,6 +2460,7 @@ pre {
   }
 
   .social-card-footer,
+  .habit-card,
   .activity-item,
   .winner-row {
     grid-template-columns: 1fr;

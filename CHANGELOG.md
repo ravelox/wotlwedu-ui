@@ -13,6 +13,8 @@
   larger thumb-friendly targets.
 - Add warmer social polish with reusable avatars, richer empty/loading states,
   friendlier poll-card media fallbacks, social proof copy, and subtle motion.
+- Add habit-loop prompts for waiting votes, closing polls, rematches, reusable
+  lists/circles, and last-draft continuation.
 
 ## 0.1.36 - 2026-05-16
 - Add public Terms, Privacy, Abuse Policy, Support, and public invite

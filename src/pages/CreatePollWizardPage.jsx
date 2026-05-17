@@ -7,6 +7,7 @@ import { getPollTemplate, POLL_TEMPLATES } from "../lib/pollTemplates";
 import PeoplePicker, { parseEmails } from "../components/PeoplePicker";
 
 const STEPS = ["Template", "Ideas", "Audience", "Sharing", "Publish"];
+const DRAFT_STORAGE_KEY = "wotlwedu_ui_create_poll_draft";
 
 function defaultExpirationValue() {
   const date = new Date(Date.now() + 24 * 60 * 60 * 1000);
@@ -35,6 +36,38 @@ function initialIdeaRows(templateId) {
     name,
     note: "",
   }));
+}
+
+function ideaRowsFromItems(items = []) {
+  return items
+    .map((item) => ({
+      id: localId(item.id || item.name),
+      name: item.name || "",
+      note: item.description || item.location || "",
+    }))
+    .filter((idea) => idea.name);
+}
+
+function safeStoredDraft() {
+  try {
+    const raw = localStorage.getItem(DRAFT_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function persistDraft(form) {
+  try {
+    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify({
+      ...form,
+      savedAt: new Date().toISOString(),
+    }));
+  } catch {
+    // Draft persistence is a convenience only.
+  }
 }
 
 function formatPreviewDate(value) {
@@ -98,10 +131,12 @@ function PollLivePreview({ form, selectedTemplate, ideas, inviteCount, audienceL
 
 export default function CreatePollWizardPage({ api, activeWorkgroupId }) {
   const [searchParams] = useSearchParams();
+  const startFromLast = searchParams.get("fromLast") === "1";
+  const storedDraft = startFromLast ? safeStoredDraft() : null;
   const initialTemplateId = POLL_TEMPLATES.some(
-    (template) => template.id === searchParams.get("template")
+    (template) => template.id === (storedDraft?.templateId || searchParams.get("template"))
   )
-    ? searchParams.get("template")
+    ? storedDraft?.templateId || searchParams.get("template")
     : "food";
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -112,20 +147,20 @@ export default function CreatePollWizardPage({ api, activeWorkgroupId }) {
   const [published, setPublished] = useState(null);
   const [form, setForm] = useState({
     templateId: initialTemplateId,
-    title: getPollTemplate(initialTemplateId).title,
-    description: getPollTemplate(initialTemplateId).description,
-    categoryId: "",
-    workgroupId: activeWorkgroupId || "",
-    ideas: initialIdeaRows(initialTemplateId),
-    groupId: "",
-    audienceMode: "circle",
-    expiration: defaultExpirationValue(),
-    publicAccess: false,
-    allowGuestVotes: true,
-    inviteEmails: "",
-    invitePersonIds: [],
-    smsNumbers: "",
-    startNow: true,
+    title: storedDraft?.title || getPollTemplate(initialTemplateId).title,
+    description: storedDraft?.description || getPollTemplate(initialTemplateId).description,
+    categoryId: storedDraft?.categoryId || "",
+    workgroupId: storedDraft?.workgroupId || activeWorkgroupId || "",
+    ideas: storedDraft?.ideas?.length ? storedDraft.ideas : initialIdeaRows(initialTemplateId),
+    groupId: storedDraft?.groupId || searchParams.get("groupId") || "",
+    audienceMode: storedDraft?.audienceMode || "circle",
+    expiration: storedDraft?.expiration || defaultExpirationValue(),
+    publicAccess: storedDraft?.publicAccess || false,
+    allowGuestVotes: storedDraft?.allowGuestVotes ?? true,
+    inviteEmails: storedDraft?.inviteEmails || "",
+    invitePersonIds: storedDraft?.invitePersonIds || [],
+    smsNumbers: storedDraft?.smsNumbers || "",
+    startNow: storedDraft?.startNow ?? true,
   });
 
   const selectedTemplate = getPollTemplate(form.templateId);
@@ -199,6 +234,76 @@ export default function CreatePollWizardPage({ api, activeWorkgroupId }) {
       cancelled = true;
     };
   }, [api]);
+
+  useEffect(() => {
+    if (loading || published) return;
+    persistDraft(form);
+  }, [form, loading, published]);
+
+  useEffect(() => {
+    if (loading) return;
+
+    let cancelled = false;
+    async function applyPrefill() {
+      const listId = searchParams.get("listId");
+      const groupId = searchParams.get("groupId");
+      const rematchPollId = searchParams.get("rematchPollId");
+
+      if (groupId) {
+        setForm((current) => ({
+          ...current,
+          groupId,
+          audienceMode: "circle",
+          publicAccess: current.publicAccess && !groupId ? current.publicAccess : false,
+        }));
+        setStep((current) => Math.max(current, 2));
+      }
+
+      try {
+        if (listId) {
+          const response = await api.get(`/list/${listId}`, { params: { detail: "item,image" } });
+          if (cancelled || response.status >= 400) return;
+          const list = response.data?.data?.list || response.data?.list;
+          const ideas = ideaRowsFromItems(list?.items);
+          setForm((current) => ({
+            ...current,
+            title: current.title || `Poll for ${list?.name || "this list"}`,
+            description: list?.description || current.description,
+            workgroupId: list?.workgroupId || current.workgroupId,
+            categoryId: list?.categoryId || current.categoryId,
+            ideas: ideas.length >= 2 ? ideas : current.ideas,
+          }));
+          setStep((current) => Math.max(current, 1));
+        }
+
+        if (rematchPollId) {
+          const response = await api.get(`/poll/${rematchPollId}`, { params: { detail: "list,group,image,item" } });
+          if (cancelled || response.status >= 400) return;
+          const poll = response.data?.data?.election || response.data?.election;
+          const ideas = ideaRowsFromItems(poll?.list?.items || poll?.items);
+          setForm((current) => ({
+            ...current,
+            title: `Rematch: ${poll?.name || current.title}`,
+            description: poll?.description || current.description,
+            workgroupId: poll?.workgroupId || current.workgroupId,
+            categoryId: poll?.categoryId || current.categoryId,
+            groupId: poll?.groupId || poll?.group?.id || current.groupId,
+            audienceMode: poll?.groupId || poll?.group?.id ? "circle" : current.audienceMode,
+            ideas: ideas.length >= 2 ? ideas : current.ideas,
+            expiration: addDays(3),
+          }));
+          setStep((current) => Math.max(current, 2));
+        }
+      } catch {
+        // Habit-loop prefill should never block manual poll creation.
+      }
+    }
+
+    applyPrefill();
+    return () => {
+      cancelled = true;
+    };
+  }, [api, loading, searchParams]);
 
   useEffect(() => {
     setForm((current) => {
@@ -382,6 +487,11 @@ export default function CreatePollWizardPage({ api, activeWorkgroupId }) {
       };
       setPublished(nextPublished);
       setSuccess("Poll published.");
+      try {
+        localStorage.removeItem(DRAFT_STORAGE_KEY);
+      } catch {
+        // Ignore storage cleanup failures.
+      }
       setStep(4);
     } catch (err) {
       setError(err.message || "Failed to publish poll");

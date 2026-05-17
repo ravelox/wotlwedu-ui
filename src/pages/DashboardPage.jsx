@@ -44,6 +44,28 @@ function EmptySocialState({ title, copy, actionTo, actionLabel }) {
   );
 }
 
+function buildCreateUrl(params = {}) {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value) query.set(key, value);
+  });
+  return `/app/create-poll${query.toString() ? `?${query.toString()}` : ""}`;
+}
+
+function HabitPrompt({ prompt }) {
+  return (
+    <Link className={`habit-card habit-card-${prompt.tone || "default"}`} to={prompt.href}>
+      <span className="habit-icon" aria-hidden="true">{prompt.mark}</span>
+      <span>
+        <small>{prompt.kicker}</small>
+        <strong>{prompt.title}</strong>
+        <span>{prompt.copy}</span>
+      </span>
+      <em>{prompt.action}</em>
+    </Link>
+  );
+}
+
 export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -96,6 +118,86 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
       unread: home?.unreadNotificationCount || 0,
       winners: home?.recentWinners?.length || 0,
     };
+  }, [home]);
+
+  const habitPrompts = useMemo(() => {
+    const prompts = [];
+    const needsVote = home?.needsVote?.[0];
+    const closingSoon = home?.closingSoon?.[0];
+    const recentWinner = home?.recentWinners?.find((card) => card.winner) || home?.recentWinners?.[0];
+    const recentList = home?.quickStarts?.recentLists?.[0];
+    const recentCircle = home?.quickStarts?.recentCircles?.[0];
+    const recentTemplate = home?.quickStarts?.templates?.[0];
+
+    if (needsVote) {
+      prompts.push({
+        mark: "1",
+        kicker: "Waiting on you",
+        title: needsVote.name,
+        copy: "A group decision is easier when your vote is in.",
+        action: "Vote",
+        href: needsVote.action?.href || `/app/cast-vote/${needsVote.id}`,
+        tone: "urgent",
+      });
+    }
+
+    if (closingSoon) {
+      prompts.push({
+        mark: "2",
+        kicker: "Closing soon",
+        title: closingSoon.name,
+        copy: `${formatPollDate(closingSoon.expiration)} deadline.`,
+        action: "Check in",
+        href: closingSoon.action?.href || `/app/statistics/${closingSoon.id}`,
+        tone: "deadline",
+      });
+    }
+
+    if (recentWinner) {
+      prompts.push({
+        mark: "3",
+        kicker: "Recently decided",
+        title: recentWinner.winner?.name || recentWinner.name,
+        copy: "Run a rematch with the same ideas and people.",
+        action: "Rematch",
+        href: buildCreateUrl({ rematchPollId: recentWinner.id }),
+        tone: "winner",
+      });
+    }
+
+    if (recentList) {
+      prompts.push({
+        mark: "4",
+        kicker: "Start from last ideas",
+        title: recentList.name,
+        copy: recentList.description || "Reuse a list you already curated.",
+        action: "Reuse",
+        href: buildCreateUrl({ listId: recentList.id }),
+      });
+    }
+
+    if (recentCircle) {
+      prompts.push({
+        mark: "5",
+        kicker: "Reuse this group",
+        title: recentCircle.name,
+        copy: recentCircle.description || "Ask the same people again.",
+        action: "Ask",
+        href: buildCreateUrl({ groupId: recentCircle.id }),
+      });
+    }
+
+    prompts.push({
+      mark: "6",
+      kicker: "Continue a draft",
+      title: "Start from last time",
+      copy: recentTemplate?.description || "Bring back your last poll setup and adjust it.",
+      action: "Resume",
+      href: buildCreateUrl({ fromLast: "1", template: recentTemplate?.id }),
+      tone: "draft",
+    });
+
+    return prompts.slice(0, 6);
   }, [home]);
 
   if (loading) return <Loading text="Loading home..." />;
@@ -244,6 +346,23 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
         title="Create your first poll"
       />
 
+      <section className="surface-card habit-loop-panel">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Next best move</p>
+            <h3>Keep decisions moving</h3>
+          </div>
+          <Link className="text-link" to="/app/create-poll">
+            New poll
+          </Link>
+        </div>
+        <div className="habit-grid">
+          {habitPrompts.map((prompt) => (
+            <HabitPrompt prompt={prompt} key={`${prompt.kicker}-${prompt.title}`} />
+          ))}
+        </div>
+      </section>
+
       <section className="surface-card">
         <div className="section-heading">
           <div>
@@ -366,13 +485,13 @@ export default function DashboardPage({ api, activeWorkgroupId, onLogout }) {
             </Link>
           ))}
           {(home?.quickStarts?.recentLists || []).slice(0, 2).map((list) => (
-            <Link className="quick-start-card" key={`list-${list.id}`} to="/app/create-poll">
+            <Link className="quick-start-card" key={`list-${list.id}`} to={buildCreateUrl({ listId: list.id })}>
               <strong>Reuse {list.name}</strong>
               <span>{list.description || "Bring these ideas into a new poll."}</span>
             </Link>
           ))}
           {(home?.quickStarts?.recentCircles || []).slice(0, 2).map((circle) => (
-            <Link className="quick-start-card" key={`circle-${circle.id}`} to="/app/create-poll">
+            <Link className="quick-start-card" key={`circle-${circle.id}`} to={buildCreateUrl({ groupId: circle.id })}>
               <strong>Ask {circle.name}</strong>
               <span>{circle.description || "Start with a circle you already use."}</span>
             </Link>
