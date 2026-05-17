@@ -417,6 +417,239 @@ a {
   margin-bottom: 4px;
 }
 
+.social-home {
+  align-items: stretch;
+}
+
+.social-hero {
+  display: grid;
+  gap: 16px;
+}
+
+.social-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.social-metric-card {
+  display: grid;
+  gap: 4px;
+  min-height: 96px;
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.66);
+  border: 1px solid rgba(32, 48, 56, 0.08);
+  color: var(--text);
+  text-decoration: none;
+  box-shadow: var(--shadow-soft);
+}
+
+.social-metric-card strong {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.social-metric-card span {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.social-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.compact-social-grid {
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+}
+
+.social-poll-card {
+  display: grid;
+  grid-template-rows: 150px minmax(0, 1fr);
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(32, 48, 56, 0.08);
+  box-shadow: var(--shadow-soft);
+}
+
+.social-poll-card-urgent {
+  border-color: rgba(180, 73, 73, 0.24);
+}
+
+.social-poll-image {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  background: rgba(29, 92, 82, 0.1);
+}
+
+.social-poll-image-fallback {
+  display: grid;
+  place-items: center;
+  color: var(--brand);
+  font-size: 3rem;
+  font-weight: 900;
+}
+
+.social-poll-body {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  min-width: 0;
+}
+
+.social-poll-body h3 {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.social-poll-body p {
+  margin: 0;
+}
+
+.idea-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip-soft {
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.social-card-footer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.participant-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.participant-summary span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.avatar-stack {
+  display: inline-flex;
+  align-items: center;
+  min-width: max-content;
+}
+
+.avatar-dot {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: var(--brand);
+  color: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.86);
+  font-size: 0.74rem;
+  font-weight: 900;
+}
+
+.avatar-stack .avatar-dot + .avatar-dot {
+  margin-left: -9px;
+}
+
+.social-two-column {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+  gap: 14px;
+}
+
+.activity-list,
+.winner-list {
+  display: grid;
+  gap: 10px;
+}
+
+.activity-item,
+.winner-row {
+  display: grid;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.66);
+  border: 1px solid rgba(32, 48, 56, 0.08);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.activity-item {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.activity-item span,
+.winner-row span {
+  min-width: 0;
+}
+
+.activity-item strong,
+.activity-item small,
+.winner-row strong,
+.winner-row small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.activity-item small,
+.winner-row small {
+  margin-top: 4px;
+  color: var(--muted);
+}
+
+.winner-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.quick-start-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.quick-start-card {
+  display: grid;
+  gap: 8px;
+  min-height: 118px;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.66);
+  border: 1px solid rgba(32, 48, 56, 0.08);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.quick-start-card span {
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.social-empty-state {
+  display: grid;
+  gap: 8px;
+  align-content: center;
+  justify-items: start;
+  min-height: 150px;
+}
+
 .section-heading,
 .split-actions,
 .chip-row,
@@ -1186,6 +1419,11 @@ pre {
 :root[data-theme="dark"] .list-card,
 :root[data-theme="dark"] .record-card,
 :root[data-theme="dark"] .election-card,
+:root[data-theme="dark"] .social-poll-card,
+:root[data-theme="dark"] .social-metric-card,
+:root[data-theme="dark"] .activity-item,
+:root[data-theme="dark"] .winner-row,
+:root[data-theme="dark"] .quick-start-card,
 :root[data-theme="dark"] .vote-card,
 :root[data-theme="dark"] .detail-grid > div,
 :root[data-theme="dark"] .stats-grid,
@@ -1364,6 +1602,11 @@ pre {
   .list-card,
   .record-card,
   .election-card,
+  .social-poll-card,
+  .social-metric-card,
+  .activity-item,
+  .winner-row,
+  .quick-start-card,
   .vote-card,
   .metric-card,
   .preference-toggle,
@@ -1389,6 +1632,11 @@ pre {
   .list-card,
   .record-card,
   .election-card,
+  .social-poll-card,
+  .social-metric-card,
+  .activity-item,
+  .winner-row,
+  .quick-start-card,
   .vote-card,
   .metric-card,
   .preference-toggle,
@@ -1442,8 +1690,17 @@ pre {
   .wizard-steps,
   .result-summary,
   .metric-grid,
+  .social-metric-grid,
+  .social-two-column,
   .detail-grid {
     grid-template-columns: 1fr;
+  }
+
+  .social-card-footer,
+  .activity-item,
+  .winner-row {
+    grid-template-columns: 1fr;
+    justify-items: start;
   }
 
   .idea-row,

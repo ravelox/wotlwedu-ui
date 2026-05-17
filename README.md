@@ -101,6 +101,10 @@ Authenticated app routes:
 - `/app/poll`
 - `/app/space`
 
+The home route is a social activity surface. It highlights polls that need the
+user's vote, polls closing soon, recent activity, recent winners, quick-start
+templates, and unread notification count.
+
 The primary poll creation route is `/app/create-poll`, a guided flow for choosing
 a template, adding ideas, selecting a circle or share-link audience, configuring
 public/private sharing, sending email invites, and handing off share text for SMS.

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import Loading from "../components/Loading";
 import { ErrorBanner, SuccessBanner } from "../components/Feedback";
 import { extractCollection, extractEntity, toApiError } from "../lib/api";
@@ -46,6 +46,12 @@ function normalizeEmails(value) {
 }
 
 export default function CreatePollWizardPage({ api, activeWorkgroupId }) {
+  const [searchParams] = useSearchParams();
+  const initialTemplateId = POLL_TEMPLATES.some(
+    (template) => template.id === searchParams.get("template")
+  )
+    ? searchParams.get("template")
+    : "food";
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [step, setStep] = useState(0);
@@ -54,12 +60,12 @@ export default function CreatePollWizardPage({ api, activeWorkgroupId }) {
   const [refs, setRefs] = useState({ categories: [], groups: [], workgroups: [] });
   const [published, setPublished] = useState(null);
   const [form, setForm] = useState({
-    templateId: "food",
-    title: getPollTemplate("food").title,
-    description: getPollTemplate("food").description,
+    templateId: initialTemplateId,
+    title: getPollTemplate(initialTemplateId).title,
+    description: getPollTemplate(initialTemplateId).description,
     categoryId: "",
     workgroupId: activeWorkgroupId || "",
-    ideas: initialIdeaRows("food"),
+    ideas: initialIdeaRows(initialTemplateId),
     groupId: "",
     audienceMode: "circle",
     expiration: defaultExpirationValue(),
