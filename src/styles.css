@@ -635,7 +635,7 @@ a {
 
 .participant-summary span {
   min-width: 0;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
 }
 
 .avatar-stack {
@@ -903,13 +903,16 @@ a {
 .section-heading > *,
 .split-actions > *,
 .chip-row > *,
-.inline-field > * {
+.inline-field > *,
+.split-heading > * {
   min-width: 0;
 }
 
 .section-heading h2,
 .section-heading h3,
-.section-heading p {
+.section-heading p,
+.split-heading h3,
+.split-heading p {
   overflow-wrap: anywhere;
 }
 
@@ -2461,9 +2464,23 @@ pre {
     align-items: flex-start;
     flex-direction: column;
   }
+
+  .split-heading {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .social-card-footer {
+    grid-template-columns: 1fr;
+    justify-items: start;
+  }
+
+  .poll-card-actions {
+    justify-content: flex-start;
+  }
 }
 
-@media (max-width: 420px) {
+@media (max-width: 480px) {
   .app-frame,
   .login-shell {
     padding: 0;
@@ -2509,16 +2526,11 @@ pre {
     position: static;
   }
 
-  .social-card-footer,
   .habit-card,
   .activity-item,
   .winner-row {
     grid-template-columns: 1fr;
     justify-items: start;
-  }
-
-  .poll-card-actions {
-    justify-content: flex-start;
   }
 
   .idea-row,
