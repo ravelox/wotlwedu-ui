@@ -231,7 +231,14 @@ export default function PreferencesPage({ api }) {
               {saving ? "Saving..." : "Save"}
             </button>
             {form.id ? (
-              <button className="btn btn-danger" disabled={saving} onClick={deletePreference} type="button">
+              <button
+                aria-label="Delete preference"
+                className="btn btn-danger btn-icon-delete"
+                disabled={saving}
+                onClick={deletePreference}
+                title="Delete preference"
+                type="button"
+              >
                 Delete
               </button>
             ) : null}

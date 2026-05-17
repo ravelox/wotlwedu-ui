@@ -1192,14 +1192,7 @@ a {
   color: #fff;
 }
 
-.split-actions .btn,
-.wrap-actions .btn,
-.wizard-actions .btn,
-.auth-actions .btn,
-.topbar-actions .btn,
-.password-row .btn,
-.actions .btn,
-.public-controls .btn {
+.btn-icon-delete {
   width: 44px;
   min-width: 44px;
   height: 44px;
@@ -1211,50 +1204,10 @@ a {
   font-size: 0;
 }
 
-.split-actions .btn::before,
-.wrap-actions .btn::before,
-.wizard-actions .btn::before,
-.auth-actions .btn::before,
-.topbar-actions .btn::before,
-.password-row .btn::before,
-.actions .btn::before,
-.public-controls .btn::before {
-  content: "+";
+.btn-icon-delete::before {
+  content: "×";
   font-size: 1.05rem;
   line-height: 1;
-}
-
-.split-actions .btn-secondary::before,
-.wrap-actions .btn-secondary::before,
-.wizard-actions .btn-secondary::before,
-.auth-actions .btn-secondary::before,
-.topbar-actions .btn-secondary::before,
-.password-row .btn-secondary::before,
-.actions .btn-secondary::before,
-.public-controls .btn-secondary::before {
-  content: "↗";
-}
-
-.split-actions .btn-tonal::before,
-.wrap-actions .btn-tonal::before,
-.wizard-actions .btn-tonal::before,
-.auth-actions .btn-tonal::before,
-.topbar-actions .btn-tonal::before,
-.password-row .btn-tonal::before,
-.actions .btn-tonal::before,
-.public-controls .btn-tonal::before {
-  content: "↻";
-}
-
-.split-actions .btn-danger::before,
-.wrap-actions .btn-danger::before,
-.wizard-actions .btn-danger::before,
-.auth-actions .btn-danger::before,
-.topbar-actions .btn-danger::before,
-.password-row .btn-danger::before,
-.actions .btn-danger::before,
-.public-controls .btn-danger::before {
-  content: "×";
 }
 
 .banner {

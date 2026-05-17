@@ -225,9 +225,11 @@ export default function NotificationsPage({ api }) {
                       </button>
                     )}
                     <button
-                      className="btn btn-secondary"
+                      aria-label="Delete notification"
+                      className="btn btn-secondary btn-icon-delete"
                       disabled={saving}
                       onClick={() => deleteNotification(notification.id)}
+                      title="Delete notification"
                       type="button"
                     >
                       Delete

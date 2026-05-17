@@ -465,7 +465,14 @@ export default function WorkgroupsPage({ api, session, activeWorkgroupId, onChan
               </button>
             ) : null}
             {form.id ? (
-              <button className="btn btn-danger" disabled={saving} onClick={removeWorkgroup} type="button">
+              <button
+                aria-label="Delete space"
+                className="btn btn-danger btn-icon-delete"
+                disabled={saving}
+                onClick={removeWorkgroup}
+                title="Delete space"
+                type="button"
+              >
                 Delete Space
               </button>
             ) : null}

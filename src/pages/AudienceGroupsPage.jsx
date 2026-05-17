@@ -395,7 +395,14 @@ export default function AudienceGroupsPage({ api, session }) {
               {saving ? "Saving..." : form.id ? "Save Circle" : "Create Circle"}
             </button>
             {form.id ? (
-              <button className="btn btn-danger" disabled={saving} onClick={removeGroup} type="button">
+              <button
+                aria-label="Delete circle"
+                className="btn btn-danger btn-icon-delete"
+                disabled={saving}
+                onClick={removeGroup}
+                title="Delete circle"
+                type="button"
+              >
                 Delete Circle
               </button>
             ) : null}
